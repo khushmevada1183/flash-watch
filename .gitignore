@@ -10,3 +10,7 @@ build/
 *.ipa
 ios/App/Pods/
 ios/App/Podfile.lock
+.agents/
+skills-lock.json
+FlashWatch-iOS-IPA/
+

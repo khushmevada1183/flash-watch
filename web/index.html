@@ -3,283 +3,465 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0969da">
-<meta name="description" content="Zero-cloud Web Bluetooth controller and bridge for the boAt FLASH smartwatch. Control your watch directly from any browser.">
+<meta name="theme-color" content="#07090e">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="description" content="Zero-cloud Web Bluetooth and native iOS CoreBluetooth controller for the boAt FLASH smartwatch.">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
-<title>boAt FLASH Watch | Web Controller</title>
+<title>boAt FLASH Watch</title>
 <style>
   :root {
-    --bg: #0d1117;
-    --card: #161b22;
-    --card-sub: #1f242c;
-    --card-hover: #262c36;
-    --fg: #e6edf3;
-    --muted: #8b949e;
-    --line: #30363d;
+    --bg: #07090e;
+    --bg-mesh: radial-gradient(120% 80% at 50% -10%, rgba(56, 139, 253, 0.16) 0%, rgba(7, 9, 14, 0) 100%), #07090e;
+    --surface: rgba(255, 255, 255, 0.04);
+    --surface-elevated: rgba(255, 255, 255, 0.07);
+    --surface-hover: rgba(255, 255, 255, 0.11);
+    --surface-active: rgba(255, 255, 255, 0.16);
+    --border: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.14);
+    --text-primary: #f0f6fc;
+    --text-secondary: #8b949e;
+    --text-tertiary: #6e7681;
     --accent: #2f81f7;
-    --accent-hover: #388bfd;
-    --accent-dim: rgba(56, 139, 253, 0.15);
-    --ok: #238636;
-    --ok-glow: rgba(35, 134, 54, 0.3);
-    --bad: #da3633;
+    --accent-glow: rgba(56, 139, 253, 0.28);
+    --accent-gradient: linear-gradient(135deg, #388bfd 0%, #1f6feb 100%);
+    --ok: #2ea043;
+    --ok-glow: rgba(46, 160, 67, 0.28);
+    --bad: #f85149;
+    --bad-glow: rgba(248, 81, 73, 0.2);
     --warn: #d29922;
-    --radius: 12px;
+    --warn-glow: rgba(210, 153, 34, 0.2);
+    --radius-xl: 24px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --radius-full: 9999px;
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --font: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, sans-serif;
+    --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
   }
+
   @media (prefers-color-scheme: light) {
     :root {
-      --bg: #f6f8fa;
-      --card: #ffffff;
-      --card-sub: #f0f3f6;
-      --card-hover: #e6eaf0;
-      --fg: #1f2328;
-      --muted: #656d76;
-      --line: #d0d7de;
+      --bg: #f5f7fb;
+      --bg-mesh: radial-gradient(120% 80% at 50% -10%, rgba(9, 105, 218, 0.12) 0%, rgba(245, 247, 251, 0) 100%), #f5f7fb;
+      --surface: rgba(255, 255, 255, 0.85);
+      --surface-elevated: #ffffff;
+      --surface-hover: rgba(255, 255, 255, 0.95);
+      --surface-active: #eef2f8;
+      --border: rgba(0, 0, 0, 0.08);
+      --border-light: rgba(0, 0, 0, 0.12);
+      --text-primary: #1f2328;
+      --text-secondary: #57606a;
+      --text-tertiary: #8c959f;
       --accent: #0969da;
-      --accent-hover: #0860ca;
-      --accent-dim: rgba(9, 105, 218, 0.1);
+      --accent-glow: rgba(9, 105, 218, 0.2);
+      --accent-gradient: linear-gradient(135deg, #0969da 0%, #054da7 100%);
       --ok: #1a7f37;
-      --ok-glow: rgba(26, 127, 55, 0.2);
+      --ok-glow: rgba(26, 127, 55, 0.18);
       --bad: #cf222e;
       --warn: #9a6700;
     }
   }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    min-height: 100vh;
-    padding-bottom: 32px;
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
   }
+
+  body {
+    background: var(--bg-mesh);
+    color: var(--text-primary);
+    font-family: var(--font);
+    min-height: 100vh;
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(40px, env(safe-area-inset-bottom));
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+  }
+
   main {
-    max-width: 680px;
+    max-width: 620px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 0 16px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
   }
+
+  /* --- Top App Bar / Dynamic Island Capsule --- */
   header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 0 8px;
-    border-bottom: 1px solid var(--line);
+    padding: 8px 12px;
+    background: var(--surface);
+    backdrop-filter: blur(24px) saturate(190%);
+    -webkit-backdrop-filter: blur(24px) saturate(190%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    box-shadow: inset 0 1px 0 0 var(--border-light), 0 4px 20px rgba(0, 0, 0, 0.15);
   }
+
   .brand {
     display: flex;
     align-items: center;
     gap: 10px;
   }
-  .brand img, .brand svg {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+
+  .brand img {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    object-fit: cover;
   }
-  .brand h1 {
-    font-size: 18px;
+
+  .brand-text h1 {
+    font-size: 15px;
     font-weight: 700;
-    letter-spacing: -0.3px;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
   }
-  .brand span {
-    font-size: 12px;
-    color: var(--muted);
-    font-weight: 400;
+
+  .brand-text span {
+    font-size: 11px;
+    color: var(--text-secondary);
     display: block;
+    line-height: 1.1;
   }
+
+  /* Dynamic Island Status Pill */
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 20px;
+    gap: 7px;
+    padding: 5px 12px;
+    border-radius: var(--radius-full);
     font-size: 12px;
-    font-weight: 500;
-    background: var(--card-sub);
-    border: 1px solid var(--line);
-    color: var(--muted);
+    font-weight: 600;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    transition: transform 140ms var(--ease-out), background 140ms ease, border-color 140ms ease, color 140ms ease;
   }
+
   .badge.connected {
     background: var(--ok-glow);
-    border-color: var(--ok);
+    border-color: rgba(46, 160, 67, 0.4);
     color: var(--ok);
   }
+
   .dot {
-    width: 8px;
-    height: 8px;
+    width: 7px;
+    height: 7px;
     border-radius: 50%;
-    background: var(--muted);
+    background: var(--text-tertiary);
+    transition: background 140ms ease, box-shadow 140ms ease;
   }
+
   .badge.connected .dot {
     background: var(--ok);
     box-shadow: 0 0 8px var(--ok);
+    animation: pulseDot 2s infinite ease-in-out;
   }
-  .card {
-    background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+
+  @keyframes pulseDot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.75; }
   }
-  .card-title {
+
+  /* --- Emil Kowalski Segmented Tab Switcher --- */
+  .segmented-nav {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--surface);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 3px;
+    gap: 4px;
+  }
+
+  .nav-pill {
+    padding: 8px 10px;
     font-size: 13px;
     font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--radius-md) - 3px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    user-select: none;
+    transition: transform 120ms var(--ease-out), color 120ms ease, background 120ms ease;
+  }
+
+  .nav-pill:active {
+    transform: scale(0.97);
+  }
+
+  .nav-pill.active {
+    background: var(--surface-active);
+    color: var(--text-primary);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  /* --- Translucent Glass Cards --- */
+  .card {
+    background: var(--surface);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: inset 0 1px 0 0 var(--border-light), 0 8px 28px rgba(0, 0, 0, 0.12);
+    transition: opacity 160ms ease, transform 160ms var(--ease-out);
+  }
+
+  .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
   }
-  .row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  button {
-    font: inherit;
-    font-weight: 500;
-    padding: 10px 16px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    background: var(--card-sub);
-    color: var(--fg);
-    cursor: pointer;
-    transition: all 0.15s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  button:hover:not(:disabled) {
-    background: var(--card-hover);
-    border-color: var(--muted);
-  }
-  button.primary {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-  }
-  button.primary:hover:not(:disabled) {
-    background: var(--accent-hover);
-  }
-  button.danger {
-    color: var(--bad);
-    border-color: rgba(218, 54, 51, 0.4);
-  }
-  button.danger:hover:not(:disabled) {
-    background: rgba(218, 54, 51, 0.1);
-  }
-  button:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
-  button.chip {
-    padding: 4px 10px;
-    font-size: 12px;
-    border-radius: 16px;
-  }
-  input, select, textarea {
-    font: inherit;
-    width: 100%;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--fg);
-    transition: border-color 0.15s ease;
-  }
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-  label {
+
+  .card-title {
     font-size: 13px;
-    color: var(--muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+  }
+
+  /* --- Hero Watch Dial & Activity Rings --- */
+  .watch-hero {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    align-items: center;
+    padding: 12px 0 8px;
+    position: relative;
   }
-  .stat-grid {
+
+  .watch-case {
+    width: 170px;
+    height: 170px;
+    border-radius: 50%;
+    position: relative;
+    background: radial-gradient(circle at 50% 40%, rgba(255, 255, 255, 0.08) 0%, rgba(0, 0, 0, 0.5) 100%);
+    border: 3px solid rgba(255, 255, 255, 0.14);
+    box-shadow: inset 0 2px 6px rgba(255, 255, 255, 0.2), 0 12px 36px rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .rings-svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    transform: rotate(-90deg);
+  }
+
+  .ring-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.06);
+  }
+
+  .ring-bar {
+    fill: none;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 800ms var(--ease-out);
+  }
+
+  .watch-content {
+    z-index: 2;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .watch-time {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+
+  .watch-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+
+  .battery-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: var(--radius-full);
+    background: rgba(46, 160, 67, 0.16);
+    color: var(--ok);
+    margin-top: 2px;
+  }
+
+  /* --- Apple Activity 4-Metric Grid --- */
+  .metrics-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 10px;
   }
-  .stat-box {
-    background: var(--card-sub);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 10px 12px;
+
+  .metric-card {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 4px;
-  }
-  .stat-box span {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-  .stat-box b {
-    font-size: 15px;
-    font-weight: 600;
-  }
-  .notice-banner {
-    background: var(--card-sub);
-    border-left: 4px solid var(--accent);
-    border-radius: 8px;
-    padding: 14px;
-    font-size: 13px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-  .notice-banner.warn {
-    border-left-color: var(--warn);
-    background: rgba(210, 153, 34, 0.12);
-  }
-  .notice-banner.bad {
-    border-left-color: var(--bad);
-    background: rgba(218, 54, 51, 0.12);
-  }
-  .notice-banner.ok {
-    border-left-color: var(--ok);
-    background: var(--ok-glow);
-  }
-  .notice-header {
-    font-weight: 600;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .notice-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 6px;
-  }
-  .notice-actions a, .notice-actions button {
-    font-size: 12px;
-    padding: 7px 14px;
-    text-decoration: none;
+    box-shadow: inset 0 1px 0 0 var(--border-light);
   }
 
-  /* Realtime Diagnostic Tracker */
-  .conn-steps-box {
-    margin-top: 12px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 12px;
+  .metric-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+  }
+
+  .metric-val {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Buttons & Touch Controls (Emil Kowalski Physics) --- */
+  button, .button {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 11px 18px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface-elevated);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    user-select: none;
+    text-decoration: none;
+    box-shadow: inset 0 1px 0 0 var(--border-light);
+    transition: transform 120ms var(--ease-out), background 120ms ease, border-color 120ms ease, opacity 120ms ease;
+  }
+
+  button:active, .button:active {
+    transform: scale(0.97);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    button:hover:not(:disabled), .button:hover:not(:disabled) {
+      background: var(--surface-hover);
+      border-color: var(--border-light);
+    }
+  }
+
+  button.primary, .button.primary {
+    background: var(--accent-gradient);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    box-shadow: 0 4px 14px var(--accent-glow), inset 0 1px 0 0 rgba(255, 255, 255, 0.28);
+  }
+
+  button.danger {
+    background: rgba(248, 81, 73, 0.12);
+    border-color: rgba(248, 81, 73, 0.3);
+    color: var(--bad);
+  }
+
+  button:disabled, .button:disabled {
+    opacity: 0.42;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .chip {
+    padding: 5px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: var(--radius-full);
+  }
+
+  .chip:active {
+    transform: scale(0.95);
+  }
+
+  /* --- Form Inputs --- */
+  input, select, textarea {
+    font-family: inherit;
+    font-size: 14px;
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+    background: var(--surface-elevated);
+    color: var(--text-primary);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+    transition: border-color 140ms ease, box-shadow 140ms ease;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+  }
+
+  label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
+
+  /* --- Multi-step Connection Diagnostic Stepper --- */
+  .conn-steps-box {
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .steps-title {
     display: flex;
     justify-content: space-between;
@@ -287,151 +469,231 @@
     font-size: 11px;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--muted);
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
   }
-  .steps-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
+
   .step-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 7px 10px;
-    border-radius: 6px;
-    background: var(--card-sub);
-    font-size: 12px;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: var(--radius-md);
+    background: var(--surface);
     border: 1px solid transparent;
-    transition: all 0.2s ease;
+    transition: transform 140ms var(--ease-out), background 140ms ease, border-color 140ms ease;
   }
+
   .step-row.active {
     border-color: var(--accent);
-    background: var(--accent-dim);
+    background: var(--accent-glow);
   }
+
   .step-row.done {
-    border-color: rgba(35, 134, 54, 0.4);
+    border-color: rgba(46, 160, 67, 0.4);
   }
+
   .step-row.error {
-    border-color: rgba(218, 54, 51, 0.4);
-    background: rgba(218, 54, 51, 0.08);
+    border-color: rgba(248, 81, 73, 0.4);
+    background: var(--bad-glow);
   }
+
   .step-indicator {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: var(--line);
-    color: var(--muted);
-    font-size: 10px;
-    font-weight: bold;
+    background: var(--surface-active);
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
+
   .step-row.active .step-indicator {
     background: var(--accent);
     color: #fff;
   }
+
   .step-row.done .step-indicator {
     background: var(--ok);
     color: #fff;
   }
+
   .step-row.error .step-indicator {
     background: var(--bad);
     color: #fff;
   }
+
   .step-info {
     display: flex;
     flex-direction: column;
     flex: 1;
     min-width: 0;
   }
+
   .step-name {
+    font-size: 13px;
     font-weight: 600;
-    color: var(--fg);
+    color: var(--text-primary);
   }
+
   .step-sub {
     font-size: 11px;
-    color: var(--muted);
+    color: var(--text-secondary);
   }
+
   .step-badge {
     font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: 10px;
-    background: var(--bg);
-    color: var(--muted);
-    flex-shrink: 0;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: var(--radius-full);
+    background: var(--surface-active);
+    color: var(--text-secondary);
   }
+
   .step-row.active .step-badge {
     background: var(--accent);
     color: #fff;
   }
+
   .step-row.done .step-badge {
     background: var(--ok);
     color: #fff;
   }
+
   .step-row.error .step-badge {
     background: var(--bad);
     color: #fff;
   }
-  .diag-error-tip {
-    background: rgba(218, 54, 51, 0.08);
-    border: 1px solid var(--bad);
-    border-radius: 6px;
-    padding: 10px 12px;
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--fg);
+
+  /* --- Notification Presets & Emoji Chips --- */
+  .presets-row {
     display: flex;
-    flex-direction: column;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .emoji-chips {
+    display: flex;
+    flex-wrap: wrap;
     gap: 6px;
   }
 
+  .emoji-btn {
+    padding: 6px 10px;
+    font-size: 15px;
+    border-radius: var(--radius-sm);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    box-shadow: none;
+  }
 
-  /* Browser & Platform Tabs Guide */
+  .emoji-btn:active {
+    transform: scale(0.92);
+  }
+
+  /* --- Traffic Log Console --- */
+  pre {
+    margin: 0;
+    max-height: 200px;
+    overflow: auto;
+    font-family: var(--mono);
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--text-secondary);
+    background: var(--surface-elevated);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+
+  /* --- Notice Banners --- */
+  .notice-banner {
+    background: var(--surface-elevated);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .notice-banner.warn {
+    border-left-color: var(--warn);
+    background: var(--warn-glow);
+  }
+
+  .notice-banner.bad {
+    border-left-color: var(--bad);
+    background: var(--bad-glow);
+  }
+
+  .notice-header {
+    font-weight: 700;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .notice-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+  }
+
+  /* --- Platform Guides --- */
   .guide-tabs {
     display: flex;
     gap: 6px;
     overflow-x: auto;
     padding-bottom: 2px;
   }
+
   .guide-tab {
-    padding: 7px 14px;
+    padding: 7px 12px;
     font-size: 12px;
     font-weight: 600;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-    background: var(--card-sub);
-    color: var(--muted);
+    border-radius: var(--radius-md);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
     cursor: pointer;
     white-space: nowrap;
-    transition: all 0.15s ease;
   }
+
   .guide-tab.active {
     background: var(--accent);
     color: #fff;
     border-color: var(--accent);
   }
+
   .guide-content {
-    background: var(--card-sub);
-    border: 1px solid var(--line);
-    border-radius: 8px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     padding: 14px;
     font-size: 13px;
     display: flex;
     flex-direction: column;
     gap: 10px;
   }
+
   .guide-step {
     display: flex;
     align-items: flex-start;
-    gap: 8px;
+    gap: 10px;
   }
-  .guide-step span.num {
-    background: var(--accent-dim);
+
+  .guide-step .num {
+    background: var(--accent-glow);
     color: var(--accent);
     border-radius: 50%;
     width: 22px;
@@ -439,77 +701,47 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: bold;
+    font-weight: 700;
     font-size: 11px;
     flex-shrink: 0;
   }
-  code {
-    background: var(--bg);
-    border: 1px solid var(--line);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: 12px;
-    color: var(--accent);
-    word-break: break-all;
-  }
-  .bytes-bar {
-    font-size: 12px;
-    color: var(--muted);
+
+  .row {
     display: flex;
-    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
     align-items: center;
   }
-  .emoji-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    padding-top: 2px;
+
+  .bytes-bar {
+    font-size: 11px;
+    color: var(--text-secondary);
   }
-  .emoji-btn {
-    padding: 4px 8px;
-    font-size: 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    background: var(--card-sub);
-    border: 1px solid var(--line);
-    color: var(--fg);
-  }
-  .emoji-btn:hover {
-    background: var(--card-hover);
-  }
-  pre {
-    margin: 0;
-    max-height: 220px;
-    overflow: auto;
-    font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    white-space: pre-wrap;
-    word-break: break-all;
-    color: var(--muted);
-    background: var(--bg);
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--line);
-  }
-  .presets-row {
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
+
   #status-text.ok { color: var(--ok); }
   #status-text.bad { color: var(--bad); }
   #status-text.warn { color: var(--warn); }
   .hidden { display: none !important; }
+
+  /* Accessibility / Reduced Motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, ::before, ::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
 <main>
+  <!-- Top Glass Bar -->
   <header>
     <div class="brand">
-      <img src="icon.svg" alt="FLASH Watch Logo">
-      <div>
-        <h1>boAt FLASH Watch</h1>
-        <span>Direct Web Bluetooth Controller</span>
+      <img src="icon.svg" alt="boAt FLASH">
+      <div class="brand-text">
+        <h1>boAt FLASH</h1>
+        <span id="mode-text">Direct Web Bluetooth</span>
       </div>
     </div>
     <div id="conn-badge" class="badge">
@@ -518,251 +750,142 @@
     </div>
   </header>
 
-  <!-- Error 2 (CoreBluetooth Connection Failed) Alert -->
+  <!-- Segmented Section Navigator -->
+  <div class="segmented-nav">
+    <button type="button" class="nav-pill active" id="btn-tab-dash">⌚ Watch</button>
+    <button type="button" class="nav-pill" id="btn-tab-notif">💬 Push</button>
+    <button type="button" class="nav-pill" id="btn-tab-diag">⚡ Diagnostics</button>
+  </div>
+
+  <!-- Error 2 Alert -->
   <div id="error2-alert" class="notice-banner bad hidden">
-    <div class="notice-header">⚠️ Error 2: Why Connection Failed (Even if Bluetooth is ON)</div>
+    <div class="notice-header">⚠️ Error 2: Connection Failed</div>
     <div style="line-height:1.45;">
-      In Bluefy on iOS, <b>Error 2</b> (<code>CBErrorConnectionFailed</code>) occurs at the hardware/iOS level. Even when the watch screen looks idle and no app is running, 3 common hidden blocks cause this:
+      In Bluefy on iOS, <b>Error 2</b> occurs when the watch hardware radio is still locked in an active state.
     </div>
     <div class="guide-step">
       <span class="num">1</span>
-      <div><b>Watch BLE Radio Locked (Single-Connection Limit):</b> The boAt FLASH chip only supports 1 connection. If an earlier scan or session was interrupted, the watch's internal radio remains stuck in "busy" mode until you reboot.<br>
-      👉 <b>Fix:</b> Long-press the physical crown button on the watch for 3 seconds &rarr; tap <b>Restart</b> (or Power Off, then hold to power back on).</div>
+      <div><b>Reboot Watch:</b> Long press watch button &rarr; tap <b>Restart</b>.</div>
     </div>
     <div class="guide-step">
       <span class="num">2</span>
-      <div><b>iPhone Settings "MY DEVICES" Hijack:</b> If <code>FLASH</code> appears in iPhone <i>Settings &rarr; Bluetooth</i> (even if it says "Not Connected"), iOS locks the background GATT handle and blocks Bluefy.<br>
-      👉 <b>Fix:</b> Open iPhone <i>Settings &rarr; Bluetooth</i>. Tap <b>(i)</b> next to <code>FLASH</code> &rarr; <b>Forget This Device</b>.</div>
-    </div>
-    <div class="guide-step">
-      <span class="num">3</span>
-      <div><b>Control Center vs Real Bluetooth Reset:</b> Toggling Bluetooth from the iPhone swipe-down Control Center does <b>NOT</b> reset the Bluetooth system daemon!<br>
-      👉 <b>Fix:</b> Open the iPhone <b>Settings app &rarr; Bluetooth</b> &rarr; toggle the switch <b>OFF</b> &rarr; wait 5 seconds &rarr; toggle <b>ON</b>.</div>
-    </div>
-    <div class="guide-step">
-      <span class="num">4</span>
-      <div><b>Background boAt App:</b> If the official boAt Wearables or Da Fit app is installed on your phone, swipe it away in the iPhone App Switcher.</div>
+      <div><b>Forget in iOS Bluetooth:</b> If <code>FLASH</code> appears in iPhone <i>Settings &rarr; Bluetooth</i>, tap <b>(i) &rarr; Forget This Device</b>.</div>
     </div>
     <div class="notice-actions">
-      <button type="button" id="error2-retry-btn" class="primary" style="padding:8px 14px; font-weight:600;">🔄 Rebooted Watch? Try Connecting Again</button>
-      <button type="button" id="error2-dismiss-btn" style="padding:8px 14px;">Dismiss</button>
+      <button type="button" id="error2-retry-btn" class="primary" style="padding:6px 12px; font-size:12px;">🔄 Retry</button>
+      <button type="button" id="error2-dismiss-btn" style="padding:6px 12px; font-size:12px;">Dismiss</button>
     </div>
   </div>
 
-  <!-- Brave Disabled Alert (Dynamic) -->
+  <!-- Brave Alert -->
   <div id="brave-alert" class="notice-banner warn hidden">
-    <div class="notice-header">🦁 How to Fix "Web Bluetooth API globally disabled" in Brave:</div>
-    <div>Brave blocks Web Bluetooth by default for fingerprint protection. You can turn it on in 15 seconds:</div>
+    <div class="notice-header">🦁 Web Bluetooth Disabled in Brave</div>
+    <div>Brave blocks Web Bluetooth by default for fingerprint protection:</div>
     <div class="guide-step">
       <span class="num">1</span>
-      <div>Click here: <button type="button" id="copy-brave-direct" style="padding:4px 10px; font-size:12px; font-weight:600; background:var(--accent); color:#fff; border-radius:6px;">📋 Copy Flag Link</button></div>
+      <div>Click: <button type="button" id="copy-brave-direct" class="chip primary">📋 Copy Flag URL</button></div>
     </div>
     <div class="guide-step">
       <span class="num">2</span>
-      <div>Paste into address bar: <code>brave://flags/#brave-web-bluetooth-api</code> and hit Enter.</div>
-    </div>
-    <div class="guide-step">
-      <span class="num">3</span>
-      <div>Change <b>Web Bluetooth API</b> to <b>Enabled</b> and click <b>Relaunch</b>.</div>
-    </div>
-    <div style="font-size:12px; color:var(--muted); margin-top:2px;">
-      💡 Or simply open this page in <b>Google Chrome</b> or <b>Microsoft Edge</b> where it works immediately!
+      <div>Paste in address bar: <code>brave://flags/#brave-web-bluetooth-api</code> &rarr; Enable & Relaunch.</div>
     </div>
   </div>
 
-  <!-- Device Overview Card -->
-  <div class="card">
-    <div class="card-title">
-      <span>Device Connection</span>
-      <span id="mode-text" style="font-size:11px; text-transform:none;">Mode: Web Bluetooth</span>
+  <!-- ================= SECTION 1: WATCH DASHBOARD ================= -->
+  <div id="section-dash" class="card">
+    <div class="card-header">
+      <span class="card-title">Watch Status</span>
+      <span id="status-text" style="font-size:12px; font-weight:600; color:var(--text-secondary);">Ready</span>
     </div>
 
-    <div class="stat-grid">
-      <div class="stat-box">
-        <span>Device</span>
-        <b id="name">FLASH</b>
-      </div>
-      <div class="stat-box">
-        <span>Firmware</span>
-        <b id="fw">–</b>
-      </div>
-      <div class="stat-box">
-        <span>Battery</span>
-        <b id="bat">–</b>
-      </div>
-      <div class="stat-box">
-        <span>MAC Address</span>
-        <b id="mac-display">08:7C:85:03:12:0F</b>
+    <!-- Apple Watch Hero Centerpiece -->
+    <div class="watch-hero">
+      <div class="watch-case">
+        <svg class="rings-svg" viewBox="0 0 170 170">
+          <!-- Step Activity Ring (Outer) -->
+          <circle class="ring-bg" cx="85" cy="85" r="74" stroke-width="7"></circle>
+          <circle id="ring-steps" class="ring-bar" cx="85" cy="85" r="74" stroke-width="7" stroke="#388bfd" stroke-dasharray="465" stroke-dashoffset="465"></circle>
+          <!-- Battery Ring (Inner) -->
+          <circle class="ring-bg" cx="85" cy="85" r="62" stroke-width="6"></circle>
+          <circle id="ring-bat" class="ring-bar" cx="85" cy="85" r="62" stroke-width="6" stroke="#2ea043" stroke-dasharray="390" stroke-dashoffset="390"></circle>
+        </svg>
+
+        <div class="watch-content">
+          <div class="watch-time" id="watch-clock">10:09</div>
+          <div class="watch-label"><b id="name">FLASH</b></div>
+          <div class="battery-pill">
+            <span>🔋</span>
+            <span id="bat">–</span>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="row">
-      <button id="connect" class="primary" style="font-size:14px; font-weight:600;">⚡ Connect Watch</button>
+    <!-- Primary Action Controls -->
+    <div class="row" style="justify-content:center;">
+      <button id="connect" class="primary" style="flex:1; max-width:240px; font-size:15px; font-weight:700;">⚡ Connect Watch</button>
       <button id="disconnect" class="danger" disabled>Disconnect</button>
-      <label style="display:inline-flex; align-items:center; gap:6px; cursor:pointer; font-size:12px; color:var(--muted);">
-        <input type="checkbox" id="scan-all" style="width:auto;"> Show all nearby BLE devices
-      </label>
-      <span id="status-text" class="stat" style="font-size:13px; margin-left:auto;">Ready</span>
     </div>
 
-    <!-- Real-time Multi-step Diagnostic Tracker -->
-    <div id="conn-steps-box" class="conn-steps-box hidden">
-      <div class="steps-title">
-        <span>Connection Progress</span>
-        <span id="step-overall-status">Connecting…</span>
-      </div>
-      <div class="steps-list">
-        <div class="step-row" id="st-scan">
-          <div class="step-indicator">1</div>
-          <div class="step-info">
-            <span class="step-name">Scan & Device Selection</span>
-            <span class="step-sub" id="st-scan-desc">Waiting for picker…</span>
-          </div>
-          <span class="step-badge" id="st-scan-badge">Pending</span>
-        </div>
-        <div class="step-row" id="st-gatt">
-          <div class="step-indicator">2</div>
-          <div class="step-info">
-            <span class="step-name">Bluetooth GATT Handshake</span>
-            <span class="step-sub" id="st-gatt-desc">CoreBluetooth connection</span>
-          </div>
-          <span class="step-badge" id="st-gatt-badge">Waiting</span>
-        </div>
-        <div class="step-row" id="st-svc">
-          <div class="step-indicator">3</div>
-          <div class="step-info">
-            <span class="step-name">Resolve Service 0xF618</span>
-            <span class="step-sub" id="st-svc-desc">TX (0xB002) & RX (0xB001) characteristics</span>
-          </div>
-          <span class="step-badge" id="st-svc-badge">Waiting</span>
-        </div>
-        <div class="step-row" id="st-ready">
-          <div class="step-indicator">4</div>
-          <div class="step-info">
-            <span class="step-name">Sync Clock & Telemetry</span>
-            <span class="step-sub" id="st-ready-desc">K6 protocol initialization</span>
-          </div>
-          <span class="step-badge" id="st-ready-badge">Waiting</span>
-        </div>
-      </div>
-      <div id="diag-error-tip" class="diag-error-tip hidden"></div>
-    </div>
-  </div>
-
-  <!-- Interactive Platform Guide Drawer -->
-  <div class="card" id="guide-card">
-    <div class="card-title">
-      <span>📱 How to Connect on Android & iOS</span>
-      <span id="detected-tag" style="font-size:11px; text-transform:none; color:var(--accent);">Detecting…</span>
-    </div>
-    <div class="guide-tabs">
-      <button type="button" class="guide-tab active" id="tab-btn-ios">🍏 iPhone / iOS (Bluefy)</button>
-      <button type="button" class="guide-tab" id="tab-btn-android">🤖 Android Setup</button>
-      <button type="button" class="guide-tab" id="tab-btn-brave">🦁 Brave Fix</button>
-      <button type="button" class="guide-tab" id="tab-btn-desktop">💻 PC / Chrome / Edge</button>
-    </div>
-
-    <!-- iOS Panel -->
-    <div class="guide-content" id="panel-ios">
-      <div style="font-weight:600; color:var(--accent);">
-        🍏 Bluefy (iOS) Connection Checklist:
-      </div>
-      <div class="guide-step">
-        <span class="num">1</span>
-        <div><b>Bluetooth Permission:</b> In iPhone <i>Settings &rarr; Bluefy</i>, ensure <b>Bluetooth Sharing</b> is turned <b>ON</b>.</div>
-      </div>
-      <div class="guide-step">
-        <span class="num">2</span>
-        <div><b>Do NOT pair in iPhone Bluetooth:</b> If <code>FLASH</code> is listed in iOS Bluetooth Settings, tap <b>Forget This Device</b>. Bluefy connects directly inside the page.</div>
-      </div>
-      <div class="guide-step">
-        <span class="num">3</span>
-        <div><b>Avoid Multi-Connection:</b> If your laptop or another phone is connected to the watch, turn off their Bluetooth. The watch only accepts one connection!</div>
-      </div>
-      <div class="row" style="margin-top:4px;">
-        <a id="open-bluefy-btn" href="bluefy://open?url=https%3A%2F%2Fflash-watch.vercel.app" class="button primary" style="padding:8px 14px; font-size:13px; text-decoration:none; border-radius:8px;">🚀 Open in Bluefy App</a>
-        <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" rel="noopener" class="button" style="padding:8px 14px; font-size:13px; text-decoration:none; border-radius:8px;">📲 Get Bluefy on App Store</a>
-      </div>
-    </div>
-
-    <!-- Android Panel -->
-    <div class="guide-content hidden" id="panel-android">
-      <div style="font-weight:600; color:var(--ok);">
-        🤖 3 Steps for Android (Chrome / Samsung / Edge):
-      </div>
-      <div class="guide-step">
-        <span class="num">1</span>
-        <div><b>Close the official boAt app:</b> Force-stop or close the boAt Wearables app. If the app holds the connection, the browser cannot find the watch.</div>
-      </div>
-      <div class="guide-step">
-        <span class="num">2</span>
-        <div><b>Unpair in Phone Settings:</b> Go to <i>Settings &rarr; Bluetooth</i>. If <code>FLASH</code> is paired, tap <b>Unpair / Forget</b>.</div>
-      </div>
-      <div class="guide-step">
-        <span class="num">3</span>
-        <div><b>Turn ON Bluetooth & Location:</b> Android requires Location / Nearby Devices permission for BLE scanning. Open in <b>Google Chrome</b> and tap <b>Connect Watch</b>.</div>
-      </div>
-    </div>
-
-    <!-- Brave Panel -->
-    <div class="guide-content hidden" id="panel-brave">
-      <div style="font-weight:600; color:var(--warn);">
-        🦁 Fixing Brave Browser "Globally Disabled" Error:
-      </div>
-      <p style="color:var(--muted); line-height:1.45;">
-        Brave blocks Web Bluetooth out-of-the-box on desktop and mobile. To enable:
-      </p>
-      <div class="guide-step">
-        <span class="num">1</span>
-        <div>Copy flag URL:
-          <button type="button" id="copy-brave-flag-guide" style="padding:4px 10px; font-size:12px; margin-left:6px;">📋 Copy brave://flags</button>
-        </div>
-      </div>
-      <div class="guide-step">
-        <span class="num">2</span>
-        <div>Paste into address bar: <code>brave://flags/#brave-web-bluetooth-api</code></div>
-      </div>
-      <div class="guide-step">
-        <span class="num">3</span>
-        <div>Set <b>Web Bluetooth API</b> to <b>Enabled</b>, then click <b>Relaunch</b>.</div>
-      </div>
-      <div style="font-size:12px; color:var(--muted); margin-top:4px;">
-        Or open in <b>Google Chrome</b> or <b>Microsoft Edge</b> where it works immediately.
-      </div>
-    </div>
-
-    <!-- Desktop Panel -->
-    <div class="guide-content hidden" id="panel-desktop">
-      <div style="font-weight:600; color:var(--accent);">
-        💻 Desktop & PC Instructions:
-      </div>
-      <p style="color:var(--muted); line-height:1.45;">
-        Works out of the box in <b>Google Chrome</b>, <b>Microsoft Edge</b>, and <b>Opera</b>.
-        On Linux/macOS Firefox, you can also run the local PC bridge:
-      </p>
-      <code>python3 server.py --lan</code>
-    </div>
-  </div>
-
-  <!-- Quick Actions Card -->
-  <div class="card">
-    <div class="card-title">Quick Controls</div>
-    <div class="row">
-      <button data-act="time" disabled title="Sync clock and timezone with this device">🕒 Sync Clock</button>
+    <!-- Quick Tool Pills -->
+    <div class="row" style="justify-content:center; gap:8px;">
+      <button data-act="time" disabled title="Sync clock with this device">🕒 Sync Clock</button>
       <button data-act="find" disabled title="Vibrate and ring the watch">🔔 Find Watch</button>
-      <button data-act="info" disabled title="Query watch firmware and hardware revision">ℹ️ Device Info</button>
+      <button data-act="info" disabled title="Query firmware info">ℹ️ Info</button>
     </div>
+
+    <!-- Activity & Sensors Grid -->
+    <div class="metrics-grid" id="telemetry-card">
+      <div class="metric-card">
+        <div class="metric-top">
+          <span>Today's Steps</span>
+          <span>👟</span>
+        </div>
+        <div class="metric-val" id="sport-steps">–</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-top">
+          <span>Distance (m)</span>
+          <span>📍</span>
+        </div>
+        <div class="metric-val" id="sport-dist">–</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-top">
+          <span>Calories (kcal)</span>
+          <span>🔥</span>
+        </div>
+        <div class="metric-val" id="sport-kcal">–</div>
+      </div>
+      <div class="metric-card">
+        <div class="metric-top">
+          <span>Active Duration</span>
+          <span>⏱️</span>
+        </div>
+        <div class="metric-val" id="sport-dur">–</div>
+      </div>
+    </div>
+
+    <!-- Hardware Meta -->
+    <div class="row" style="justify-content:space-between; font-size:11px; color:var(--text-tertiary); padding:4px 4px 0;">
+      <span>Firmware: <b id="fw" style="color:var(--text-secondary); font-weight:600;">–</b></span>
+      <span>MAC: <b id="mac-display" style="color:var(--text-secondary); font-weight:600;">08:7C:85:03:12:0F</b></span>
+    </div>
+
+    <label style="flex-direction:row; align-items:center; gap:8px; cursor:pointer; font-size:12px; color:var(--text-secondary); margin-top:4px;">
+      <input type="checkbox" id="scan-all" style="width:auto;"> Show all nearby BLE devices
+    </label>
   </div>
 
-  <!-- Notifications Studio -->
-  <div class="card">
-    <div class="card-title">
-      <span>Push Notification</span>
+  <!-- ================= SECTION 2: PUSH NOTIFICATIONS ================= -->
+  <div id="section-notif" class="card hidden">
+    <div class="card-header">
+      <span class="card-title">Push Notification Studio</span>
       <span id="nbytes" class="bytes-bar">0 / 150 B</span>
     </div>
 
     <div class="presets-row">
-      <span style="font-size:12px; color:var(--muted); align-self:center;">Presets:</span>
+      <span style="font-size:12px; color:var(--text-secondary);">Presets:</span>
       <button type="button" class="chip" id="preset-call">📞 Call</button>
       <button type="button" class="chip" id="preset-wa">💬 WhatsApp</button>
       <button type="button" class="chip" id="preset-alert">🚨 Alert</button>
@@ -778,7 +901,6 @@
     </label>
 
     <div class="emoji-chips">
-      <span style="font-size:11px; color:var(--muted); align-self:center; margin-right:4px;">Emojis:</span>
       <button type="button" class="emoji-btn">👋</button>
       <button type="button" class="emoji-btn">🔥</button>
       <button type="button" class="emoji-btn">⚡</button>
@@ -811,39 +933,100 @@
     </div>
   </div>
 
-  <!-- Telemetry Card (Sport & Steps) -->
-  <div class="card" id="telemetry-card">
-    <div class="card-title">Activity & Sensors</div>
-    <div class="stat-grid">
-      <div class="stat-box">
-        <span>Today's Steps</span>
-        <b id="sport-steps">–</b>
-      </div>
-      <div class="stat-box">
-        <span>Distance (m)</span>
-        <b id="sport-dist">–</b>
-      </div>
-      <div class="stat-box">
-        <span>Calories (kcal)</span>
-        <b id="sport-kcal">–</b>
-      </div>
-      <div class="stat-box">
-        <span>Active Duration</span>
-        <b id="sport-dur">–</b>
-      </div>
-    </div>
-  </div>
-
-  <!-- Live Traffic Hex Inspector -->
-  <div class="card">
-    <div class="card-title">
-      <span>Bluetooth Traffic Monitor</span>
+  <!-- ================= SECTION 3: DIAGNOSTICS & GUIDES ================= -->
+  <div id="section-diag" class="card hidden">
+    <div class="card-header">
+      <span class="card-title">Diagnostics & Traffic</span>
       <div class="row" style="gap:6px;">
-        <button id="copy-log" style="padding:4px 8px; font-size:11px;">Copy</button>
-        <button id="clear" style="padding:4px 8px; font-size:11px;">Clear</button>
+        <button id="copy-log" class="chip" style="padding:3px 9px;">Copy</button>
+        <button id="clear" class="chip" style="padding:3px 9px;">Clear</button>
       </div>
     </div>
-    <pre id="log"></pre>
+
+    <!-- Real-time 4-Step Diagnostic Tracker -->
+    <div id="conn-steps-box" class="conn-steps-box">
+      <div class="steps-title">
+        <span>GATT Connection Stepper</span>
+        <span id="step-overall-status">Idle</span>
+      </div>
+      <div class="step-row" id="st-scan">
+        <div class="step-indicator">1</div>
+        <div class="step-info">
+          <span class="step-name">Scan & Device Discovery</span>
+          <span class="step-sub" id="st-scan-desc">Waiting for picker…</span>
+        </div>
+        <span class="step-badge" id="st-scan-badge">Pending</span>
+      </div>
+      <div class="step-row" id="st-gatt">
+        <div class="step-indicator">2</div>
+        <div class="step-info">
+          <span class="step-name">GATT Handshake</span>
+          <span class="step-sub" id="st-gatt-desc">CoreBluetooth connection</span>
+        </div>
+        <span class="step-badge" id="st-gatt-badge">Waiting</span>
+      </div>
+      <div class="step-row" id="st-svc">
+        <div class="step-indicator">3</div>
+        <div class="step-info">
+          <span class="step-name">Resolve Service 0xF618</span>
+          <span class="step-sub" id="st-svc-desc">TX & RX characteristics</span>
+        </div>
+        <span class="step-badge" id="st-svc-badge">Waiting</span>
+      </div>
+      <div class="step-row" id="st-ready">
+        <div class="step-indicator">4</div>
+        <div class="step-info">
+          <span class="step-name">Clock & Protocol Sync</span>
+          <span class="step-sub" id="st-ready-desc">K6 protocol initialization</span>
+        </div>
+        <span class="step-badge" id="st-ready-badge">Waiting</span>
+      </div>
+      <div id="diag-error-tip" class="diag-error-tip hidden"></div>
+    </div>
+
+    <!-- Platform Guide Card -->
+    <div id="guide-card" style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span class="card-title">Platform Guide</span>
+        <span id="detected-tag" style="font-size:11px; font-weight:600; color:var(--accent);">Detecting…</span>
+      </div>
+      <div class="guide-tabs">
+        <button type="button" class="guide-tab active" id="tab-btn-ios">🍏 iOS / Bluefy</button>
+        <button type="button" class="guide-tab" id="tab-btn-android">🤖 Android</button>
+        <button type="button" class="guide-tab" id="tab-btn-brave">🦁 Brave</button>
+        <button type="button" class="guide-tab" id="tab-btn-desktop">💻 PC / Chrome</button>
+      </div>
+
+      <div class="guide-content" id="panel-ios">
+        <div style="font-weight:700; color:var(--accent);">🍏 Bluefy (iOS) Guide:</div>
+        <div class="guide-step"><span class="num">1</span><div>Ensure <b>Bluetooth Sharing</b> is ON in iPhone <i>Settings &rarr; Bluefy</i>.</div></div>
+        <div class="guide-step"><span class="num">2</span><div>Do NOT pair in iPhone Bluetooth settings. Bluefy connects inside the page.</div></div>
+        <div class="row" style="margin-top:4px;">
+          <a id="open-bluefy-btn" href="bluefy://open?url=https%3A%2F%2Fflash-watch.vercel.app" class="button primary" style="font-size:12px; padding:6px 12px;">🚀 Open in Bluefy</a>
+          <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" rel="noopener" class="button" style="font-size:12px; padding:6px 12px;">📲 App Store</a>
+        </div>
+      </div>
+
+      <div class="guide-content hidden" id="panel-android">
+        <div style="font-weight:700; color:var(--ok);">🤖 Android Steps:</div>
+        <div class="guide-step"><span class="num">1</span><div>Close the boAt app so it doesn't hold the connection.</div></div>
+        <div class="guide-step"><span class="num">2</span><div>Enable Bluetooth & Location in phone settings, then tap Connect Watch in Chrome.</div></div>
+      </div>
+
+      <div class="guide-content hidden" id="panel-brave">
+        <div style="font-weight:700; color:var(--warn);">🦁 Brave Fix:</div>
+        <div class="guide-step"><span class="num">1</span><div>Copy URL: <button type="button" id="copy-brave-flag-guide" class="chip">📋 Copy</button></div></div>
+        <div class="guide-step"><span class="num">2</span><div>Paste in address bar: <code>brave://flags/#brave-web-bluetooth-api</code> &rarr; Enable.</div></div>
+      </div>
+
+      <div class="guide-content hidden" id="panel-desktop">
+        <div style="font-weight:700; color:var(--accent);">💻 PC / Chrome:</div>
+        <div>Works out-of-the-box in Chrome and Edge. For LAN bridge mode: <code>python3 server.py --lan</code></div>
+      </div>
+    </div>
+
+    <!-- Packet Log -->
+    <pre id="log" placeholder="Bluetooth traffic will appear here..."></pre>
   </div>
 </main>
 
@@ -1001,8 +1184,15 @@ function done() {
       }
       break;
     case 3:
-      if ($("bat")) $("bat").textContent = d[0] + "%";
-      log(`   battery ${d[0]}%`);
+      const batVal = d[0];
+      if ($("bat")) $("bat").textContent = batVal + "%";
+      // Update battery ring (max circumference = 390)
+      const batRing = $("ring-bat");
+      if (batRing) {
+        const pct = Math.max(0, Math.min(100, batVal));
+        batRing.style.strokeDashoffset = 390 - (390 * (pct / 100));
+      }
+      log(`   battery ${batVal}%`);
       break;
     case 11:
       log(`   watch is looking for the phone (${d[0] ? "start" : "stop"})`);
@@ -1023,6 +1213,12 @@ function done() {
         if ($("sport-dist")) $("sport-dist").textContent = dist.toLocaleString();
         if ($("sport-kcal")) $("sport-kcal").textContent = kcal.toLocaleString();
         if ($("sport-dur")) $("sport-dur").textContent = Math.floor(dur / 60) + "m";
+        // Update activity ring (max circumference = 465, goal 10,000 steps)
+        const stepRing = $("ring-steps");
+        if (stepRing) {
+          const stepPct = Math.max(0, Math.min(1, steps / 10000));
+          stepRing.style.strokeDashoffset = 465 - (465 * stepPct);
+        }
         log(`   sport record: steps=${steps} dist=${dist}m kcal=${kcal} dur=${dur}s`);
       }
       break;
@@ -1053,7 +1249,7 @@ function alertUser(msg) {
   const st = $("status-text");
   if (st) {
     st.textContent = msg;
-    st.className = "stat bad";
+    st.className = "bad";
   }
 }
 
@@ -1062,7 +1258,7 @@ function setConnected(on, msg) {
   const st = $("status-text");
   if (st) {
     st.textContent = msg;
-    st.className = "stat " + (on ? "ok" : (msg && msg.toLowerCase().includes("error") ? "bad" : ""));
+    st.className = on ? "ok" : (msg && msg.toLowerCase().includes("error") ? "bad" : "");
   }
   const badge = $("conn-badge");
   const state = $("conn-state");
@@ -1081,6 +1277,18 @@ function setConnected(on, msg) {
     document.querySelectorAll("[data-act]").forEach(b => b.disabled = !on);
   }
 }
+
+// Update Watch face clock
+function updateLocalClock() {
+  const clockEl = $("watch-clock");
+  if (!clockEl) return;
+  const d = new Date();
+  const hrs = d.getHours().toString().padStart(2, "0");
+  const mins = d.getMinutes().toString().padStart(2, "0");
+  clockEl.textContent = `${hrs}:${mins}`;
+}
+setInterval(updateLocalClock, 1000);
+updateLocalClock();
 
 // --- bridge mode: server.py uses PC's Bluetooth (no Web Bluetooth needed) ---
 let bridge = false, since = 0;
@@ -1114,6 +1322,11 @@ async function poll() {
           log("   device info fw=" + e.firmware);
         } else if ("battery" in e) {
           if ($("bat")) $("bat").textContent = e.battery + "%";
+          const batRing = $("ring-bat");
+          if (batRing) {
+            const pct = Math.max(0, Math.min(100, e.battery));
+            batRing.style.strokeDashoffset = 390 - (390 * (pct / 100));
+          }
           log(`   battery ${e.battery}%`);
         } else if ("find_phone" in e) {
           log("   watch is looking for the phone");
@@ -1134,7 +1347,7 @@ if (typeof fetch !== 'undefined') {
   api("status").then(r => r.ok ? r.json() : null).then(s => {
     if (!s || !s.bridge) return;
     bridge = true;
-    if ($("mode-text")) $("mode-text").textContent = "Mode: Local PC Bluetooth (server.py)";
+    if ($("mode-text")) $("mode-text").textContent = "Local PC Bluetooth";
     api("events").then(r => r.json()).then(r => { since = r.next; poll(); });
   }).catch(() => {});
 }
@@ -1147,6 +1360,37 @@ function switchGuideTab(tabKey) {
     const panel = $("panel-" + t);
     if (btn) btn.className = (t === tabKey ? "guide-tab active" : "guide-tab");
     if (panel) panel.className = (t === tabKey ? "guide-content" : "guide-content hidden");
+  });
+}
+
+// Main 3-Tab Navigator (Emil Kowalski style)
+function switchMainTab(activeTab) {
+  const sections = {
+    dash: $("section-dash"),
+    notif: $("section-notif"),
+    diag: $("section-diag")
+  };
+  const buttons = {
+    dash: $("btn-tab-dash"),
+    notif: $("btn-tab-notif"),
+    diag: $("btn-tab-diag")
+  };
+
+  Object.keys(sections).forEach(k => {
+    if (sections[k]) {
+      if (k === activeTab) {
+        sections[k].classList.remove("hidden");
+      } else {
+        sections[k].classList.add("hidden");
+      }
+    }
+    if (buttons[k]) {
+      if (k === activeTab) {
+        buttons[k].classList.add("active");
+      } else {
+        buttons[k].classList.remove("active");
+      }
+    }
   });
 }
 
@@ -1176,8 +1420,8 @@ function checkBrowserCompatibility() {
 
   if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
     isCapacitorNative = true;
-    if ($("mode-text")) $("mode-text").textContent = "Mode: Native iOS App (CoreBluetooth)";
-    if ($("detected-tag")) $("detected-tag").textContent = "Detected: Native iOS App";
+    if ($("mode-text")) $("mode-text").textContent = "Native iOS App";
+    if ($("detected-tag")) $("detected-tag").textContent = "Native iOS App";
     const guide = $("guide-card");
     if (guide) guide.classList.add("hidden");
     return;
@@ -1294,7 +1538,15 @@ if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     checkBrowserCompatibility();
 
-    // Tab buttons
+    // Main 3-Tab Navigator
+    const tDash = $("btn-tab-dash");
+    if (tDash) tDash.onclick = () => switchMainTab("dash");
+    const tNotif = $("btn-tab-notif");
+    if (tNotif) tNotif.onclick = () => switchMainTab("notif");
+    const tDiag = $("btn-tab-diag");
+    if (tDiag) tDiag.onclick = () => switchMainTab("diag");
+
+    // Platform Guide Tab buttons
     ["brave", "ios", "android", "desktop"].forEach(t => {
       const btn = $("tab-btn-" + t);
       if (btn) btn.onclick = () => switchGuideTab(t);
@@ -1420,7 +1672,6 @@ if (typeof window !== 'undefined') {
 
         try {
           const scanAll = $("scan-all") && $("scan-all").checked;
-          // Clean standard primary service UUID ONLY (never characteristics!)
           const optServices = [SERVICE_UUID];
 
           updateStep(1, "active", scanAll ? "Prompting device picker (all devices)..." : "Scanning for FLASH watch…");
