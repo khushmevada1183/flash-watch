@@ -874,6 +874,8 @@ const $ = id => {
 
 const enc = new TextEncoder();
 let dev, tx, rx, rxBuf = null, writing = Promise.resolve();
+let isCapacitorNative = false, capDeviceId = null;
+const rawHex = b => [...b].map(x => x.toString(16).padStart(2, "0")).join("");
 
 function log(...a) {
   const el = $("log");
@@ -911,7 +913,14 @@ function write(pkts) {
   writing = writing.then(async () => {
     for (const p of pkts) {
       log("->", hex(p));
-      if (tx && tx.writeValueWithResponse) {
+      if (isCapacitorNative && typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BluetoothLe) {
+        await window.Capacitor.Plugins.BluetoothLe.write({
+          deviceId: capDeviceId,
+          service: SERVICE_UUID,
+          characteristic: TX_UUID,
+          value: rawHex(p)
+        });
+      } else if (tx && tx.writeValueWithResponse) {
         await tx.writeValueWithResponse(p);
       }
     }
@@ -1166,6 +1175,15 @@ function copyText(str, btn, successText = "Copied! Paste into address bar") {
 function checkBrowserCompatibility() {
   if (typeof navigator === 'undefined' || typeof window === 'undefined') return;
 
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) {
+    isCapacitorNative = true;
+    if ($("mode-text")) $("mode-text").textContent = "Mode: Native iOS App (CoreBluetooth)";
+    if ($("detected-tag")) $("detected-tag").textContent = "Detected: Native iOS App";
+    const guide = $("guide-card");
+    if (guide) guide.classList.add("hidden");
+    return;
+  }
+
   const ua = navigator.userAgent || "";
   const isIOS = (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream;
   const isBluefy = ua.includes("Bluefy");
@@ -1336,6 +1354,56 @@ if (typeof window !== 'undefined') {
           return;
         }
 
+        if (isCapacitorNative && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BluetoothLe) {
+          try {
+            const ble = window.Capacitor.Plugins.BluetoothLe;
+            updateStep(1, "active", "Initializing native iOS Bluetooth…");
+            setConnected(false, "Scanning for FLASH watch…");
+            await ble.initialize();
+
+            const scanResult = await ble.requestDevice({
+              namePrefix: "FLASH"
+            });
+            capDeviceId = scanResult.deviceId;
+            updateStep(1, "done", `Selected: ${scanResult.name || "FLASH"}`);
+            log(`Capacitor Native BLE selected: ${scanResult.name} (${capDeviceId})`);
+
+            updateStep(2, "active", "Connecting native CoreBluetooth link…");
+            await ble.connect({ deviceId: capDeviceId });
+            updateStep(2, "done", "GATT connected!");
+
+            updateStep(3, "active", "Configuring 0xF618 service notifications…");
+            const notifKey = `notification|${capDeviceId}|${SERVICE_UUID}|${RX_UUID}`;
+            await ble.addListener(notifKey, (event) => {
+              let buf;
+              if (typeof event.value === "string") {
+                const hexBytes = event.value.match(/.{1,2}/g) || [];
+                buf = new Uint8Array(hexBytes.map(b => parseInt(b, 16))).buffer;
+              } else if (event.value && event.value.buffer) {
+                buf = event.value.buffer;
+              }
+              if (buf) onNotify({ target: { value: { buffer: buf } } });
+            });
+            await ble.startNotifications({
+              deviceId: capDeviceId,
+              service: SERVICE_UUID,
+              characteristic: RX_UUID
+            });
+            updateStep(3, "done", "TX & RX channels ready!");
+
+            updateStep(4, "active", "Syncing clock & telemetry…");
+            if ($("name")) $("name").textContent = scanResult.name || "FLASH";
+            setConnected(true, "Connected (Native iOS App)");
+            await cmds.time();
+            await cmds.info();
+            updateStep(4, "done", "Watch active and synchronized!");
+          } catch (nativeErr) {
+            updateStep(2, "error", nativeErr.message || String(nativeErr));
+            setConnected(false, "Error: " + (nativeErr.message || String(nativeErr)));
+          }
+          return;
+        }
+
         if (!navigator.bluetooth) {
           const ua = navigator.userAgent || "";
           const isIOS = (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
@@ -1486,7 +1554,10 @@ if (typeof window !== 'undefined') {
 
     if ($("disconnect")) {
       $("disconnect").onclick = () => {
-        if (bridge) {
+        if (isCapacitorNative && capDeviceId && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.BluetoothLe) {
+          window.Capacitor.Plugins.BluetoothLe.disconnect({ deviceId: capDeviceId }).catch(() => {});
+          setConnected(false, "Disconnected");
+        } else if (bridge) {
           setConnected(false, "Idle (Watch remains paired to PC)");
         } else if (dev && dev.gatt) {
           dev.gatt.disconnect();

@@ -5,3 +5,8 @@ __pycache__/
 apk/
 
 .vercel
+node_modules/
+build/
+*.ipa
+ios/App/Pods/
+ios/App/Podfile.lock

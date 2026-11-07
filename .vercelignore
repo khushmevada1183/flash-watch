@@ -7,3 +7,9 @@ cli/
 server.py
 SYSTEM.md
 __pycache__/
+node_modules/
+ios/
+.github/
+package.json
+package-lock.json
+capacitor.config.json

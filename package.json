@@ -1,0 +1,18 @@
+{
+  "name": "flash-watch",
+  "version": "1.0.0",
+  "description": "boAt FLASH smartwatch BLE web and native iOS controller",
+  "main": "web/index.html",
+  "scripts": {
+    "test": "node web/check.js",
+    "build": "node web/check.js"
+  },
+  "dependencies": {
+    "@capacitor/core": "^6.2.0",
+    "@capacitor/ios": "^6.2.0",
+    "@capacitor-community/bluetooth-le": "^6.0.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^6.2.0"
+  }
+}

@@ -1,0 +1,59 @@
+name: Build FLASH Watch iOS (.ipa)
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build-ipa:
+    name: Build Unsigned IPA
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci || npm install
+
+      - name: Sync Capacitor iOS
+        run: npx cap sync ios
+
+      - name: Install CocoaPods
+        run: |
+          cd ios/App
+          pod install
+
+      - name: Build Archive (Unsigned)
+        run: |
+          xcodebuild clean archive \
+            -workspace "ios/App/App.xcworkspace" \
+            -scheme "App" \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "build/App.xcarchive" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package Unsigned IPA
+        run: |
+          mkdir -p build/Payload
+          cp -r "build/App.xcarchive/Products/Applications/"*.app "build/Payload/"
+          cd build
+          zip -r FlashWatch.ipa Payload
+          echo "IPA created successfully at build/FlashWatch.ipa"
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlashWatch-iOS-IPA
+          path: build/FlashWatch.ipa
+          retention-days: 14

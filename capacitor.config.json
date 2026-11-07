@@ -1,0 +1,17 @@
+{
+  "appId": "com.khushmevada.flashwatch",
+  "appName": "FLASH Watch",
+  "webDir": "web",
+  "bundledWebRuntime": false,
+  "ios": {
+    "contentInset": "automatic"
+  },
+  "plugins": {
+    "BluetoothLe": {
+      "displayStrings": {
+        "scanning": "Scanning for FLASH Watch...",
+        "cancel": "Cancel"
+      }
+    }
+  }
+}
