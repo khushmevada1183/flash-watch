@@ -875,7 +875,6 @@ const $ = id => {
 const enc = new TextEncoder();
 let dev, tx, rx, rxBuf = null, writing = Promise.resolve();
 let isCapacitorNative = false, capDeviceId = null;
-const rawHex = b => [...b].map(x => x.toString(16).padStart(2, "0")).join("");
 
 function log(...a) {
   const el = $("log");
@@ -918,13 +917,13 @@ function write(pkts) {
           deviceId: capDeviceId,
           service: SERVICE_UUID,
           characteristic: TX_UUID,
-          value: rawHex(p)
+          value: hex(p)
         });
       } else if (tx && tx.writeValueWithResponse) {
         await tx.writeValueWithResponse(p);
       }
     }
-  }).catch(e => log("write error:", e.message));
+  }).catch(e => log("write error:", e.message || String(e)));
   return writing;
 }
 
@@ -1377,10 +1376,13 @@ if (typeof window !== 'undefined') {
             await ble.addListener(notifKey, (event) => {
               let buf;
               if (typeof event.value === "string") {
-                const hexBytes = event.value.match(/.{1,2}/g) || [];
+                const str = event.value.trim();
+                const hexBytes = str.includes(" ") ? str.split(/\s+/).filter(Boolean) : (str.match(/.{1,2}/g) || []);
                 buf = new Uint8Array(hexBytes.map(b => parseInt(b, 16))).buffer;
               } else if (event.value && event.value.buffer) {
                 buf = event.value.buffer;
+              } else if (Array.isArray(event.value)) {
+                buf = new Uint8Array(event.value).buffer;
               }
               if (buf) onNotify({ target: { value: { buffer: buf } } });
             });

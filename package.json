@@ -5,7 +5,8 @@
   "main": "web/index.html",
   "scripts": {
     "test": "node web/check.js",
-    "build": "node web/check.js"
+    "build": "node web/check.js",
+    "postinstall": "node scripts/patch-plugin.js"
   },
   "dependencies": {
     "@capacitor/core": "^6.2.0",
