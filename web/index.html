@@ -1,0 +1,983 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0969da">
+<meta name="description" content="Zero-cloud Web Bluetooth controller and bridge for the boAt FLASH smartwatch. Control your watch directly from any browser.">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="manifest" href="manifest.webmanifest">
+<title>boAt FLASH Watch | Web Controller</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+    --card-sub: #1f242c;
+    --card-hover: #262c36;
+    --fg: #e6edf3;
+    --muted: #8b949e;
+    --line: #30363d;
+    --accent: #2f81f7;
+    --accent-hover: #388bfd;
+    --accent-dim: rgba(56, 139, 253, 0.15);
+    --ok: #238636;
+    --ok-glow: rgba(35, 134, 54, 0.3);
+    --bad: #da3633;
+    --warn: #d29922;
+    --radius: 12px;
+  }
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg: #f6f8fa;
+      --card: #ffffff;
+      --card-sub: #f0f3f6;
+      --card-hover: #e6eaf0;
+      --fg: #1f2328;
+      --muted: #656d76;
+      --line: #d0d7de;
+      --accent: #0969da;
+      --accent-hover: #0860ca;
+      --accent-dim: rgba(9, 105, 218, 0.1);
+      --ok: #1a7f37;
+      --ok-glow: rgba(26, 127, 55, 0.2);
+      --bad: #cf222e;
+      --warn: #9a6700;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font: 14px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    min-height: 100vh;
+    padding-bottom: 32px;
+  }
+  main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0 8px;
+    border-bottom: 1px solid var(--line);
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .brand img, .brand svg {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+  }
+  .brand h1 {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+  .brand span {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 400;
+    display: block;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    background: var(--card-sub);
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .badge.connected {
+    background: var(--ok-glow);
+    border-color: var(--ok);
+    color: var(--ok);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+  }
+  .badge.connected .dot {
+    background: var(--ok);
+    box-shadow: 0 0 8px var(--ok);
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  button {
+    font: inherit;
+    font-weight: 500;
+    padding: 10px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--card-sub);
+    color: var(--fg);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  button:hover:not(:disabled) {
+    background: var(--card-hover);
+    border-color: var(--muted);
+  }
+  button.primary {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  button.primary:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+  button.danger {
+    color: var(--bad);
+    border-color: rgba(218, 54, 51, 0.4);
+  }
+  button.danger:hover:not(:disabled) {
+    background: rgba(218, 54, 51, 0.1);
+  }
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  button.chip {
+    padding: 4px 10px;
+    font-size: 12px;
+    border-radius: 16px;
+  }
+  input, select, textarea {
+    font: inherit;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--fg);
+    transition: border-color 0.15s ease;
+  }
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  label {
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 10px;
+  }
+  .stat-box {
+    background: var(--card-sub);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .stat-box span {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .stat-box b {
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .notice-banner {
+    background: var(--card-sub);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .notice-banner.warn {
+    border-left-color: var(--warn);
+    background: rgba(210, 153, 34, 0.08);
+  }
+  .notice-banner.bad {
+    border-left-color: var(--bad);
+    background: rgba(218, 54, 51, 0.08);
+  }
+  .notice-banner.ok {
+    border-left-color: var(--ok);
+    background: var(--ok-glow);
+  }
+  .notice-header {
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .notice-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+  .notice-actions a, .notice-actions button {
+    font-size: 12px;
+    padding: 6px 12px;
+    text-decoration: none;
+  }
+  .bytes-bar {
+    font-size: 12px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .emoji-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-top: 2px;
+  }
+  .emoji-btn {
+    padding: 4px 8px;
+    font-size: 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: var(--card-sub);
+    border: 1px solid var(--line);
+    color: var(--fg);
+  }
+  .emoji-btn:hover {
+    background: var(--card-hover);
+  }
+  pre {
+    margin: 0;
+    max-height: 220px;
+    overflow: auto;
+    font: 11px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: var(--muted);
+    background: var(--bg);
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  .presets-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  #status-text.ok { color: var(--ok); }
+  #status-text.bad { color: var(--bad); }
+  #status-text.warn { color: var(--warn); }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="brand">
+      <img src="icon.svg" alt="FLASH Watch Logo">
+      <div>
+        <h1>boAt FLASH Watch</h1>
+        <span>Direct Web Bluetooth Controller</span>
+      </div>
+    </div>
+    <div id="conn-badge" class="badge">
+      <div class="dot"></div>
+      <span id="conn-state">Disconnected</span>
+    </div>
+  </header>
+
+  <!-- Browser & Platform Diagnostic Notice -->
+  <div id="compat-notice" class="notice-banner hidden">
+    <div class="notice-header" id="compat-header">Browser Compatibility</div>
+    <div id="compat-body">Checking device and browser capabilities...</div>
+    <div class="notice-actions" id="compat-actions"></div>
+  </div>
+
+  <!-- Device Overview Card -->
+  <div class="card">
+    <div class="card-title">
+      <span>Device Connection</span>
+      <span id="mode-text" style="font-size:11px; text-transform:none;">Mode: Web Bluetooth</span>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-box">
+        <span>Device</span>
+        <b id="name">FLASH</b>
+      </div>
+      <div class="stat-box">
+        <span>Firmware</span>
+        <b id="fw">–</b>
+      </div>
+      <div class="stat-box">
+        <span>Battery</span>
+        <b id="bat">–</b>
+      </div>
+      <div class="stat-box">
+        <span>MAC Address</span>
+        <b id="mac-display">08:7C:85:03:12:0F</b>
+      </div>
+    </div>
+
+    <div class="row">
+      <button id="connect" class="primary">⚡ Connect Watch</button>
+      <button id="disconnect" class="danger" disabled>Disconnect</button>
+      <span id="status-text" class="stat" style="font-size:13px; margin-left:auto;">Ready</span>
+    </div>
+  </div>
+
+  <!-- Quick Actions Card -->
+  <div class="card">
+    <div class="card-title">Quick Controls</div>
+    <div class="row">
+      <button data-act="time" disabled title="Sync clock and timezone with this device">🕒 Sync Clock</button>
+      <button data-act="find" disabled title="Vibrate and ring the watch">🔔 Find Watch</button>
+      <button data-act="info" disabled title="Query watch firmware and hardware revision">ℹ️ Device Info</button>
+    </div>
+  </div>
+
+  <!-- Notifications Studio -->
+  <div class="card">
+    <div class="card-title">
+      <span>Push Notification</span>
+      <span id="nbytes" class="bytes-bar">0 / 150 B</span>
+    </div>
+
+    <div class="presets-row">
+      <span style="font-size:12px; color:var(--muted); align-self:center;">Presets:</span>
+      <button type="button" class="chip" id="preset-call">📞 Call</button>
+      <button type="button" class="chip" id="preset-wa">💬 WhatsApp</button>
+      <button type="button" class="chip" id="preset-alert">🚨 Alert</button>
+      <button type="button" class="chip" id="preset-emoji">🎉 Emoji</button>
+    </div>
+
+    <label>Title
+      <input id="ntitle" value="Hello 👋" maxlength="60" placeholder="Title (≤ 52 bytes)">
+    </label>
+
+    <label>Message
+      <textarea id="nbody" rows="3" placeholder="Message content (UTF-8, emoji supported)">Sent from the web controller 🔥</textarea>
+    </label>
+
+    <div class="emoji-chips">
+      <span style="font-size:11px; color:var(--muted); align-self:center; margin-right:4px;">Emojis:</span>
+      <button type="button" class="emoji-btn">👋</button>
+      <button type="button" class="emoji-btn">🔥</button>
+      <button type="button" class="emoji-btn">⚡</button>
+      <button type="button" class="emoji-btn">⌚</button>
+      <button type="button" class="emoji-btn">🤖</button>
+      <button type="button" class="emoji-btn">📱</button>
+      <button type="button" class="emoji-btn">❤️</button>
+      <button type="button" class="emoji-btn">✅</button>
+      <button type="button" class="emoji-btn">🚀</button>
+      <button type="button" class="emoji-btn">💬</button>
+      <button type="button" class="emoji-btn">😎</button>
+    </div>
+
+    <div class="row">
+      <label style="flex:1">App Icon
+        <select id="nkind">
+          <option value="2">SMS (Message)</option>
+          <option value="1">Phone Call</option>
+          <option value="8" selected>WhatsApp</option>
+          <option value="19">Telegram</option>
+          <option value="18">Instagram</option>
+          <option value="5">Email</option>
+          <option value="7">Twitter / X</option>
+          <option value="6">Facebook</option>
+          <option value="10">LinkedIn</option>
+          <option value="16">Other</option>
+        </select>
+      </label>
+      <button data-act="notify" class="primary" disabled style="align-self:flex-end;">Send to Watch</button>
+    </div>
+  </div>
+
+  <!-- Telemetry Card (Sport & Steps) -->
+  <div class="card" id="telemetry-card">
+    <div class="card-title">Activity & Sensors</div>
+    <div class="stat-grid">
+      <div class="stat-box">
+        <span>Today's Steps</span>
+        <b id="sport-steps">–</b>
+      </div>
+      <div class="stat-box">
+        <span>Distance (m)</span>
+        <b id="sport-dist">–</b>
+      </div>
+      <div class="stat-box">
+        <span>Calories (kcal)</span>
+        <b id="sport-kcal">–</b>
+      </div>
+      <div class="stat-box">
+        <span>Active Duration</span>
+        <b id="sport-dur">–</b>
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Traffic Hex Inspector -->
+  <div class="card">
+    <div class="card-title">
+      <span>Bluetooth Traffic Monitor</span>
+      <div class="row" style="gap:6px;">
+        <button id="copy-log" style="padding:4px 8px; font-size:11px;">Copy</button>
+        <button id="clear" style="padding:4px 8px; font-size:11px;">Clear</button>
+      </div>
+    </div>
+    <pre id="log"></pre>
+  </div>
+</main>
+
+<script>
+// Protocol: see ../SYSTEM.md. CE "K6" SDK from the boAt Wearables app.
+const SERVICE = 0xf618, TX = 0xb002, RX = 0xb001;
+const CMD = { SEND: 1, REQUEST: 3, ACK: 4 };
+
+// Hard allowlist. Reset(118), shutdown(119), OTA(201/202), watch-face/file push(131),
+// pairing/bond(69,70,112,120), deletes, contacts etc. can never be sent from this page.
+const ALLOWED = new Set(["3:2", "1:11", "1:104", "1:107"]);
+
+const $ = id => {
+  const el = typeof document !== 'undefined' && document.getElementById ? document.getElementById(id) : null;
+  if (el && !el.classList) {
+    el.classList = {
+      add: () => {},
+      remove: () => {},
+      toggle: () => {},
+      contains: () => false
+    };
+  }
+  return el;
+};
+
+const enc = new TextEncoder();
+let dev, tx, rx, rxBuf = null, writing = Promise.resolve();
+
+function log(...a) {
+  const el = $("log");
+  if (el) {
+    el.textContent += a.join(" ") + "\n";
+    el.scrollTop = 1e9;
+  }
+}
+
+const hex = b => [...b].map(x => x.toString(16).padStart(2, "0")).join(" ");
+const u32 = (v) => { const b = new Uint8Array(4); new DataView(b.buffer).setInt32(0, v, true); return b; };
+const cat = (...p) => { const o = new Uint8Array(p.reduce((n, x) => n + x.length, 0)); let i = 0; for (const x of p) { o.set(x, i); i += x.length; } return o; };
+
+// Head page: [0]=0 [1]=devType 1 [2]=pages [3]=N [4]=cmd [5]=dataType [6,7]=0 [8,9]=len LE [10..19]=data
+// Follow-up pages: [index][19 bytes]. 20 bytes each, no checksum.
+function pages(cmd, type, data = new Uint8Array(0)) {
+  if (cmd !== CMD.ACK && !ALLOWED.has(`${cmd}:${type}`)) throw new Error(`blocked cmd=${cmd} type=${type}`);
+  const rest = data.slice(10), n = Math.ceil(rest.length / 19);
+  if (n > 255) throw new Error("payload too long");
+  const head = new Uint8Array(20);
+  head.set([0, 1, n, 0, cmd, type, 0, 0, data.length & 255, data.length >> 8]);
+  head.set(data.slice(0, 10), 10);
+  const out = [head];
+  for (let i = 0; i < n; i++) { const p = new Uint8Array(20); p[0] = i + 1; p.set(rest.slice(i * 19, i * 19 + 19), 1); out.push(p); }
+  return out;
+}
+
+function ackFrame(type, n) {
+  const b = new Uint8Array(20);
+  b.set([0, 1, 0, n, CMD.ACK, type, 0, 0, 1, 0, 1]);
+  return b;
+}
+
+function write(pkts) {
+  writing = writing.then(async () => {
+    for (const p of pkts) {
+      log("->", hex(p));
+      if (tx && tx.writeValueWithResponse) {
+        await tx.writeValueWithResponse(p);
+      }
+    }
+  }).catch(e => log("write error:", e.message));
+  return writing;
+}
+
+const send = (cmd, type, data) => write(pages(cmd, type, data));
+
+// --- commands -------------------------------------------------------------
+const nowSec = () => Math.floor(Date.now() / 1000);
+const cmds = {
+  info: () => send(CMD.REQUEST, 2),
+  find: () => send(CMD.SEND, 11, new Uint8Array([1])),
+  // K6_CESyncTime: u32 unix | i32 tz offset seconds | flags (bit0 time format, bit1 month/day order)
+  time: () => send(CMD.SEND, 104, cat(u32(nowSec()), u32(-new Date().getTimezoneOffset() * 60), new Uint8Array([1]))),
+  notify: () => {
+    const title = $("ntitle") ? $("ntitle").value : "";
+    const body = $("nbody") ? $("nbody").value : "";
+    const kind = $("nkind") ? +$("nkind").value : 2;
+    return send(CMD.SEND, 107, notice(title, body, kind));
+  },
+};
+
+// Trim to <= limit UTF-8 bytes without splitting a character (emoji safe)
+function cut(text, limit) {
+  let b = enc.encode(text);
+  if (b.length <= limit) return b;
+  let chars = [...text];
+  while (enc.encode(chars.join("") + "...").length > limit) chars.pop();
+  return enc.encode(chars.join("") + "...");
+}
+
+// K6_MessageNoticeStruct: u32 time | type | count | [attr=1,len,name] [attr=2,len,content]
+function notice(title, body, kind) {
+  const name = cut(title, 52), content = cut(body, 150 - (name.length + 2) - 8);
+  return cat(u32(nowSec()), new Uint8Array([kind, 2, 1, name.length]), name, new Uint8Array([2, content.length]), content);
+}
+
+function updateBytes() {
+  const title = $("ntitle") ? $("ntitle").value : "";
+  const body = $("nbody") ? $("nbody").value : "";
+  const d = notice(title, body, 2);
+  const nb = $("nbytes");
+  if (nb) {
+    nb.textContent = `${d.length} / 150 B (${pages(1, 107, d).length} packets)`;
+  }
+}
+
+// --- receiving ------------------------------------------------------------
+function onNotify(e) {
+  const v = new Uint8Array(e.target.value.buffer);
+  log("<-", hex(v));
+  if (v[0] !== 0) { // follow-up page
+    if (!rxBuf || v[0] !== rxBuf.next) { rxBuf = null; return; }
+    rxBuf.data = cat(rxBuf.data, v.slice(1)); rxBuf.next++;
+    if (rxBuf.data.length >= rxBuf.len) done();
+    return;
+  }
+  const cmd = v[4] & 15, type = v[5];
+  if (cmd === CMD.ACK) {
+    log(`   ack type=${type} ${v[10] === 1 ? "OK" : "status " + v[10]}`);
+    return;
+  }
+  rxBuf = { cmd, type, n: v[3], len: v[8] | (v[9] << 8), data: v.slice(10), next: 1 };
+  if (v[2] === 0 || rxBuf.data.length >= rxBuf.len) done();
+}
+
+function done() {
+  const { type, n, len } = rxBuf, d = rxBuf.data.slice(0, len);
+  rxBuf = null;
+  write([ackFrame(type, n)]); // app ACKs every data packet from the watch
+  switch (type) {
+    case 2:
+      if (d.length >= 6) {
+        const fwStr = `${d[1]}.${d[2]}.${d[3]}.${d[4]}.${d[5]}`;
+        if ($("fw")) $("fw").textContent = fwStr;
+        log(`   device info fw=${fwStr}`);
+      }
+      break;
+    case 3:
+      if ($("bat")) $("bat").textContent = d[0] + "%";
+      log(`   battery ${d[0]}%`);
+      break;
+    case 11:
+      log(`   watch is looking for the phone (${d[0] ? "start" : "stop"})`);
+      if (d[0]) {
+        beep();
+        alertUser("Watch is paging this device!");
+      }
+      break;
+    case 4:
+    case 5: { // K6_Sport records
+      const dv = new DataView(d.buffer, d.byteOffset);
+      for (let i = 3; i + 20 <= d.length; i += 20) {
+        const steps = dv.getUint32(i + 4, true);
+        const dist = dv.getUint32(i + 8, true) & 0xffffff;
+        const kcal = dv.getUint32(i + 12, true) & 0xffffff;
+        const dur = dv.getUint32(i + 16, true) & 0xffffff;
+        if ($("sport-steps")) $("sport-steps").textContent = steps.toLocaleString();
+        if ($("sport-dist")) $("sport-dist").textContent = dist.toLocaleString();
+        if ($("sport-kcal")) $("sport-kcal").textContent = kcal.toLocaleString();
+        if ($("sport-dur")) $("sport-dur").textContent = Math.floor(dur / 60) + "m";
+        log(`   sport record: steps=${steps} dist=${dist}m kcal=${kcal} dur=${dur}s`);
+      }
+      break;
+    }
+    default:
+      log(`   type=${type} data=${hex(d)}`);
+  }
+}
+
+function beep() {
+  try {
+    const a = new (window.AudioContext || window.webkitAudioContext)();
+    const o = a.createOscillator(), g = a.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(880, a.currentTime);
+    o.frequency.exponentialRampToValueAtTime(1320, a.currentTime + 0.3);
+    o.connect(g);
+    g.connect(a.destination);
+    g.gain.setValueAtTime(0.3, a.currentTime);
+    o.start();
+    o.stop(a.currentTime + 1.2);
+  } catch (err) {
+    /* audio context not permitted */
+  }
+}
+
+function alertUser(msg) {
+  const st = $("status-text");
+  if (st) {
+    st.textContent = msg;
+    st.className = "stat bad";
+  }
+}
+
+// --- connection UI --------------------------------------------------------
+function setConnected(on, msg) {
+  const st = $("status-text");
+  if (st) {
+    st.textContent = msg;
+    st.className = "stat " + (on ? "ok" : (msg && msg.toLowerCase().includes("error") ? "bad" : ""));
+  }
+  const badge = $("conn-badge");
+  const state = $("conn-state");
+  if (badge && state) {
+    if (on) {
+      badge.className = "badge connected";
+      state.textContent = "Connected";
+    } else {
+      badge.className = "badge";
+      state.textContent = "Disconnected";
+    }
+  }
+  if ($("connect")) $("connect").disabled = on;
+  if ($("disconnect")) $("disconnect").disabled = !on;
+  if (typeof document !== 'undefined' && document.querySelectorAll) {
+    document.querySelectorAll("[data-act]").forEach(b => b.disabled = !on);
+  }
+}
+
+// --- bridge mode: server.py uses PC's Bluetooth (no Web Bluetooth needed) ---
+let bridge = false, since = 0;
+const TOKEN = (typeof location !== 'undefined' && location.search) ? (new URLSearchParams(location.search).get("t") || "") : "";
+const api = (path, opts = {}) => fetch("/api/" + path, { ...opts, headers: { "X-Token": TOKEN } });
+const post = (path, body) => api(path, { method: "POST", body: JSON.stringify(body || {}) })
+  .then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; });
+
+const bridgeCmds = {
+  info: () => post("info"),
+  find: () => post("find"),
+  time: () => post("time"),
+  notify: () => {
+    const title = $("ntitle") ? $("ntitle").value : "";
+    const body = $("nbody") ? $("nbody").value : "";
+    const kind = $("nkind") ? +$("nkind").value : 2;
+    return post("notify", { title, body, kind });
+  },
+};
+
+async function poll() {
+  try {
+    const r = await (await api("events?since=" + since)).json();
+    since = r.next;
+    for (const e of r.events) {
+      if (e.dir) log(e.dir, e.hex);
+      else if ("ack" in e) log(`   ack type=${e.ack} ${e.ok ? "OK" : "FAIL"}`);
+      else {
+        if (e.firmware) {
+          if ($("fw")) $("fw").textContent = e.firmware;
+          log("   device info fw=" + e.firmware);
+        } else if ("battery" in e) {
+          if ($("bat")) $("bat").textContent = e.battery + "%";
+          log(`   battery ${e.battery}%`);
+        } else if ("find_phone" in e) {
+          log("   watch is looking for the phone");
+          if (e.find_phone) { beep(); alertUser("Watch is looking for this phone!"); }
+        } else {
+          log(`   type=${e.type} data=${e.data}`);
+        }
+      }
+    }
+  } catch (err) {
+    /* server paused or offline */
+  }
+  setTimeout(poll, 700);
+}
+
+// Check if running on server.py bridge
+if (typeof fetch !== 'undefined') {
+  api("status").then(r => r.ok ? r.json() : null).then(s => {
+    if (!s || !s.bridge) return;
+    bridge = true;
+    if ($("mode-text")) $("mode-text").textContent = "Mode: Local PC Bluetooth (server.py)";
+    api("events").then(r => r.json()).then(r => { since = r.next; poll(); });
+  }).catch(() => {});
+}
+
+// --- Browser Detection & Compatibility Advisor ---
+function checkBrowserCompatibility() {
+  const notice = $("compat-notice");
+  const header = $("compat-header");
+  const body = $("compat-body");
+  const actions = $("compat-actions");
+  if (!notice || typeof navigator === 'undefined' || typeof window === 'undefined') return;
+
+  const ua = navigator.userAgent || "";
+  const isIOS = (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream;
+  const isBluefy = ua.includes("Bluefy");
+  const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function');
+  const isFirefox = ua.includes("Firefox");
+  const isSecure = window.isSecureContext;
+  const hasBLE = 'bluetooth' in navigator;
+
+  if (isBluefy && hasBLE) {
+    notice.className = "notice-banner ok";
+    header.innerHTML = "✅ Bluefy Web Bluetooth Ready";
+    body.textContent = "You are running in Bluefy on iOS. Direct Bluetooth communication is fully supported!";
+    return;
+  }
+
+  if (isIOS && !isBluefy) {
+    notice.className = "notice-banner warn";
+    header.innerHTML = "🍎 iOS Safari WebKit Limitation";
+    body.innerHTML = "Apple WebKit disables Web Bluetooth in standard iOS Safari, Chrome, and Firefox.<br>To connect directly from your iPhone/iPad, use the free <b>Bluefy Web BLE Browser</b>.";
+    actions.innerHTML = `
+      <a href="bluefy://open?url=${encodeURIComponent(window.location.href)}" class="button primary" style="background:var(--accent); color:#fff; border-radius:6px;">Open in Bluefy App</a>
+      <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline; font-size:12px; align-self:center;">Get Bluefy on App Store ↗</a>
+    `;
+    return;
+  }
+
+  if (isBrave && !hasBLE) {
+    notice.className = "notice-banner warn";
+    header.innerHTML = "🦁 Brave Web Bluetooth Blocked";
+    body.innerHTML = "Brave disables Web Bluetooth flags by default for fingerprint protection.<br>Enable it to connect: open <code>brave://flags/#brave-web-bluetooth-api</code>, set to <b>Enabled</b>, and relaunch.";
+    actions.innerHTML = `
+      <button type="button" id="copy-brave-flag" style="font-size:12px; padding:6px 10px;">📋 Copy Flag URL</button>
+    `;
+    setTimeout(() => {
+      const b = $("copy-brave-flag");
+      if (b) b.onclick = () => {
+        navigator.clipboard.writeText("brave://flags/#brave-web-bluetooth-api");
+        b.textContent = "Copied! Paste into address bar";
+      };
+    }, 100);
+    return;
+  }
+
+  if (isFirefox) {
+    notice.className = "notice-banner warn";
+    header.innerHTML = "🦊 Firefox Web Bluetooth Unsupported";
+    body.innerHTML = "Mozilla Firefox has not implemented the Web Bluetooth API.<br>Please open this controller in <b>Google Chrome</b>, <b>Microsoft Edge</b>, <b>Opera</b>, or use the <code>python3 server.py</code> local bridge.";
+    return;
+  }
+
+  if (!isSecure && !bridge) {
+    notice.className = "notice-banner bad";
+    header.innerHTML = "🔒 Insecure Context (HTTP)";
+    body.innerHTML = "Web Bluetooth strictly requires HTTPS (or <code>http://localhost</code>).<br>When hosting remotely, deploy with HTTPS (e.g. Vercel) or run <code>python3 server.py</code> for LAN access.";
+    return;
+  }
+
+  if (hasBLE) {
+    notice.className = "notice-banner ok";
+    header.innerHTML = "🌐 Web Bluetooth Ready";
+    body.textContent = "This browser fully supports Web Bluetooth. Click 'Connect Watch' to select your FLASH device.";
+    setTimeout(() => {
+      notice.className = "notice-banner ok hidden";
+    }, 4500);
+  }
+}
+
+// --- Wire Event Handlers ---
+if (typeof window !== 'undefined') {
+  window.addEventListener('DOMContentLoaded', () => {
+    checkBrowserCompatibility();
+
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    if ($("connect")) {
+      $("connect").onclick = async () => {
+        if (bridge) {
+          try {
+            setConnected(false, "Connecting to watch via PC Bluetooth…");
+            await post("connect");
+            if ($("name")) $("name").textContent = "FLASH";
+            setConnected(true, "Connected (via PC Bluetooth)");
+            await post("time");
+            await post("info");
+          } catch (e) {
+            setConnected(false, "Error: " + e.message);
+          }
+          return;
+        }
+
+        if (!navigator.bluetooth) {
+          setConnected(false, window.isSecureContext
+            ? "Error: Web Bluetooth is disabled or unsupported in this browser."
+            : "Error: Insecure origin. Open via HTTPS or localhost.");
+          const n = $("compat-notice");
+          if (n) n.className = "notice-banner bad";
+          return;
+        }
+
+        try {
+          dev = await navigator.bluetooth.requestDevice({
+            filters: [{ services: [SERVICE] }, { namePrefix: "FLASH" }],
+            optionalServices: [SERVICE]
+          });
+          dev.addEventListener("gattserverdisconnected", () => setConnected(false, "Disconnected"));
+          setConnected(false, "Connecting GATT server…");
+
+          const gatt = await dev.gatt.connect();
+          const svc = await gatt.getPrimaryService(SERVICE);
+          tx = await svc.getCharacteristic(TX);
+          rx = await svc.getCharacteristic(RX);
+          rx.addEventListener("characteristicvaluechanged", onNotify);
+          await rx.startNotifications();
+
+          if ($("name")) $("name").textContent = dev.name || "FLASH";
+          setConnected(true, "Connected via Web Bluetooth");
+
+          // Sync clock immediately as official app does, then request device info
+          await cmds.time();
+          await cmds.info();
+        } catch (e) {
+          setConnected(false, "Error: " + e.message);
+        }
+      };
+    }
+
+    if ($("disconnect")) {
+      $("disconnect").onclick = () => {
+        if (bridge) {
+          setConnected(false, "Idle (Watch remains paired to PC)");
+        } else if (dev && dev.gatt) {
+          dev.gatt.disconnect();
+          setConnected(false, "Disconnected");
+        }
+      };
+    }
+
+    if ($("clear")) {
+      $("clear").onclick = () => {
+        if ($("log")) $("log").textContent = "";
+      };
+    }
+
+    if ($("copy-log")) {
+      $("copy-log").onclick = () => {
+        const text = $("log") ? $("log").textContent : "";
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(text);
+          $("copy-log").textContent = "Copied!";
+          setTimeout(() => { $("copy-log").textContent = "Copy"; }, 1500);
+        }
+      };
+    }
+
+    if (document.querySelectorAll) {
+      document.querySelectorAll("[data-act]").forEach(b => {
+        b.onclick = () => (bridge ? bridgeCmds : cmds)[b.dataset.act]().catch(e => log("error:", e.message));
+      });
+    }
+
+    // Preset Notification Buttons
+    if ($("preset-call")) {
+      $("preset-call").onclick = () => {
+        if ($("nkind")) $("nkind").value = "1";
+        if ($("ntitle")) $("ntitle").value = "Incoming Call";
+        if ($("nbody")) $("nbody").value = "Mom is calling...";
+        updateBytes();
+      };
+    }
+    if ($("preset-wa")) {
+      $("preset-wa").onclick = () => {
+        if ($("nkind")) $("nkind").value = "8";
+        if ($("ntitle")) $("ntitle").value = "WhatsApp";
+        if ($("nbody")) $("nbody").value = "Hey! Let's meet at 5pm? 🔥";
+        updateBytes();
+      };
+    }
+    if ($("preset-alert")) {
+      $("preset-alert").onclick = () => {
+        if ($("nkind")) $("nkind").value = "16";
+        if ($("ntitle")) $("ntitle").value = "FLASH Alert";
+        if ($("nbody")) $("nbody").value = "Battery or fitness reminder ⚡";
+        updateBytes();
+      };
+    }
+    if ($("preset-emoji")) {
+      $("preset-emoji").onclick = () => {
+        if ($("nkind")) $("nkind").value = "2";
+        if ($("ntitle")) $("ntitle").value = "Claude 🤖";
+        if ($("nbody")) $("nbody").value = "Hello from your laptop 👋🔥😎 it works! ✅";
+        updateBytes();
+      };
+    }
+
+    // Emoji chip clicks
+    document.querySelectorAll(".emoji-btn").forEach(btn => {
+      btn.onclick = () => {
+        const bodyInput = $("nbody");
+        if (bodyInput) {
+          bodyInput.value += btn.textContent;
+          updateBytes();
+        }
+      };
+    });
+
+    if ($("ntitle")) $("ntitle").oninput = updateBytes;
+    if ($("nbody")) $("nbody").oninput = updateBytes;
+  });
+}
+
+updateBytes();
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{
+  "name": "boAt FLASH Watch Controller",
+  "short_name": "FLASH Watch",
+  "description": "Zero-cloud Web Bluetooth controller and bridge for boAt FLASH smartwatch",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0d1117",
+  "theme_color": "#0969da",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["utilities", "lifestyle"]
+}

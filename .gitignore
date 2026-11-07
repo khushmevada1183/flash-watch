@@ -1,0 +1,5 @@
+*.apk
+*.xapk
+apk_src/
+__pycache__/
+apk/
