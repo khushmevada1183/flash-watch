@@ -269,6 +269,128 @@
     text-decoration: none;
   }
 
+  /* Realtime Diagnostic Tracker */
+  .conn-steps-box {
+    margin-top: 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .steps-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+  .steps-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .step-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    background: var(--card-sub);
+    font-size: 12px;
+    border: 1px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .step-row.active {
+    border-color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .step-row.done {
+    border-color: rgba(35, 134, 54, 0.4);
+  }
+  .step-row.error {
+    border-color: rgba(218, 54, 51, 0.4);
+    background: rgba(218, 54, 51, 0.08);
+  }
+  .step-indicator {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--muted);
+    font-size: 10px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .step-row.active .step-indicator {
+    background: var(--accent);
+    color: #fff;
+  }
+  .step-row.done .step-indicator {
+    background: var(--ok);
+    color: #fff;
+  }
+  .step-row.error .step-indicator {
+    background: var(--bad);
+    color: #fff;
+  }
+  .step-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+  }
+  .step-name {
+    font-weight: 600;
+    color: var(--fg);
+  }
+  .step-sub {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .step-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .step-row.active .step-badge {
+    background: var(--accent);
+    color: #fff;
+  }
+  .step-row.done .step-badge {
+    background: var(--ok);
+    color: #fff;
+  }
+  .step-row.error .step-badge {
+    background: var(--bad);
+    color: #fff;
+  }
+  .diag-error-tip {
+    background: rgba(218, 54, 51, 0.08);
+    border: 1px solid var(--bad);
+    border-radius: 6px;
+    padding: 10px 12px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--fg);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+
   /* Browser & Platform Tabs Guide */
   .guide-tabs {
     display: flex;
@@ -398,26 +520,32 @@
 
   <!-- Error 2 (CoreBluetooth Connection Failed) Alert -->
   <div id="error2-alert" class="notice-banner bad hidden">
-    <div class="notice-header">⚠️ Error 2: Watch Connection Failed (Device Busy)</div>
-    <div>
-      In Bluefy on iOS, <b>Error 2</b> (<code>CBErrorConnectionFailed</code>) means the FLASH watch rejected the connection.
-      Smartwatches only accept <b>one active connection at a time</b>.
+    <div class="notice-header">⚠️ Error 2: Why Connection Failed (Even if Bluetooth is ON)</div>
+    <div style="line-height:1.45;">
+      In Bluefy on iOS, <b>Error 2</b> (<code>CBErrorConnectionFailed</code>) occurs at the hardware/iOS level. Even when the watch screen looks idle and no app is running, 3 common hidden blocks cause this:
     </div>
     <div class="guide-step">
       <span class="num">1</span>
-      <div><b>Disconnect other devices:</b> Is your PC, laptop, or another phone currently connected to the watch? Turn off Bluetooth on those devices.</div>
+      <div><b>Watch BLE Radio Locked (Single-Connection Limit):</b> The boAt FLASH chip only supports 1 connection. If an earlier scan or session was interrupted, the watch's internal radio remains stuck in "busy" mode until you reboot.<br>
+      👉 <b>Fix:</b> Long-press the physical crown button on the watch for 3 seconds &rarr; tap <b>Restart</b> (or Power Off, then hold to power back on).</div>
     </div>
     <div class="guide-step">
       <span class="num">2</span>
-      <div><b>Forget in iPhone Settings:</b> Open iPhone <i>Settings &rarr; Bluetooth</i>. If <code>FLASH</code> appears in "MY DEVICES", tap <b>(i) &rarr; Forget This Device</b>.</div>
+      <div><b>iPhone Settings "MY DEVICES" Hijack:</b> If <code>FLASH</code> appears in iPhone <i>Settings &rarr; Bluetooth</i> (even if it says "Not Connected"), iOS locks the background GATT handle and blocks Bluefy.<br>
+      👉 <b>Fix:</b> Open iPhone <i>Settings &rarr; Bluetooth</i>. Tap <b>(i)</b> next to <code>FLASH</code> &rarr; <b>Forget This Device</b>.</div>
     </div>
     <div class="guide-step">
       <span class="num">3</span>
-      <div><b>Force-close the boAt app:</b> Swipe away the boAt Wearables app if it is running in background.</div>
+      <div><b>Control Center vs Real Bluetooth Reset:</b> Toggling Bluetooth from the iPhone swipe-down Control Center does <b>NOT</b> reset the Bluetooth system daemon!<br>
+      👉 <b>Fix:</b> Open the iPhone <b>Settings app &rarr; Bluetooth</b> &rarr; toggle the switch <b>OFF</b> &rarr; wait 5 seconds &rarr; toggle <b>ON</b>.</div>
     </div>
     <div class="guide-step">
       <span class="num">4</span>
-      <div><b>Reboot the watch:</b> Hold the physical button on the watch to restart it, then tap <b>Connect Watch</b> again below.</div>
+      <div><b>Background boAt App:</b> If the official boAt Wearables or Da Fit app is installed on your phone, swipe it away in the iPhone App Switcher.</div>
+    </div>
+    <div class="notice-actions">
+      <button type="button" id="error2-retry-btn" class="primary" style="padding:8px 14px; font-weight:600;">🔄 Rebooted Watch? Try Connecting Again</button>
+      <button type="button" id="error2-dismiss-btn" style="padding:8px 14px;">Dismiss</button>
     </div>
   </div>
 
@@ -475,6 +603,49 @@
         <input type="checkbox" id="scan-all" style="width:auto;"> Show all nearby BLE devices
       </label>
       <span id="status-text" class="stat" style="font-size:13px; margin-left:auto;">Ready</span>
+    </div>
+
+    <!-- Real-time Multi-step Diagnostic Tracker -->
+    <div id="conn-steps-box" class="conn-steps-box hidden">
+      <div class="steps-title">
+        <span>Connection Progress</span>
+        <span id="step-overall-status">Connecting…</span>
+      </div>
+      <div class="steps-list">
+        <div class="step-row" id="st-scan">
+          <div class="step-indicator">1</div>
+          <div class="step-info">
+            <span class="step-name">Scan & Device Selection</span>
+            <span class="step-sub" id="st-scan-desc">Waiting for picker…</span>
+          </div>
+          <span class="step-badge" id="st-scan-badge">Pending</span>
+        </div>
+        <div class="step-row" id="st-gatt">
+          <div class="step-indicator">2</div>
+          <div class="step-info">
+            <span class="step-name">Bluetooth GATT Handshake</span>
+            <span class="step-sub" id="st-gatt-desc">CoreBluetooth connection</span>
+          </div>
+          <span class="step-badge" id="st-gatt-badge">Waiting</span>
+        </div>
+        <div class="step-row" id="st-svc">
+          <div class="step-indicator">3</div>
+          <div class="step-info">
+            <span class="step-name">Resolve Service 0xF618</span>
+            <span class="step-sub" id="st-svc-desc">TX (0xB002) & RX (0xB001) characteristics</span>
+          </div>
+          <span class="step-badge" id="st-svc-badge">Waiting</span>
+        </div>
+        <div class="step-row" id="st-ready">
+          <div class="step-indicator">4</div>
+          <div class="step-info">
+            <span class="step-name">Sync Clock & Telemetry</span>
+            <span class="step-sub" id="st-ready-desc">K6 protocol initialization</span>
+          </div>
+          <span class="step-badge" id="st-ready-badge">Waiting</span>
+        </div>
+      </div>
+      <div id="diag-error-tip" class="diag-error-tip hidden"></div>
     </div>
   </div>
 
@@ -1029,19 +1200,74 @@ function checkBrowserCompatibility() {
   }
 }
 
+function updateStep(num, state, subText) {
+  const box = $("conn-steps-box");
+  if (box && box.classList.contains("hidden")) {
+    box.classList.remove("hidden");
+  }
+  const steps = ["scan", "gatt", "svc", "ready"];
+  const id = steps[num - 1];
+  const row = $("st-" + id);
+  const desc = $("st-" + id + "-desc");
+  const badge = $("st-" + id + "-badge");
+  if (!row) return;
+
+  row.className = "step-row " + state;
+  if (subText && desc) desc.textContent = subText;
+  if (badge) {
+    if (state === "active") badge.textContent = "Running…";
+    else if (state === "done") badge.textContent = "Done ✓";
+    else if (state === "error") badge.textContent = "Failed ✗";
+    else badge.textContent = "Waiting";
+  }
+
+  const overall = $("step-overall-status");
+  if (overall) {
+    if (state === "error") {
+      overall.textContent = "Failed at Step " + num;
+      overall.style.color = "var(--bad)";
+    } else if (state === "done" && num === 4) {
+      overall.textContent = "Connected & Ready ✓";
+      overall.style.color = "var(--ok)";
+    } else {
+      overall.textContent = "Step " + num + " of 4…";
+      overall.style.color = "var(--accent)";
+    }
+  }
+}
+
 // Reliable GATT connect helper with retry & delay for iOS / Bluefy CoreBluetooth
 async function connectGattWithRetry(targetDevice, maxRetries = 2) {
+  if (targetDevice.gatt && targetDevice.gatt.connected) {
+    log("Device already connected to GATT server.");
+    return targetDevice.gatt;
+  }
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      setConnected(false, `Connecting GATT server (try ${attempt}/${maxRetries})…`);
+      updateStep(2, "active", `CoreBluetooth link handshake (try ${attempt}/${maxRetries})…`);
+      setConnected(false, `Connecting GATT server (${attempt}/${maxRetries})…`);
+      log(`GATT connect attempt ${attempt}/${maxRetries}...`);
+
+      try {
+        if (targetDevice.gatt && !targetDevice.gatt.connected) {
+          targetDevice.gatt.disconnect();
+        }
+      } catch (_) {}
+
+      if (attempt > 1) {
+        await new Promise(res => setTimeout(res, 800));
+      }
+
       const gatt = await targetDevice.gatt.connect();
-      // Allow CoreBluetooth connection handshake to stabilize
+      log("GATT connect() returned successfully.");
       await new Promise(res => setTimeout(res, 350));
       return gatt;
     } catch (err) {
-      log(`GATT connect attempt ${attempt} failed: ${err.message || err}`);
+      const errMsg = err.message || String(err);
+      log(`GATT connect attempt ${attempt} failed: ${errMsg}`);
       if (attempt === maxRetries) throw err;
-      await new Promise(res => setTimeout(res, 750));
+      await new Promise(res => setTimeout(res, 800));
     }
   }
 }
@@ -1063,6 +1289,16 @@ if (typeof window !== 'undefined') {
     const b2 = $("copy-brave-flag-guide");
     if (b2) b2.onclick = () => copyText("brave://flags/#brave-web-bluetooth-api", b2);
 
+    // Error 2 action buttons
+    const err2Retry = $("error2-retry-btn");
+    if (err2Retry) err2Retry.onclick = () => {
+      if ($("connect")) $("connect").click();
+    };
+    const err2Dismiss = $("error2-dismiss-btn");
+    if (err2Dismiss) err2Dismiss.onclick = () => {
+      if ($("error2-alert")) $("error2-alert").className = "notice-banner bad hidden";
+    };
+
     // Register Service Worker
     if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
       navigator.serviceWorker.register('sw.js').then(r => r.update()).catch(() => {});
@@ -1070,18 +1306,31 @@ if (typeof window !== 'undefined') {
 
     if ($("connect")) {
       $("connect").onclick = async () => {
-        // Reset error banners
+        // Reset error banners & tips
         if ($("error2-alert")) $("error2-alert").className = "notice-banner bad hidden";
+        const tipEl = $("diag-error-tip");
+        if (tipEl) tipEl.className = "diag-error-tip hidden";
+
+        const box = $("conn-steps-box");
+        if (box) box.classList.remove("hidden");
+        for (let i = 1; i <= 4; i++) updateStep(i, "pending", "");
 
         if (bridge) {
           try {
+            updateStep(1, "active", "Connecting to PC Bluetooth bridge (server.py)...");
             setConnected(false, "Connecting to watch via PC Bluetooth…");
             await post("connect");
+            updateStep(1, "done", "Connected via PC bridge");
+            updateStep(2, "done", "D-Bus / BlueZ active");
+            updateStep(3, "done", "0xF618 pipe established");
+            updateStep(4, "active", "Syncing time & info...");
             if ($("name")) $("name").textContent = "FLASH";
             setConnected(true, "Connected (via PC Bluetooth)");
             await post("time");
             await post("info");
+            updateStep(4, "done", "Clock & telemetry synced!");
           } catch (e) {
+            updateStep(1, "error", e.message);
             setConnected(false, "Error: " + e.message);
           }
           return;
@@ -1101,98 +1350,102 @@ if (typeof window !== 'undefined') {
 
         try {
           const scanAll = $("scan-all") && $("scan-all").checked;
-          const optServices = [
-            SERVICE_UUID,
-            "0000f618-0000-1000-8000-00805f9b34fb",
-            "f618",
-            SERVICE,
-            TX_UUID,
-            RX_UUID
-          ];
+          // Clean standard primary service UUID ONLY (never characteristics!)
+          const optServices = [SERVICE_UUID];
 
+          updateStep(1, "active", scanAll ? "Prompting device picker (all devices)..." : "Scanning for FLASH watch…");
           setConnected(false, "Scanning for FLASH watch…");
 
-          // Resilient device request with automatic fallback
+          let requestOpts;
           if (scanAll) {
-            dev = await navigator.bluetooth.requestDevice({
+            requestOpts = {
               acceptAllDevices: true,
               optionalServices: optServices
-            });
+            };
           } else {
-            try {
+            requestOpts = {
+              filters: [
+                { name: "FLASH" },
+                { namePrefix: "FLASH" },
+                { namePrefix: "flash" },
+                { namePrefix: "boAt" }
+              ],
+              optionalServices: optServices
+            };
+          }
+
+          try {
+            dev = await navigator.bluetooth.requestDevice(requestOpts);
+          } catch (scanErr) {
+            const errMsg = scanErr.message ? scanErr.message.toLowerCase() : "";
+            if (!scanAll && scanErr.name === "NotFoundError" && !errMsg.includes("cancel")) {
+              log("Name filter found no devices, prompting all nearby BLE devices...");
               dev = await navigator.bluetooth.requestDevice({
-                filters: [
-                  { name: "FLASH" },
-                  { namePrefix: "FLASH" },
-                  { services: [SERVICE_UUID] },
-                  { services: ["f618"] },
-                  { services: [SERVICE] }
-                ],
+                acceptAllDevices: true,
                 optionalServices: optServices
               });
-            } catch (scanErr) {
-              const errMsg = scanErr.message ? scanErr.message.toLowerCase() : "";
-              if (scanErr.name === "NotFoundError" && !errMsg.includes("cancel")) {
-                log("Filtered scan found no devices, prompting with all nearby devices...");
-                dev = await navigator.bluetooth.requestDevice({
-                  acceptAllDevices: true,
-                  optionalServices: optServices
-                });
-              } else {
-                throw scanErr;
-              }
+            } else {
+              throw scanErr;
             }
           }
 
-          dev.addEventListener("gattserverdisconnected", () => setConnected(false, "Disconnected"));
+          const devLabel = dev.name || "FLASH";
+          const devIdShort = dev.id ? (dev.id.slice(0, 8) + "…") : "";
+          updateStep(1, "done", `Selected: ${devLabel} (${devIdShort})`);
+          log(`Selected device: ${devLabel} (id: ${dev.id})`);
+
+          dev.addEventListener("gattserverdisconnected", () => {
+            setConnected(false, "Disconnected");
+            for (let i = 1; i <= 4; i++) updateStep(i, "pending", "");
+          });
 
           // Connect to GATT with pacing & retry for Bluefy
+          updateStep(2, "active", "Initiating Bluetooth GATT link…");
           const gatt = await connectGattWithRetry(dev, 2);
+          updateStep(2, "done", "GATT connected successfully!");
 
-          // Pacing before service lookup for Bluefy / iOS CoreBluetooth
+          // Discover Primary Service 0xF618
+          updateStep(3, "active", "Discovering primary service 0xF618…");
           await new Promise(res => setTimeout(res, 250));
 
-          // Resolve primary service (supports Bluefy string & Chrome number)
           let svc;
           try {
             svc = await gatt.getPrimaryService(SERVICE_UUID);
-          } catch {
-            try {
-              svc = await gatt.getPrimaryService("f618");
-            } catch {
-              svc = await gatt.getPrimaryService(SERVICE);
-            }
+          } catch (svcErr) {
+            log("Primary service lookup failed by UUID string, trying integer: " + svcErr.message);
+            svc = await gatt.getPrimaryService(SERVICE);
           }
 
           await new Promise(res => setTimeout(res, 150));
-
-          // Resolve TX & RX characteristics
-          try {
-            tx = await svc.getCharacteristic(TX_UUID);
-          } catch {
-            tx = await svc.getCharacteristic(TX);
-          }
-
+          tx = await svc.getCharacteristic(TX_UUID);
           await new Promise(res => setTimeout(res, 150));
-
-          try {
-            rx = await svc.getCharacteristic(RX_UUID);
-          } catch {
-            rx = await svc.getCharacteristic(RX);
-          }
-
+          rx = await svc.getCharacteristic(RX_UUID);
           rx.addEventListener("characteristicvaluechanged", onNotify);
           await rx.startNotifications();
+          updateStep(3, "done", "TX (0xB002) & RX (0xB001) ready!");
 
+          // Sync Clock & Device Info
+          updateStep(4, "active", "Syncing clock & requesting device info…");
           if ($("name")) $("name").textContent = dev.name || "FLASH";
           setConnected(true, "Connected via Web Bluetooth");
 
-          // Sync clock immediately as official app does, then request device info
           await cmds.time();
           await cmds.info();
+          updateStep(4, "done", "Watch synchronized & ready!");
         } catch (e) {
           const errStr = e.message || String(e);
           setConnected(false, "Error: " + errStr);
+          log("Connection failed: " + errStr);
+
+          // Mark current active step as failed
+          const steps = ["scan", "gatt", "svc", "ready"];
+          for (let i = 1; i <= 4; i++) {
+            const row = $("st-" + steps[i - 1]);
+            if (row && row.classList.contains("active")) {
+              updateStep(i, "error", `Failed: ${errStr}`);
+              break;
+            }
+          }
 
           // Handle "Web Bluetooth API globally disabled" (Brave)
           if (errStr.includes("globally disabled") || errStr.includes("not allowed")) {
@@ -1202,6 +1455,24 @@ if (typeof window !== 'undefined') {
           // Handle iOS Bluefy Error 2 (CBErrorConnectionFailed / Device Busy)
           if (errStr === "2" || errStr.includes(" 2") || errStr.includes("error 2") || errStr.includes("Connection failed") || errStr.includes("GATT Server is disconnected")) {
             triggerError2Alert();
+            if (tipEl) {
+              tipEl.className = "diag-error-tip";
+              tipEl.innerHTML = `
+                <div style="font-weight:600; color:var(--bad);">⚠️ Why Error 2 happened (Even with Bluetooth ON):</div>
+                <div><b>1. Watch BLE Radio Locked:</b> The watch hardware only has 1 BLE connection slot. If an earlier session dropped abruptly, the watch remains internally locked in "connected/busy" mode until you <b>reboot the watch</b>.</div>
+                <div><b>2. iPhone Settings Hijack:</b> If <code>FLASH</code> is listed in iPhone <i>Settings &rarr; Bluetooth &rarr; MY DEVICES</i>, iOS blocks Bluefy. You must tap <b>(i) &rarr; Forget This Device</b>.</div>
+                <div><b>3. Real Bluetooth Reset:</b> Toggling Bluetooth from Control Center does <b>NOT</b> reset Bluetooth. Toggle it in <b>iPhone Settings &rarr; Bluetooth</b>.</div>
+                <div style="margin-top:4px;">
+                  <button type="button" id="diag-retry-btn" class="primary" style="padding:5px 12px; font-size:12px; font-weight:600;">🔄 Rebooted Watch? Tap to Retry</button>
+                </div>
+              `;
+              const rBtn = $("diag-retry-btn");
+              if (rBtn) {
+                rBtn.onclick = () => {
+                  if ($("connect")) $("connect").click();
+                };
+              }
+            }
           }
 
           // Handle iOS Bluefy Bluetooth Permission block

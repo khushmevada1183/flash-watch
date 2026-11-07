@@ -1,5 +1,5 @@
 // Service Worker for boAt FLASH Watch Web App
-const CACHE_NAME = 'flash-watch-v3';
+const CACHE_NAME = 'flash-watch-v4';
 const ASSETS = [
   './',
   'index.html',
