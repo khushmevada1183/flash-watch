@@ -3,3 +3,5 @@
 apk_src/
 __pycache__/
 apk/
+
+.vercel

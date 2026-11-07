@@ -1,0 +1,9 @@
+# Vercel deployment ignore
+apk/
+apk_src/
+*.apk
+*.xapk
+cli/
+server.py
+SYSTEM.md
+__pycache__/
