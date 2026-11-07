@@ -232,7 +232,7 @@
     background: var(--card-sub);
     border-left: 4px solid var(--accent);
     border-radius: 6px;
-    padding: 12px;
+    padding: 14px;
     font-size: 13px;
     display: flex;
     flex-direction: column;
@@ -240,11 +240,11 @@
   }
   .notice-banner.warn {
     border-left-color: var(--warn);
-    background: rgba(210, 153, 34, 0.08);
+    background: rgba(210, 153, 34, 0.1);
   }
   .notice-banner.bad {
     border-left-color: var(--bad);
-    background: rgba(218, 54, 51, 0.08);
+    background: rgba(218, 54, 51, 0.12);
   }
   .notice-banner.ok {
     border-left-color: var(--ok);
@@ -252,6 +252,7 @@
   }
   .notice-header {
     font-weight: 600;
+    font-size: 14px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -260,12 +261,74 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    margin-top: 4px;
+    margin-top: 6px;
   }
   .notice-actions a, .notice-actions button {
     font-size: 12px;
-    padding: 6px 12px;
+    padding: 7px 14px;
     text-decoration: none;
+  }
+
+  /* Browser & Platform Tabs Guide */
+  .guide-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+  .guide-tab {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--card-sub);
+    color: var(--muted);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s ease;
+  }
+  .guide-tab.active {
+    background: var(--accent);
+    color: #fff;
+    border-color: var(--accent);
+  }
+  .guide-content {
+    background: var(--card-sub);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .guide-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .guide-step span.num {
+    background: var(--accent-dim);
+    color: var(--accent);
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  code {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 12px;
+    color: var(--accent);
   }
   .bytes-bar {
     font-size: 12px;
@@ -332,11 +395,100 @@
     </div>
   </header>
 
-  <!-- Browser & Platform Diagnostic Notice -->
+  <!-- Dynamic Browser & Platform Diagnostic Alert -->
   <div id="compat-notice" class="notice-banner hidden">
-    <div class="notice-header" id="compat-header">Browser Compatibility</div>
-    <div id="compat-body">Checking device and browser capabilities...</div>
+    <div class="notice-header" id="compat-header">Browser Compatibility Notice</div>
+    <div id="compat-body">Checking device capabilities...</div>
     <div class="notice-actions" id="compat-actions"></div>
+  </div>
+
+  <!-- Interactive Platform Guide Drawer -->
+  <div class="card" id="guide-card">
+    <div class="card-title">
+      <span>📱 Browser & Device Compatibility Guide</span>
+      <span id="detected-tag" style="font-size:11px; text-transform:none; color:var(--accent);">Detecting…</span>
+    </div>
+    <div class="guide-tabs">
+      <button type="button" class="guide-tab" id="tab-btn-brave">🦁 Brave Fix</button>
+      <button type="button" class="guide-tab" id="tab-btn-ios">🍏 iPhone / iOS</button>
+      <button type="button" class="guide-tab active" id="tab-btn-android">🤖 Android</button>
+      <button type="button" class="guide-tab" id="tab-btn-desktop">💻 PC / Mac / Chrome</button>
+    </div>
+
+    <!-- Brave Panel -->
+    <div class="guide-content hidden" id="panel-brave">
+      <div style="font-weight:600; color:var(--warn); display:flex; align-items:center; gap:6px;">
+        ⚠️ Why "Web Bluetooth API globally disabled" happens in Brave:
+      </div>
+      <p style="color:var(--muted); line-height:1.45;">
+        Brave blocks all Web Bluetooth requests by default for fingerprint protection. You can enable it in 15 seconds:
+      </p>
+      <div class="guide-step">
+        <span class="num">1</span>
+        <div>Copy the flag link:
+          <button type="button" id="copy-brave-flag-guide" style="padding:4px 10px; font-size:12px; margin-left:6px;">📋 Copy brave://flags</button>
+        </div>
+      </div>
+      <div class="guide-step">
+        <span class="num">2</span>
+        <div>Paste into address bar and press Enter: <code>brave://flags/#brave-web-bluetooth-api</code></div>
+      </div>
+      <div class="guide-step">
+        <span class="num">3</span>
+        <div>Set <b>Web Bluetooth API</b> from <i>Default (Disabled)</i> to <b>Enabled</b>, then tap <b>Relaunch</b>.</div>
+      </div>
+      <div style="font-size:12px; color:var(--muted); margin-top:2px;">
+        💡 <b>Alternative:</b> Open this link in <b>Google Chrome</b> or <b>Microsoft Edge</b> where it works immediately.
+      </div>
+    </div>
+
+    <!-- iOS Panel -->
+    <div class="guide-content hidden" id="panel-ios">
+      <div style="font-weight:600; color:var(--accent);">
+        🍏 Running on iPhone / iPad:
+      </div>
+      <p style="color:var(--muted); line-height:1.45;">
+        Apple WebKit blocks Web Bluetooth in Safari, Chrome, and Firefox on iOS. To connect directly from an iPhone, use <b>Bluefy</b> (a free iOS browser that injects standard Web Bluetooth support):
+      </p>
+      <div class="row" style="margin-top:4px;">
+        <a id="open-bluefy-btn" href="bluefy://open?url=https%3A%2F%2Fflash-watch.vercel.app" class="button primary" style="padding:8px 14px; font-size:13px; text-decoration:none; border-radius:8px;">🚀 Open in Bluefy App</a>
+        <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" rel="noopener" class="button" style="padding:8px 14px; font-size:13px; text-decoration:none; border-radius:8px;">📲 Get Bluefy (App Store)</a>
+      </div>
+      <div style="font-size:12px; color:var(--muted);">
+        Once opened in Bluefy, tap <b>Connect Watch</b> and select your FLASH smartwatch!
+      </div>
+    </div>
+
+    <!-- Android Panel -->
+    <div class="guide-content" id="panel-android">
+      <div style="font-weight:600; color:var(--ok);">
+        🤖 Running on Android Phone / Tablet:
+      </div>
+      <div class="guide-step">
+        <span class="num">1</span>
+        <div>Use <b>Google Chrome</b>, <b>Samsung Internet</b>, or <b>Microsoft Edge</b> (all support Web Bluetooth on HTTPS).</div>
+      </div>
+      <div class="guide-step">
+        <span class="num">2</span>
+        <div>Turn <b>Bluetooth</b> and <b>Location</b> ON in your phone's quick settings (Android requires location permission for BLE scanning).</div>
+      </div>
+      <div class="guide-step">
+        <span class="num">3</span>
+        <div><b>Important:</b> Ensure the official boAt Wearables app is closed or uninstalled, and unpair the watch in phone Bluetooth settings. The watch only accepts 1 connection!</div>
+      </div>
+    </div>
+
+    <!-- Desktop Panel -->
+    <div class="guide-content hidden" id="panel-desktop">
+      <div style="font-weight:600; color:var(--accent);">
+        💻 Desktop & Laptop Instructions:
+      </div>
+      <p style="color:var(--muted); line-height:1.45;">
+        Supported out of the box in <b>Google Chrome</b>, <b>Microsoft Edge</b>, and <b>Opera</b>.
+        If using Firefox or Safari on macOS, run the local PC bridge:
+      </p>
+      <code>python3 server.py --lan</code>
+    </div>
   </div>
 
   <!-- Device Overview Card -->
@@ -756,78 +908,121 @@ if (typeof fetch !== 'undefined') {
   }).catch(() => {});
 }
 
-// --- Browser Detection & Compatibility Advisor ---
+// --- Browser & Platform Helper Logic ---
+function switchGuideTab(tabKey) {
+  const tabs = ["brave", "ios", "android", "desktop"];
+  tabs.forEach(t => {
+    const btn = $("tab-btn-" + t);
+    const panel = $("panel-" + t);
+    if (btn) btn.className = (t === tabKey ? "guide-tab active" : "guide-tab");
+    if (panel) panel.className = (t === tabKey ? "guide-content" : "guide-content hidden");
+  });
+}
+
+function showBraveHelp() {
+  switchGuideTab("brave");
+  const notice = $("compat-notice");
+  if (notice) {
+    notice.className = "notice-banner warn";
+    $("compat-header").innerHTML = "🦁 Brave Web Bluetooth Blocked";
+    $("compat-body").innerHTML = `
+      Brave disables Web Bluetooth flags by default for fingerprint protection.<br>
+      To enable: Open <code>brave://flags/#brave-web-bluetooth-api</code>, set to <b>Enabled</b>, and click <b>Relaunch</b>.
+    `;
+    $("compat-actions").innerHTML = `
+      <button type="button" id="copy-brave-flag-btn" style="font-size:12px; padding:6px 12px; background:var(--accent); color:#fff; border-radius:6px;">📋 Copy Flag Link</button>
+      <span style="font-size:12px; color:var(--muted); align-self:center;">Or open in Google Chrome / MS Edge</span>
+    `;
+    setTimeout(() => {
+      const b = $("copy-brave-flag-btn");
+      if (b) {
+        b.onclick = () => {
+          navigator.clipboard.writeText("brave://flags/#brave-web-bluetooth-api");
+          b.textContent = "Copied! Paste into address bar";
+          setTimeout(() => { b.textContent = "📋 Copy Flag Link"; }, 2500);
+        };
+      }
+    }, 50);
+  }
+}
+
 function checkBrowserCompatibility() {
   const notice = $("compat-notice");
-  const header = $("compat-header");
-  const body = $("compat-body");
-  const actions = $("compat-actions");
   if (!notice || typeof navigator === 'undefined' || typeof window === 'undefined') return;
 
   const ua = navigator.userAgent || "";
   const isIOS = (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !window.MSStream;
   const isBluefy = ua.includes("Bluefy");
-  const isBrave = (navigator.brave && typeof navigator.brave.isBrave === 'function');
+  const isAndroid = /Android/i.test(ua);
   const isFirefox = ua.includes("Firefox");
   const isSecure = window.isSecureContext;
   const hasBLE = 'bluetooth' in navigator;
 
+  // Update Bluefy custom URL scheme button
+  const bluefyBtn = $("open-bluefy-btn");
+  if (bluefyBtn && typeof window !== 'undefined' && window.location) {
+    bluefyBtn.href = "bluefy://open?url=" + encodeURIComponent(window.location.href);
+  }
+
+  // Detect and set active platform tab
+  if (isIOS) {
+    if ($("detected-tag")) $("detected-tag").textContent = "Detected: Apple iOS";
+    switchGuideTab("ios");
+  } else if (isAndroid) {
+    if ($("detected-tag")) $("detected-tag").textContent = "Detected: Android";
+    switchGuideTab("android");
+  } else {
+    if ($("detected-tag")) $("detected-tag").textContent = "Detected: Desktop / PC";
+    switchGuideTab("desktop");
+  }
+
+  // Check Brave asynchronously
+  if (navigator.brave && typeof navigator.brave.isBrave === 'function') {
+    navigator.brave.isBrave().then(isBrave => {
+      if (isBrave) {
+        if ($("detected-tag")) $("detected-tag").textContent = "Detected: Brave Browser";
+        // Check if Bluetooth is actually available in Brave
+        if (navigator.bluetooth && navigator.bluetooth.getAvailability) {
+          navigator.bluetooth.getAvailability().then(avail => {
+            if (!avail) showBraveHelp();
+          }).catch(() => showBraveHelp());
+        } else {
+          showBraveHelp();
+        }
+      }
+    }).catch(() => {});
+  }
+
   if (isBluefy && hasBLE) {
     notice.className = "notice-banner ok";
-    header.innerHTML = "✅ Bluefy Web Bluetooth Ready";
-    body.textContent = "You are running in Bluefy on iOS. Direct Bluetooth communication is fully supported!";
+    $("compat-header").innerHTML = "🍏 Bluefy Web BLE Browser Detected";
+    $("compat-body").textContent = "You are running in Bluefy on iOS. Direct Bluetooth communication is fully supported!";
     return;
   }
 
   if (isIOS && !isBluefy) {
     notice.className = "notice-banner warn";
-    header.innerHTML = "🍎 iOS Safari WebKit Limitation";
-    body.innerHTML = "Apple WebKit disables Web Bluetooth in standard iOS Safari, Chrome, and Firefox.<br>To connect directly from your iPhone/iPad, use the free <b>Bluefy Web BLE Browser</b>.";
-    actions.innerHTML = `
-      <a href="bluefy://open?url=${encodeURIComponent(window.location.href)}" class="button primary" style="background:var(--accent); color:#fff; border-radius:6px;">Open in Bluefy App</a>
-      <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline; font-size:12px; align-self:center;">Get Bluefy on App Store ↗</a>
+    $("compat-header").innerHTML = "🍎 iOS Safari WebKit Limitation";
+    $("compat-body").innerHTML = "Apple WebKit disables Web Bluetooth in standard Safari, Chrome, and Firefox on iOS.<br>To connect directly from your iPhone, use the free <b>Bluefy Web BLE Browser</b>:";
+    $("compat-actions").innerHTML = `
+      <a href="bluefy://open?url=${encodeURIComponent(window.location.href)}" class="button primary" style="background:var(--accent); color:#fff; border-radius:6px;">🚀 Open in Bluefy App</a>
+      <a href="https://apps.apple.com/app/bluefy-web-ble-browser/id1492822055" target="_blank" rel="noopener" style="color:var(--accent); text-decoration:underline; font-size:12px; align-self:center;">📲 Get Bluefy from App Store ↗</a>
     `;
-    return;
-  }
-
-  if (isBrave && !hasBLE) {
-    notice.className = "notice-banner warn";
-    header.innerHTML = "🦁 Brave Web Bluetooth Blocked";
-    body.innerHTML = "Brave disables Web Bluetooth flags by default for fingerprint protection.<br>Enable it to connect: open <code>brave://flags/#brave-web-bluetooth-api</code>, set to <b>Enabled</b>, and relaunch.";
-    actions.innerHTML = `
-      <button type="button" id="copy-brave-flag" style="font-size:12px; padding:6px 10px;">📋 Copy Flag URL</button>
-    `;
-    setTimeout(() => {
-      const b = $("copy-brave-flag");
-      if (b) b.onclick = () => {
-        navigator.clipboard.writeText("brave://flags/#brave-web-bluetooth-api");
-        b.textContent = "Copied! Paste into address bar";
-      };
-    }, 100);
     return;
   }
 
   if (isFirefox) {
     notice.className = "notice-banner warn";
-    header.innerHTML = "🦊 Firefox Web Bluetooth Unsupported";
-    body.innerHTML = "Mozilla Firefox has not implemented the Web Bluetooth API.<br>Please open this controller in <b>Google Chrome</b>, <b>Microsoft Edge</b>, <b>Opera</b>, or use the <code>python3 server.py</code> local bridge.";
+    $("compat-header").innerHTML = "🦊 Firefox Web Bluetooth Unsupported";
+    $("compat-body").innerHTML = "Mozilla Firefox has not implemented the Web Bluetooth API.<br>Please open this site in <b>Google Chrome</b>, <b>Microsoft Edge</b>, <b>Opera</b>, or use the <code>python3 server.py</code> local bridge.";
     return;
   }
 
   if (!isSecure && !bridge) {
     notice.className = "notice-banner bad";
-    header.innerHTML = "🔒 Insecure Context (HTTP)";
-    body.innerHTML = "Web Bluetooth strictly requires HTTPS (or <code>http://localhost</code>).<br>When hosting remotely, deploy with HTTPS (e.g. Vercel) or run <code>python3 server.py</code> for LAN access.";
+    $("compat-header").innerHTML = "🔒 Insecure Context (HTTP)";
+    $("compat-body").innerHTML = "Web Bluetooth strictly requires HTTPS (or <code>http://localhost</code>).";
     return;
-  }
-
-  if (hasBLE) {
-    notice.className = "notice-banner ok";
-    header.innerHTML = "🌐 Web Bluetooth Ready";
-    body.textContent = "This browser fully supports Web Bluetooth. Click 'Connect Watch' to select your FLASH device.";
-    setTimeout(() => {
-      notice.className = "notice-banner ok hidden";
-    }, 4500);
   }
 }
 
@@ -835,6 +1030,22 @@ function checkBrowserCompatibility() {
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     checkBrowserCompatibility();
+
+    // Setup Tab click listeners
+    ["brave", "ios", "android", "desktop"].forEach(t => {
+      const btn = $("tab-btn-" + t);
+      if (btn) btn.onclick = () => switchGuideTab(t);
+    });
+
+    // Copy brave flag button in guide panel
+    const copyGuideBtn = $("copy-brave-flag-guide");
+    if (copyGuideBtn) {
+      copyGuideBtn.onclick = () => {
+        navigator.clipboard.writeText("brave://flags/#brave-web-bluetooth-api");
+        copyGuideBtn.textContent = "Copied! Paste into address bar";
+        setTimeout(() => { copyGuideBtn.textContent = "📋 Copy brave://flags"; }, 2500);
+      };
+    }
 
     // Register Service Worker for PWA
     if ('serviceWorker' in navigator && (window.location.protocol === 'https:' || window.location.hostname === 'localhost')) {
@@ -858,9 +1069,14 @@ if (typeof window !== 'undefined') {
         }
 
         if (!navigator.bluetooth) {
-          setConnected(false, window.isSecureContext
-            ? "Error: Web Bluetooth is disabled or unsupported in this browser."
-            : "Error: Insecure origin. Open via HTTPS or localhost.");
+          const ua = navigator.userAgent || "";
+          const isIOS = (/iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
+          if (isIOS) {
+            switchGuideTab("ios");
+            setConnected(false, "Error: iOS Safari blocks Web Bluetooth. Open in Bluefy.");
+          } else {
+            setConnected(false, "Error: Web Bluetooth is disabled or unsupported.");
+          }
           const n = $("compat-notice");
           if (n) n.className = "notice-banner bad";
           return;
@@ -888,7 +1104,13 @@ if (typeof window !== 'undefined') {
           await cmds.time();
           await cmds.info();
         } catch (e) {
-          setConnected(false, "Error: " + e.message);
+          const errStr = e.message || String(e);
+          setConnected(false, "Error: " + errStr);
+
+          // Handle "Web Bluetooth API globally disabled" (Brave or flags)
+          if (errStr.includes("globally disabled") || errStr.includes("not allowed") || e.name === "NotFoundError") {
+            showBraveHelp();
+          }
         }
       };
     }
