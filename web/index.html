@@ -3,45 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0b0f19">
+<meta name="theme-color" content="#050811">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Clean zero-cloud Web Bluetooth and native iOS companion app for the boAt FLASH smartwatch.">
+<meta name="description" content="boAt FLASH Smartwatch Cyberpunk Tactical HUD & Apple Health Bridge">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
-<title>boAt FLASH Watch</title>
+<title>boAt FLASH // CYBER-HUD</title>
 <style>
   :root {
-    --bg-page: #0b0f19;
-    --surface-card: rgba(15, 23, 42, 0.72);
-    --surface-card-hover: rgba(22, 33, 58, 0.85);
-    --surface-inset: rgba(11, 17, 32, 0.6);
-    --surface-dock: rgba(15, 23, 42, 0.88);
-    --border-color: rgba(255, 255, 255, 0.08);
-    --border-subtle: rgba(255, 255, 255, 0.05);
-    --border-highlight: rgba(255, 255, 255, 0.14);
-    --text-primary: #f8fafc;
+    --bg-void: #050811;
+    --bg-hud: rgba(9, 14, 28, 0.75);
+    --bg-hud-elevated: rgba(13, 21, 42, 0.85);
+    --bg-hud-inset: rgba(6, 10, 20, 0.7);
+    --bg-dock: rgba(8, 12, 24, 0.88);
+    
+    /* Cyberpunk Neon Palette */
+    --neon-cyan: #00f0ff;
+    --neon-cyan-glow: rgba(0, 240, 255, 0.35);
+    --neon-cyan-dim: rgba(0, 240, 255, 0.12);
+    --neon-green: #05ffa1;
+    --neon-green-glow: rgba(5, 255, 161, 0.35);
+    --neon-green-dim: rgba(5, 255, 161, 0.12);
+    --neon-pink: #ff2a6d;
+    --neon-pink-glow: rgba(255, 42, 109, 0.35);
+    --neon-pink-dim: rgba(255, 42, 109, 0.12);
+    --neon-amber: #ffd600;
+    --neon-amber-glow: rgba(255, 214, 0, 0.35);
+    --neon-amber-dim: rgba(255, 214, 0, 0.12);
+    --neon-purple: #9d4edd;
+    
+    /* Text Hierarchy */
+    --text-pure: #ffffff;
+    --text-primary: #e2e8f0;
     --text-secondary: #94a3b8;
-    --text-muted: #64748b;
-    --primary: #3b82f6;
-    --primary-hover: #2563eb;
-    --primary-glow: rgba(59, 130, 246, 0.25);
-    --success: #10b981;
-    --success-bg: rgba(16, 185, 129, 0.12);
-    --warning: #f59e0b;
-    --warning-bg: rgba(245, 158, 11, 0.12);
-    --danger: #ef4444;
-    --danger-bg: rgba(239, 68, 68, 0.12);
-    --rose: #f43f5e;
-    --rose-bg: rgba(244, 63, 94, 0.12);
-    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -system-ui, sans-serif;
-    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    --radius-2xl: 20px;
-    --radius-xl: 16px;
-    --radius-lg: 12px;
-    --radius-md: 10px;
-    --radius-full: 9999px;
-    --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    --text-dim: #64748b;
+    --text-cyan: #38bdf8;
+    
+    /* HUD Borders & Tech Lines */
+    --border-hud: rgba(0, 240, 255, 0.22);
+    --border-subtle: rgba(255, 255, 255, 0.08);
+    --border-glow: rgba(0, 240, 255, 0.5);
+    
+    /* Typography */
+    --font-hud: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", -system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Cascadia Code", Menlo, monospace;
+    
+    --radius-hud: 16px;
+    --radius-pill: 9999px;
+    --transition-snappy: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   * {
@@ -52,8 +62,8 @@
   }
 
   html {
-    -webkit-tap-highlight-color: transparent;
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
 
   html, body {
@@ -61,9 +71,9 @@
     width: 100%;
     margin: 0;
     padding: 0;
-    background-color: var(--bg-page);
+    background-color: var(--bg-void);
     color: var(--text-primary);
-    font-family: var(--font-sans);
+    font-family: var(--font-hud);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
@@ -71,229 +81,321 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  /* Subtle ambient lighting behind main cards */
+  /* Precision Cyberpunk Tactical Grid Background */
   body::before {
     content: '';
     position: fixed;
-    top: -120px;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+      linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
+    background-size: 36px 36px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Upper Atmospheric Hologram Glow */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -100px;
     left: 50%;
     transform: translateX(-50%);
-    width: 680px;
-    height: 440px;
-    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.04) 40%, transparent 70%);
+    width: 800px;
+    height: 480px;
+    background: radial-gradient(ellipse at 50% 20%, rgba(0, 240, 255, 0.16) 0%, rgba(157, 78, 221, 0.08) 45%, transparent 75%);
     pointer-events: none;
     z-index: 0;
   }
 
   /* Clean Scrollbars */
   ::-webkit-scrollbar {
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
   }
   ::-webkit-scrollbar-track {
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(0, 240, 255, 0.25);
     border-radius: 4px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 255, 255, 0.25);
+    background: var(--neon-cyan);
   }
 
-  /* Main Responsive Container */
-  .app-container {
+  /* Responsive Main HUD Shell */
+  .hud-container {
     width: 100%;
-    max-width: 580px;
+    max-width: 680px;
     margin: 0 auto;
     min-height: 100dvh;
     display: flex;
     flex-direction: column;
     position: relative;
     z-index: 1;
-    padding: max(14px, env(safe-area-inset-top, 0px)) 16px calc(92px + env(safe-area-inset-bottom, 0px)) 16px;
+    padding: max(14px, env(safe-area-inset-top, 0px)) 16px calc(100px + env(safe-area-inset-bottom, 0px)) 16px;
   }
 
-  /* Top App Header */
-  header.app-header {
+  /* Top Tactical HUD Header */
+  header.hud-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 0 18px 0;
-    gap: 12px;
+    padding: 12px 0 16px 0;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 16px;
   }
 
-  .brand-group {
+  .hud-brand {
     display: flex;
     align-items: center;
     gap: 12px;
   }
 
-  .brand-icon-box {
-    width: 38px;
-    height: 38px;
-    border-radius: 11px;
-    background: linear-gradient(145deg, #1e293b, #0f172a);
-    border: 1px solid var(--border-color);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  .hud-badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.15) 0%, rgba(8, 14, 28, 0.9) 100%);
+    border: 1px solid var(--border-hud);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.25), inset 0 0 10px rgba(0, 240, 255, 0.1);
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    position: relative;
     flex-shrink: 0;
   }
 
-  .brand-icon-box img {
+  .hud-badge-icon img {
     width: 24px;
     height: 24px;
     object-fit: contain;
+    filter: drop-shadow(0 0 4px var(--neon-cyan));
   }
 
-  .brand-title {
+  .hud-brand-title {
     font-size: 15px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: var(--text-primary);
-    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: #fff;
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  .brand-status-capsule {
+  .hud-brand-title .tag {
+    font-size: 9px;
+    padding: 1px 5px;
+    border-radius: 3px;
+    background: var(--neon-cyan-dim);
+    color: var(--neon-cyan);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+    font-weight: 700;
+  }
+
+  .hud-connection-status {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 11px;
     color: var(--text-secondary);
-    margin-top: 2px;
-    font-weight: 500;
+    font-family: var(--font-mono);
+    margin-top: 3px;
   }
 
-  .status-dot {
+  .beacon-pip {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--text-muted);
-    transition: var(--transition);
+    background: var(--text-dim);
+    transition: var(--transition-snappy);
   }
 
-  .status-dot.active {
-    background: var(--success);
-    box-shadow: 0 0 8px var(--success);
+  .beacon-pip.active {
+    background: var(--neon-green);
+    box-shadow: 0 0 10px var(--neon-green), 0 0 18px var(--neon-green);
+    animation: beaconPulse 2s infinite ease-in-out;
   }
 
-  .header-actions {
+  @keyframes beaconPulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.85); }
+  }
+
+  .hud-header-actions {
     display: flex;
     align-items: center;
     gap: 8px;
   }
 
-  /* Surface Cards - Office-Break-Calculator Signature */
-  .surface-card {
-    position: relative;
-    border-radius: var(--radius-2xl);
-    background: var(--surface-card);
-    backdrop-filter: blur(22px) saturate(1.4);
-    -webkit-backdrop-filter: blur(22px) saturate(1.4);
-    border: 1px solid var(--border-color);
-    box-shadow: 
-      0 1px 0 var(--border-highlight) inset,
-      0 12px 32px -10px rgba(0, 0, 0, 0.45);
-    padding: 20px;
-    margin-bottom: 14px;
-    transition: var(--transition);
-  }
-
-  .surface-card:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-
-  .card-header-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  .card-section-label {
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--text-muted);
-  }
-
-  /* Buttons */
-  button, .btn {
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 9px 15px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-color);
-    background: rgba(30, 41, 59, 0.6);
-    color: var(--text-primary);
+  /* Cyberpunk Buttons */
+  button, .cyber-btn {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 9px 16px;
+    border-radius: 8px;
+    border: 1px solid var(--border-hud);
+    background: rgba(13, 21, 42, 0.7);
+    color: var(--text-pure);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 7px;
-    text-decoration: none;
-    touch-action: manipulation;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     user-select: none;
     -webkit-user-select: none;
-    transition: var(--transition);
+    touch-action: manipulation;
+    transition: var(--transition-snappy);
+    position: relative;
+    overflow: hidden;
   }
 
-  button:active, .btn:active {
+  button:active, .cyber-btn:active {
     transform: scale(0.97);
   }
 
-  button.btn-primary, .btn.btn-primary {
-    background: var(--primary);
-    border-color: rgba(255, 255, 255, 0.18);
+  button.cyber-primary, .cyber-btn.cyber-primary {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0, 168, 255, 0.15) 100%);
+    border-color: var(--neon-cyan);
     color: #fff;
-    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+    box-shadow: 0 0 18px rgba(0, 240, 255, 0.28), inset 0 0 12px rgba(0, 240, 255, 0.15);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
   }
 
-  button.btn-primary:hover, .btn.btn-primary:hover {
-    background: var(--primary-hover);
+  button.cyber-primary:hover, .cyber-btn.cyber-primary:hover {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.35) 0%, rgba(0, 168, 255, 0.25) 100%);
+    box-shadow: 0 0 24px rgba(0, 240, 255, 0.45);
   }
 
-  button.btn-danger, .btn.btn-danger {
-    background: var(--danger-bg);
-    border-color: rgba(239, 68, 68, 0.3);
-    color: #fca5a5;
+  button.cyber-danger, .cyber-btn.cyber-danger {
+    background: var(--neon-pink-dim);
+    border-color: var(--neon-pink);
+    color: #ffa8c5;
+    box-shadow: 0 0 14px rgba(255, 42, 109, 0.25);
   }
 
-  button.btn-danger:hover, .btn.btn-danger:hover {
-    background: rgba(239, 68, 68, 0.22);
+  button.cyber-danger:hover, .cyber-btn.cyber-danger:hover {
+    background: rgba(255, 42, 109, 0.22);
+    box-shadow: 0 0 20px rgba(255, 42, 109, 0.4);
   }
 
-  button:disabled, .btn:disabled {
-    opacity: 0.38;
+  button:disabled, .cyber-btn:disabled {
+    opacity: 0.32;
     cursor: not-allowed;
     transform: none !important;
     box-shadow: none !important;
+    border-color: var(--border-subtle);
   }
 
-  /* Watch Activity Centerpiece */
-  .watch-hero-container {
+  /* HUD Panel Card */
+  .hud-panel {
+    position: relative;
+    border-radius: var(--radius-hud);
+    background: var(--bg-hud);
+    backdrop-filter: blur(28px) saturate(1.5);
+    -webkit-backdrop-filter: blur(28px) saturate(1.5);
+    border: 1px solid var(--border-hud);
+    box-shadow: 
+      0 0 24px -6px rgba(0, 240, 255, 0.12),
+      0 12px 36px -10px rgba(0, 0, 0, 0.7),
+      inset 0 1px 0 rgba(0, 240, 255, 0.25);
+    padding: 20px;
+    margin-bottom: 16px;
+    transition: var(--transition-snappy);
+  }
+
+  /* High-Tech Tactical Corner Reticles */
+  .hud-panel::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid var(--neon-cyan);
+    border-left: 2px solid var(--neon-cyan);
+    border-top-left-radius: 4px;
+    pointer-events: none;
+  }
+  .hud-panel::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 12px;
+    height: 12px;
+    border-bottom: 2px solid var(--neon-cyan);
+    border-right: 2px solid var(--neon-cyan);
+    border-bottom-right-radius: 4px;
+    pointer-events: none;
+  }
+
+  .hud-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .hud-panel-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--neon-cyan);
+    font-family: var(--font-mono);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .hud-panel-title svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .hud-badge-tag {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: var(--font-mono);
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--neon-cyan-dim);
+    color: var(--neon-cyan);
+    border: 1px solid rgba(0, 240, 255, 0.3);
+  }
+
+  /* Watch Hologram Hero Section */
+  .watch-telemetry-stage {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 8px 0 16px 0;
+    padding: 6px 0 18px 0;
   }
 
-  .watch-ring-stage {
-    width: 176px;
-    height: 176px;
+  .hologram-ring-wrapper {
+    width: 184px;
+    height: 184px;
     position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    background: radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.45) 0%, rgba(15, 23, 42, 0.6) 100%);
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
-    border: 1px solid var(--border-color);
+    background: radial-gradient(circle at 50% 50%, rgba(13, 21, 42, 0.8) 0%, rgba(5, 8, 17, 0.95) 100%);
+    box-shadow: 
+      0 0 35px rgba(0, 240, 255, 0.22),
+      inset 0 0 25px rgba(0, 240, 255, 0.12);
+    border: 1px solid rgba(0, 240, 255, 0.35);
   }
 
   .rings-svg {
@@ -305,348 +407,359 @@
     transform: rotate(-90deg);
   }
 
-  .ring-bg {
+  .ring-track {
     fill: none;
     stroke: rgba(255, 255, 255, 0.05);
   }
 
-  .ring-bar {
+  .ring-progress {
     fill: none;
     stroke-linecap: round;
     transition: stroke-dashoffset 900ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .watch-ring-content {
+  .hologram-digits-center {
     z-index: 2;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
   }
 
-  .watch-main-digits {
-    font-size: 32px;
-    font-weight: 700;
+  .telemetry-primary-number {
+    font-size: 34px;
+    font-weight: 800;
+    font-family: var(--font-mono);
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
-    font-family: var(--font-mono);
     color: #fff;
+    text-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
     line-height: 1;
   }
 
-  .watch-digits-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    letter-spacing: 0.02em;
-    margin-top: 3px;
+  .telemetry-unit-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-family: var(--font-mono);
+    color: var(--neon-cyan);
+    margin-top: 4px;
   }
 
-  .watch-telemetry-pills {
+  /* Telemetry Metadata Chips */
+  .telemetry-pills-row {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     flex-wrap: wrap;
-    margin-top: 14px;
+    margin-top: 16px;
   }
 
-  .tele-pill {
+  .hud-chip {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     font-size: 11px;
-    font-weight: 500;
+    font-family: var(--font-mono);
     color: var(--text-secondary);
-    background: var(--surface-inset);
-    border: 1px solid var(--border-color);
+    background: var(--bg-hud-inset);
+    border: 1px solid rgba(0, 240, 255, 0.18);
     padding: 4px 10px;
-    border-radius: var(--radius-full);
+    border-radius: 6px;
   }
 
-  .tele-pill svg {
+  .hud-chip svg {
     width: 13px;
     height: 13px;
-    color: var(--primary);
+    color: var(--neon-cyan);
   }
 
-  /* Quick Actions Row */
-  .quick-actions-grid {
+  /* Quick Actions HUD Grid */
+  .tactical-tools-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 8px;
-    margin: 16px 0 6px 0;
+    margin: 16px 0 8px 0;
   }
 
-  .action-tile {
+  .tool-tile {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 6px;
     padding: 12px 6px;
-    border-radius: var(--radius-xl);
-    background: var(--surface-inset);
-    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--bg-hud-inset);
+    border: 1px solid rgba(0, 240, 255, 0.15);
     color: var(--text-secondary);
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
-    transition: var(--transition);
+    transition: var(--transition-snappy);
   }
 
-  .action-tile:hover {
-    background: rgba(30, 41, 59, 0.75);
-    color: var(--text-primary);
-    border-color: rgba(255, 255, 255, 0.14);
+  .tool-tile:hover {
+    background: rgba(13, 21, 42, 0.95);
+    border-color: var(--neon-cyan);
+    color: var(--text-pure);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.25);
   }
 
-  .action-tile:active {
+  .tool-tile:active {
     transform: scale(0.95);
   }
 
-  .action-tile-icon {
+  .tool-tile-icon {
     width: 32px;
     height: 32px;
-    border-radius: 9px;
-    background: rgba(59, 130, 246, 0.1);
-    color: #60a5fa;
+    border-radius: 8px;
+    background: var(--neon-cyan-dim);
+    color: var(--neon-cyan);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: var(--transition);
+    transition: var(--transition-snappy);
+    border: 1px solid rgba(0, 240, 255, 0.25);
   }
 
-  .action-tile:hover .action-tile-icon {
-    background: rgba(59, 130, 246, 0.2);
-    transform: translateY(-1px);
+  .tool-tile:hover .tool-tile-icon {
+    background: rgba(0, 240, 255, 0.25);
+    box-shadow: 0 0 10px var(--neon-cyan);
   }
 
-  .action-tile-icon svg {
+  .tool-tile-icon svg {
     width: 16px;
     height: 16px;
   }
 
-  /* 4 Premium Stat Cards - Matching Office-Break-Calculator */
-  .metrics-2x2-grid {
+  /* 4 Telemetry Stat Modules (Responsive 2x2 Grid) */
+  .metrics-tactical-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 12px;
     margin-top: 14px;
   }
 
-  .stat-card-box {
-    background: var(--surface-inset);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
+  .metric-module {
+    background: var(--bg-hud-inset);
+    border: 1px solid rgba(0, 240, 255, 0.15);
+    border-radius: 12px;
     padding: 14px 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 94px;
-    transition: var(--transition);
+    min-height: 98px;
+    transition: var(--transition-snappy);
+    position: relative;
+    overflow: hidden;
   }
 
-  .stat-card-box:hover {
-    border-color: rgba(255, 255, 255, 0.12);
-    background: rgba(15, 23, 42, 0.8);
+  .metric-module:hover {
+    border-color: var(--border-hud);
+    background: rgba(13, 21, 42, 0.85);
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.12);
   }
 
-  .stat-card-header {
+  .metric-module-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 8px;
   }
 
-  .stat-card-title {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    letter-spacing: -0.01em;
-    truncate: true;
+  .metric-index-label {
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
   }
 
-  .stat-icon-wrapper {
+  .metric-icon-badge {
     width: 28px;
     height: 28px;
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
-  .stat-icon-wrapper svg {
+  .metric-icon-badge svg {
     width: 14px;
     height: 14px;
   }
 
-  .stat-card-val {
-    font-size: 22px;
-    font-weight: 700;
+  .metric-main-value {
+    font-size: 24px;
+    font-weight: 800;
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.02em;
-    color: var(--text-primary);
     line-height: 1.1;
-    margin-top: 8px;
+    margin-top: 6px;
   }
 
-  .stat-card-sub {
-    font-size: 11px;
-    color: var(--text-muted);
+  .metric-subtext {
+    font-size: 10px;
+    color: var(--text-dim);
+    font-family: var(--font-mono);
+    letter-spacing: 0.02em;
     margin-top: 3px;
   }
 
-  /* Apple Health Card Specifics */
-  .health-hero-row {
+  /* Apple Health Vault Card */
+  .health-vault-body {
     display: flex;
     align-items: flex-start;
     gap: 14px;
   }
 
-  .health-badge-icon {
-    width: 40px;
-    height: 40px;
+  .health-vault-icon {
+    width: 44px;
+    height: 44px;
     border-radius: 12px;
-    background: linear-gradient(135deg, rgba(244, 63, 94, 0.2) 0%, rgba(225, 29, 72, 0.1) 100%);
-    border: 1px solid rgba(244, 63, 94, 0.25);
-    color: #fb7185;
+    background: linear-gradient(135deg, rgba(255, 42, 109, 0.25) 0%, rgba(13, 21, 42, 0.9) 100%);
+    border: 1px solid var(--neon-pink);
+    box-shadow: 0 0 16px rgba(255, 42, 109, 0.35);
+    color: #ff5c8d;
     display: flex;
     align-items: center;
     justify-content: center;
     flex-shrink: 0;
   }
 
-  .health-badge-icon svg {
-    width: 20px;
-    height: 20px;
+  .health-vault-icon svg {
+    width: 22px;
+    height: 22px;
   }
 
-  .health-content {
+  .health-vault-content {
     flex: 1;
   }
 
-  .health-title-row {
+  .health-vault-title-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
   }
 
-  .health-main-title {
+  .health-vault-title {
     font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
+    font-weight: 800;
+    font-family: var(--font-mono);
+    color: #fff;
+    letter-spacing: 0.02em;
   }
 
-  .health-status-badge {
-    font-size: 10px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    background: var(--success-bg);
-    color: var(--success);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-  }
-
-  .health-desc {
+  .health-vault-desc {
     font-size: 12px;
     color: var(--text-secondary);
     line-height: 1.45;
-    margin: 4px 0 14px 0;
+    margin: 6px 0 14px 0;
   }
 
-  .health-actions-row {
+  .health-vault-actions {
     display: flex;
     align-items: center;
     gap: 10px;
     flex-wrap: wrap;
   }
 
-  .toggle-switch-row {
+  .cyber-toggle-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding-top: 14px;
     margin-top: 14px;
-    border-top: 1px solid var(--border-color);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
   }
 
-  .toggle-label {
-    font-size: 12px;
+  .cyber-toggle-label {
+    font-size: 11px;
+    font-family: var(--font-mono);
     color: var(--text-secondary);
-    font-weight: 500;
+    font-weight: 600;
   }
 
-  /* iOS Style Switch */
-  .ios-switch {
+  /* Cyberpunk Switch */
+  .cyber-switch {
     position: relative;
     display: inline-block;
-    width: 42px;
+    width: 44px;
     height: 24px;
   }
 
-  .ios-switch input {
+  .cyber-switch input {
     opacity: 0;
     width: 0;
     height: 0;
   }
 
-  .ios-slider {
+  .cyber-switch-slider {
     position: absolute;
     cursor: pointer;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: rgba(255, 255, 255, 0.16);
+    background-color: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(0, 240, 255, 0.2);
     transition: .25s;
-    border-radius: 24px;
+    border-radius: 6px;
   }
 
-  .ios-slider:before {
+  .cyber-switch-slider:before {
     position: absolute;
     content: "";
-    height: 18px;
-    width: 18px;
+    height: 16px;
+    width: 16px;
     left: 3px;
     bottom: 3px;
-    background-color: white;
+    background-color: #fff;
     transition: .25s;
-    border-radius: 50%;
+    border-radius: 4px;
   }
 
-  input:checked + .ios-slider {
-    background-color: var(--primary);
+  input:checked + .cyber-switch-slider {
+    background-color: var(--neon-cyan-dim);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px var(--neon-cyan);
   }
 
-  input:checked + .ios-slider:before {
-    transform: translateX(18px);
+  input:checked + .cyber-switch-slider:before {
+    transform: translateX(20px);
+    background-color: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
   }
 
-  /* Form Controls */
+  /* Form Elements */
   input[type="text"], textarea, select {
     width: 100%;
     padding: 10px 14px;
-    font-family: var(--font-sans);
-    font-size: 14px;
-    background: var(--surface-inset);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    color: var(--text-primary);
-    transition: var(--transition);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: var(--bg-hud-inset);
+    border: 1px solid var(--border-hud);
+    border-radius: 8px;
+    color: var(--text-pure);
+    transition: var(--transition-snappy);
   }
 
   input[type="text"]:focus, textarea:focus, select:focus {
     outline: none;
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--primary-glow);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
   }
 
   .form-group {
@@ -657,15 +770,16 @@
   }
 
   .form-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    color: var(--text-dim);
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
   }
 
-  /* Floating Dynamic Island Navigation Dock */
-  .dynamic-island-dock {
+  /* Floating Dynamic Island Cyber Dock */
+  .dynamic-cyber-dock {
     position: fixed;
     bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 6px);
     left: 50%;
@@ -673,85 +787,72 @@
     z-index: 1000;
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 5px;
     padding: 6px;
-    background: var(--surface-dock);
-    backdrop-filter: blur(32px) saturate(1.6);
-    -webkit-backdrop-filter: blur(32px) saturate(1.6);
-    border: 1px solid rgba(255, 255, 255, 0.14);
-    border-radius: var(--radius-full);
+    background: var(--bg-dock);
+    backdrop-filter: blur(32px) saturate(1.8);
+    -webkit-backdrop-filter: blur(32px) saturate(1.8);
+    border: 1px solid var(--border-hud);
+    border-radius: var(--radius-pill);
     box-shadow: 
-      0 1px 0 rgba(255, 255, 255, 0.15) inset,
-      0 16px 40px -8px rgba(0, 0, 0, 0.65);
+      0 0 24px -4px rgba(0, 240, 255, 0.25),
+      0 16px 40px -8px rgba(0, 0, 0, 0.75),
+      inset 0 1px 0 rgba(0, 240, 255, 0.2);
   }
 
-  .dock-btn {
+  .dock-tab-btn {
     display: flex;
     align-items: center;
     gap: 7px;
-    padding: 7px 15px;
-    border-radius: var(--radius-full);
-    border: none;
+    padding: 8px 16px;
+    border-radius: var(--radius-pill);
+    border: 1px solid transparent;
     background: transparent;
     color: var(--text-secondary);
-    font-family: var(--font-sans);
-    font-size: 12px;
-    font-weight: 500;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
-    transition: var(--transition);
+    transition: var(--transition-snappy);
   }
 
-  .dock-btn:active {
+  .dock-tab-btn:active {
     transform: scale(0.96);
   }
 
-  .dock-btn.active {
-    background: rgba(59, 130, 246, 0.18);
-    color: #60a5fa;
-    font-weight: 600;
+  .dock-tab-btn.active {
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.22) 0%, rgba(0, 168, 255, 0.12) 100%);
+    border-color: rgba(0, 240, 255, 0.5);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.35);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
   }
 
-  .dock-btn svg {
-    width: 16px;
-    height: 16px;
+  .dock-tab-btn svg {
+    width: 15px;
+    height: 15px;
   }
 
-  /* Terminal Log */
+  /* Log Terminal */
   pre#log {
-    background: #070a12;
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
+    background: #03050a;
+    border: 1px solid var(--border-hud);
+    border-radius: 8px;
     padding: 12px 14px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: #34d399;
-    height: 170px;
+    color: var(--neon-green);
+    height: 180px;
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-all;
     line-height: 1.5;
-  }
-
-  .chip {
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 500;
-    border-radius: var(--radius-full);
-    background: var(--surface-inset);
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .chip:hover {
-    background: rgba(30, 41, 59, 0.8);
-    color: var(--text-primary);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
   }
 
   .preset-row {
@@ -761,26 +862,49 @@
     margin-bottom: 12px;
   }
 
+  .cyber-chip {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    border-radius: 6px;
+    background: var(--bg-hud-inset);
+    border: 1px solid var(--border-hud);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    text-transform: uppercase;
+  }
+
+  .cyber-chip:hover {
+    background: rgba(0, 240, 255, 0.15);
+    color: #fff;
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+  }
+
   .hidden {
     display: none !important;
   }
 
-  /* Responsive Adjustments */
+  /* Responsive Refinements */
   @media (max-width: 480px) {
-    .app-container {
+    .hud-container {
       padding-left: 12px;
       padding-right: 12px;
     }
-    .metrics-2x2-grid {
+    .metrics-tactical-grid {
       gap: 8px;
     }
-    .stat-card-box {
+    .metric-module {
       padding: 12px;
     }
-    .stat-card-val {
-      font-size: 20px;
+    .metric-main-value {
+      font-size: 21px;
     }
-    .dock-btn span {
+    .dock-tab-btn span {
       display: inline-block;
     }
   }
@@ -788,226 +912,232 @@
 </head>
 <body>
 
-<div class="app-container">
-  <!-- Top App Header -->
-  <header class="app-header">
-    <div class="brand-group">
-      <div class="brand-icon-box">
+<div class="hud-container">
+  <!-- Top Tactical HUD Header -->
+  <header class="hud-header">
+    <div class="hud-brand">
+      <div class="hud-badge-icon">
         <img src="icon.svg" alt="boAt FLASH">
       </div>
       <div>
-        <div class="brand-title">boAt FLASH</div>
-        <div class="brand-status-capsule" id="conn-badge">
-          <span class="status-dot" id="status-dot"></span>
-          <span id="name">Ready to connect</span>
+        <div class="hud-brand-title">
+          <span>boAt FLASH</span>
+          <span class="tag">CYBER-K6</span>
+        </div>
+        <div class="hud-connection-status" id="conn-badge">
+          <span class="beacon-pip" id="status-dot"></span>
+          <span id="name">TELEMETRY STANDBY</span>
         </div>
       </div>
     </div>
 
-    <div class="header-actions">
-      <button id="connect" type="button" class="btn btn-primary">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5L7 17"></path></svg>
-        <span>Connect Watch</span>
+    <div class="hud-header-actions">
+      <button id="connect" type="button" class="cyber-btn cyber-primary">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5L7 17"></path></svg>
+        <span>CONNECT WATCH</span>
       </button>
-      <button id="disconnect" type="button" class="btn btn-danger hidden">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-        <span>Disconnect</span>
+      <button id="disconnect" type="button" class="cyber-btn cyber-danger hidden">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <span>DISCONNECT</span>
       </button>
     </div>
   </header>
 
-  <!-- iOS Bluetooth Notice Banner (Hidden unless triggered) -->
-  <div id="error2-alert" class="surface-card hidden" style="border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.08);">
+  <!-- iOS Notice Banner -->
+  <div id="error2-alert" class="hud-panel hidden" style="border-color:var(--neon-pink); background:rgba(255, 42, 109, 0.08);">
     <div style="display:flex; align-items:flex-start; gap:10px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff2a6d" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
       <div style="flex:1;">
-        <div style="font-weight:600; color:var(--danger); font-size:13px;">iOS Connection Notice</div>
-        <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 10px; line-height:1.4;">
-          If connection drops, open iPhone Settings > Bluetooth, tap "Forget This Device", then reconnect here.
+        <div style="font-weight:700; color:#ff2a6d; font-size:12px; font-family:var(--font-mono);">IOS BLUETOOTH CAUTION</div>
+        <p style="font-size:11px; color:var(--text-secondary); margin:4px 0 10px; line-height:1.4;">
+          If connection halts, open iPhone Settings > Bluetooth, tap "Forget This Device", then reconnect here.
         </p>
         <div style="display:flex; gap:8px;">
-          <button type="button" id="error2-retry-btn" class="btn btn-primary" style="padding:5px 12px; font-size:11px;">Retry Scan</button>
-          <button type="button" id="error2-dismiss-btn" class="btn" style="padding:5px 12px; font-size:11px;">Dismiss</button>
+          <button type="button" id="error2-retry-btn" class="cyber-btn cyber-primary" style="padding:5px 12px; font-size:10px;">RETRY SCAN</button>
+          <button type="button" id="error2-dismiss-btn" class="cyber-btn" style="padding:5px 12px; font-size:10px;">DISMISS</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Brave Browser Notice Banner -->
-  <div id="brave-alert" class="surface-card hidden" style="border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.08);">
+  <!-- Brave Browser Flag Banner -->
+  <div id="brave-alert" class="hud-panel hidden" style="border-color:var(--neon-amber); background:rgba(255, 214, 0, 0.08);">
     <div style="display:flex; align-items:flex-start; gap:10px;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffd600" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
       <div style="flex:1;">
-        <div style="font-weight:600; color:var(--warning); font-size:12px;">Brave Shields WebBluetooth Flag Required</div>
+        <div style="font-weight:700; color:#ffd600; font-size:12px; font-family:var(--font-mono);">BRAVE SHIELDS BLUETOOTH FLAG REQUIRED</div>
         <div style="display:flex; gap:8px; margin-top:6px;">
-          <button type="button" id="copy-brave-direct" class="chip">Copy Flag Link</button>
+          <button type="button" id="copy-brave-direct" class="cyber-chip">COPY FLAG LINK</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ================= TAB 1: ACTIVITY & DASHBOARD ================= -->
+  <!-- ================= TAB 1: TELEMETRY & ACTIVITY ================= -->
   <main id="section-dash">
-    <!-- Watch Activity & Telemetry Centerpiece -->
-    <section class="surface-card">
-      <div class="card-header-row">
-        <span class="card-section-label">Watch Activity</span>
-        <span class="status-badge" id="watch-clock" style="font-size:11px; font-weight:600; color:var(--text-secondary); font-family:var(--font-mono);">10:09</span>
+    <!-- Watch Hologram Hero Section -->
+    <section class="hud-panel">
+      <div class="hud-panel-header">
+        <span class="hud-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          WATCH TELEMETRY MATRIX
+        </span>
+        <span class="hud-badge-tag" id="watch-clock">10:09</span>
       </div>
 
-      <div class="watch-hero-container">
-        <!-- Dual Circular Activity Rings (Steps & Battery) -->
-        <div class="watch-ring-stage">
-          <svg class="rings-svg" viewBox="0 0 176 176">
-            <!-- Step Activity Ring (Outer Emerald) -->
-            <circle class="ring-bg" cx="88" cy="88" r="76" stroke-width="7"></circle>
-            <circle id="ring-steps" class="ring-bar" cx="88" cy="88" r="76" stroke-width="7" stroke="#10b981" stroke-dasharray="477" stroke-dashoffset="477"></circle>
-            <!-- Battery Ring (Inner Blue) -->
-            <circle class="ring-bg" cx="88" cy="88" r="64" stroke-width="6"></circle>
-            <circle id="ring-bat" class="ring-bar" cx="88" cy="88" r="64" stroke-width="6" stroke="#3b82f6" stroke-dasharray="402" stroke-dashoffset="402"></circle>
+      <div class="watch-telemetry-stage">
+        <!-- Dual Neon Rings (Outer: Mint Steps | Inner: Cyan Battery) -->
+        <div class="hologram-ring-wrapper">
+          <svg class="rings-svg" viewBox="0 0 184 184">
+            <!-- Step Activity Ring (Outer Mint) -->
+            <circle class="ring-track" cx="92" cy="92" r="80" stroke-width="8"></circle>
+            <circle id="ring-steps" class="ring-progress" cx="92" cy="92" r="80" stroke-width="8" stroke="#05ffa1" stroke-dasharray="502" stroke-dashoffset="502" style="filter:drop-shadow(0 0 8px #05ffa1);"></circle>
+            <!-- Battery Ring (Inner Cyan) -->
+            <circle class="ring-track" cx="92" cy="92" r="67" stroke-width="6"></circle>
+            <circle id="ring-bat" class="ring-progress" cx="92" cy="92" r="67" stroke-width="6" stroke="#00f0ff" stroke-dasharray="421" stroke-dashoffset="421" style="filter:drop-shadow(0 0 8px #00f0ff);"></circle>
           </svg>
 
-          <div class="watch-ring-content">
-            <div class="watch-main-digits" id="hero-steps-display">—</div>
-            <div class="watch-digits-label">Steps Today</div>
+          <div class="hologram-digits-center">
+            <div class="telemetry-primary-number" id="hero-steps-display">—</div>
+            <div class="telemetry-unit-label">STEPS TODAY</div>
           </div>
         </div>
 
-        <!-- Telemetry Details Bar -->
-        <div class="watch-telemetry-pills">
-          <div class="tele-pill">
+        <!-- Telemetry Metadata Chips -->
+        <div class="telemetry-pills-row">
+          <div class="hud-chip">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line></svg>
-            <span>Battery:</span>
-            <strong id="bat" style="color:var(--text-primary);">–</strong>
+            <span>POWER:</span>
+            <strong id="bat" style="color:#00f0ff;">–</strong>
           </div>
-          <div class="tele-pill">
+          <div class="hud-chip">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
             <span id="fw">FW: –</span>
           </div>
         </div>
       </div>
 
-      <!-- Quick Actions Grid -->
-      <div class="quick-actions-grid">
-        <button type="button" data-act="sport" class="action-tile" disabled title="Sync Daily Steps">
-          <div class="action-tile-icon">
+      <!-- Tactical Quick Action Tools -->
+      <div class="tactical-tools-grid">
+        <button type="button" data-act="sport" class="tool-tile" disabled title="Sync Daily Steps">
+          <div class="tool-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
           </div>
-          <span>Sync Steps</span>
+          <span>SYNC STEPS</span>
         </button>
 
-        <button type="button" data-act="time" class="action-tile" disabled title="Sync Watch Clock">
-          <div class="action-tile-icon">
+        <button type="button" data-act="time" class="tool-tile" disabled title="Sync Watch Clock">
+          <div class="tool-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
           </div>
-          <span>Sync Time</span>
+          <span>SYNC CLOCK</span>
         </button>
 
-        <button type="button" data-act="find" class="action-tile" disabled title="Vibrate and Find Watch">
-          <div class="action-tile-icon">
+        <button type="button" data-act="find" class="tool-tile" disabled title="Vibrate and Find Watch">
+          <div class="tool-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
           </div>
-          <span>Find Watch</span>
+          <span>PING WATCH</span>
         </button>
 
-        <button type="button" data-act="info" class="action-tile" disabled title="Query Device Information">
-          <div class="action-tile-icon">
+        <button type="button" data-act="info" class="tool-tile" disabled title="Query Device Information">
+          <div class="tool-tile-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
           </div>
-          <span>Watch Info</span>
+          <span>SYS INFO</span>
         </button>
       </div>
 
-      <!-- 4 Stat Cards - Exact Office-Break PremiumStatCard Specification -->
-      <div class="metrics-2x2-grid">
-        <!-- Steps Card -->
-        <div class="stat-card-box">
-          <div class="stat-card-header">
-            <span class="stat-card-title">Today's Steps</span>
-            <div class="stat-icon-wrapper" style="background:var(--success-bg); color:var(--success);">
+      <!-- 4 Telemetry Metrics (Tactical 2x2 Matrix) -->
+      <div class="metrics-tactical-grid">
+        <!-- Module 1: Steps -->
+        <div class="metric-module">
+          <div class="metric-module-header">
+            <span class="metric-index-label">01 // KINETICS</span>
+            <div class="metric-icon-badge" style="background:var(--neon-green-dim); color:var(--neon-green);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"></path><circle cx="12" cy="5" r="3"></circle></svg>
             </div>
           </div>
           <div>
-            <div class="stat-card-val" id="sport-steps" style="color:var(--success);">–</div>
-            <div class="stat-card-sub">Daily Goal: 10,000</div>
+            <div class="metric-main-value" id="sport-steps" style="color:var(--neon-green); text-shadow:0 0 12px rgba(5, 255, 161, 0.4);">–</div>
+            <div class="metric-subtext">TARGET: 10,000 STEPS</div>
           </div>
         </div>
 
-        <!-- Distance Card -->
-        <div class="stat-card-box">
-          <div class="stat-card-header">
-            <span class="stat-card-title">Distance (M)</span>
-            <div class="stat-icon-wrapper" style="background:var(--primary-glow); color:var(--primary);">
+        <!-- Module 2: Distance -->
+        <div class="metric-module">
+          <div class="metric-module-header">
+            <span class="metric-index-label">02 // TRAVERSE</span>
+            <div class="metric-icon-badge" style="background:var(--neon-cyan-dim); color:var(--neon-cyan);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </div>
           </div>
           <div>
-            <div class="stat-card-val" id="sport-dist" style="color:var(--primary);">–</div>
-            <div class="stat-card-sub">Stride calculated</div>
+            <div class="metric-main-value" id="sport-dist" style="color:var(--neon-cyan); text-shadow:0 0 12px rgba(0, 240, 255, 0.4);">–</div>
+            <div class="metric-subtext">STRIDE DISTANCE (M)</div>
           </div>
         </div>
 
-        <!-- Calories Card -->
-        <div class="stat-card-box">
-          <div class="stat-card-header">
-            <span class="stat-card-title">Active Energy</span>
-            <div class="stat-icon-wrapper" style="background:var(--rose-bg); color:var(--rose);">
+        <!-- Module 3: Active Calories -->
+        <div class="metric-module">
+          <div class="metric-module-header">
+            <span class="metric-index-label">03 // METABOLIC</span>
+            <div class="metric-icon-badge" style="background:var(--neon-pink-dim); color:var(--neon-pink);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
             </div>
           </div>
           <div>
-            <div class="stat-card-val" id="sport-kcal" style="color:var(--rose);">–</div>
-            <div class="stat-card-sub">Metabolic burn</div>
+            <div class="metric-main-value" id="sport-kcal" style="color:var(--neon-pink); text-shadow:0 0 12px rgba(255, 42, 109, 0.4);">–</div>
+            <div class="metric-subtext">ACTIVE ENERGY (KCAL)</div>
           </div>
         </div>
 
-        <!-- Duration Card -->
-        <div class="stat-card-box">
-          <div class="stat-card-header">
-            <span class="stat-card-title">Active Duration</span>
-            <div class="stat-icon-wrapper" style="background:var(--warning-bg); color:var(--warning);">
+        <!-- Module 4: Active Chrono -->
+        <div class="metric-module">
+          <div class="metric-module-header">
+            <span class="metric-index-label">04 // CHRONO</span>
+            <div class="metric-icon-badge" style="background:var(--neon-amber-dim); color:var(--neon-amber);">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
             </div>
           </div>
           <div>
-            <div class="stat-card-val" id="sport-dur" style="color:var(--warning);">–</div>
-            <div class="stat-card-sub">Moving time</div>
+            <div class="metric-main-value" id="sport-dur" style="color:var(--neon-amber); text-shadow:0 0 12px rgba(255, 214, 0, 0.4);">–</div>
+            <div class="metric-subtext">ACTIVE MOVEMENT</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Apple Health Integration Card -->
-    <section class="surface-card">
-      <div class="health-hero-row">
-        <div class="health-badge-icon">
+    <!-- Apple Health Cyber Bridge Card -->
+    <section class="hud-panel">
+      <div class="health-vault-body">
+        <div class="health-vault-icon">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
         </div>
-        <div class="health-content">
-          <div class="health-title-row">
-            <div class="health-main-title" id="health-title">Apple Health Sync</div>
-            <span class="health-status-badge" id="health-status">1-Tap Bridge</span>
+        <div class="health-vault-content">
+          <div class="health-vault-title-row">
+            <div class="health-vault-title" id="health-title">APPLE HEALTH DIRECT BRIDGE</div>
+            <span class="hud-badge-tag" id="health-status">1-TAP SHORTCUT</span>
           </div>
-          <p class="health-desc" id="health-desc">
-            Directly record watch activity into the Apple Health app using the 1-Tap iOS Shortcut bridge without requiring Apple Developer entitlements.
+          <p class="health-vault-desc" id="health-desc">
+            Directly commit watch biometrics into the native iOS Apple Health database via the 1-Tap Shortcut runner.
           </p>
-          <div class="health-actions-row">
-            <button type="button" id="btn-health-shortcut" class="btn btn-primary">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              <span>Sync to Apple Health</span>
+          <div class="health-vault-actions">
+            <button type="button" id="btn-health-shortcut" class="cyber-btn cyber-primary">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>SYNC TO APPLE HEALTH</span>
             </button>
-            <button type="button" id="btn-health-export" class="btn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-              <span>Export CSV</span>
+            <button type="button" id="btn-health-export" class="cyber-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>EXPORT CSV</span>
             </button>
           </div>
 
-          <div class="toggle-switch-row">
-            <span class="toggle-label">Auto-sync steps on connect</span>
-            <label class="ios-switch">
+          <div class="cyber-toggle-row">
+            <span class="cyber-toggle-label">AUTO-SYNC STEPS ON CONNECT</span>
+            <label class="cyber-switch">
               <input type="checkbox" id="health-auto-sync" checked>
-              <span class="ios-slider"></span>
+              <span class="cyber-switch-slider"></span>
             </label>
           </div>
         </div>
@@ -1015,88 +1145,95 @@
     </section>
   </main>
 
-  <!-- ================= TAB 2: NOTIFICATIONS / MESSAGES ================= -->
-  <section id="section-notif" class="surface-card hidden">
-    <div class="card-header-row">
-      <span class="card-section-label">Push to Watch</span>
-      <span class="chip" id="nbytes">0 / 250 bytes</span>
+  <!-- ================= TAB 2: COMMS & NOTIFICATIONS ================= -->
+  <section id="section-notif" class="hud-panel hidden">
+    <div class="hud-panel-header">
+      <span class="hud-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+        HOLO-COMMS TRANSMITTER
+      </span>
+      <span class="hud-badge-tag" id="nbytes">0 / 250 BYTES</span>
     </div>
 
     <!-- Quick Presets -->
     <div class="preset-row">
-      <button type="button" class="chip" id="preset-call">Call Alert</button>
-      <button type="button" class="chip" id="preset-wa">WhatsApp</button>
-      <button type="button" class="chip" id="preset-alert">Meeting</button>
-      <button type="button" class="chip" id="preset-emoji">Break Time</button>
+      <button type="button" class="cyber-chip" id="preset-call">CALL ALERT</button>
+      <button type="button" class="cyber-chip" id="preset-wa">WHATSAPP</button>
+      <button type="button" class="cyber-chip" id="preset-alert">ALERT</button>
+      <button type="button" class="cyber-chip" id="preset-emoji">TEST MSG</button>
     </div>
 
     <div class="form-group">
-      <label class="form-label" for="ntitle">Title</label>
-      <input type="text" id="ntitle" placeholder="Sender or App Name" maxlength="32">
+      <label class="form-label" for="ntitle">SENDER / HEADER</label>
+      <input type="text" id="ntitle" placeholder="App Name or Caller ID" maxlength="32">
     </div>
 
     <div class="form-group">
-      <label class="form-label" for="nbody">Message Body</label>
-      <textarea id="nbody" rows="3" placeholder="Message text displayed on watch screen..."></textarea>
+      <label class="form-label" for="nbody">PAYLOAD TEXT</label>
+      <textarea id="nbody" rows="3" placeholder="Message content to render on watch display..."></textarea>
     </div>
 
     <div class="form-group">
-      <label class="form-label" for="nkind">Notification Type</label>
+      <label class="form-label" for="nkind">NOTIFICATION PROTOCOL</label>
       <select id="nkind">
-        <option value="1">Phone Call (Kind 1)</option>
+        <option value="1">Voice Call (Kind 1)</option>
         <option value="2" selected>SMS / Instant Message (Kind 2)</option>
         <option value="4">WhatsApp (Kind 4)</option>
-        <option value="7">Facebook / Social (Kind 7)</option>
+        <option value="7">Social Stream (Kind 7)</option>
         <option value="8">Twitter / X (Kind 8)</option>
         <option value="11">Instagram (Kind 11)</option>
       </select>
     </div>
 
-    <button type="button" data-act="notify" id="btn-send-notif" class="btn btn-primary" style="width:100%; margin-top:8px;" disabled>
+    <button type="button" data-act="notify" id="btn-send-notif" class="cyber-btn cyber-primary" style="width:100%; margin-top:8px;" disabled>
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-      <span>Send to Watch Screen</span>
+      <span>BEAM TO WATCH SCREEN</span>
     </button>
   </section>
 
   <!-- ================= TAB 3: DIAGNOSTICS & SYSTEM ================= -->
-  <section id="section-diag" class="surface-card hidden">
-    <div class="card-header-row">
-      <span class="card-section-label">BLE Diagnostics & Logs</span>
+  <section id="section-diag" class="hud-panel hidden">
+    <div class="hud-panel-header">
+      <span class="hud-panel-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
+        BLE DIAGNOSTICS & PACKET STREAM
+      </span>
       <div style="display:flex; gap:6px;">
-        <button type="button" id="copy-log" class="chip">Copy</button>
-        <button type="button" id="clear" class="chip">Clear</button>
+        <button type="button" id="copy-log" class="cyber-chip">COPY</button>
+        <button type="button" id="clear" class="cyber-chip">CLEAR</button>
       </div>
     </div>
 
-    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:8px 12px; background:var(--surface-inset); border-radius:var(--radius-lg); border:1px solid var(--border-color);">
-      <span style="font-size:12px; color:var(--text-secondary);">Show all nearby BLE devices</span>
-      <label class="ios-switch">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:10px 14px; background:var(--bg-hud-inset); border-radius:8px; border:1px solid var(--border-hud);">
+      <span style="font-size:11px; font-family:var(--font-mono); color:var(--text-secondary);">SCAN ALL NEARBY BLE NODES (UNFILTERED)</span>
+      <label class="cyber-switch">
         <input type="checkbox" id="scan-all">
-        <span class="ios-slider"></span>
+        <span class="cyber-switch-slider"></span>
       </label>
     </div>
 
-    <pre id="log" placeholder="Live BLE packets will stream here..."></pre>
+    <pre id="log" placeholder="Live BLE packet traffic will stream here..."></pre>
   </section>
 
-  <!-- Floating Dynamic Island Bottom Dock -->
-  <nav class="dynamic-island-dock">
-    <button type="button" class="dock-btn active" id="btn-tab-dash">
+  <!-- Floating Dynamic Island Cyber Dock -->
+  <nav class="dynamic-cyber-dock">
+    <button type="button" class="dock-tab-btn active" id="btn-tab-dash">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-      <span>Activity</span>
+      <span>TELEMETRY</span>
     </button>
-    <button type="button" class="dock-btn" id="btn-tab-notif">
+    <button type="button" class="dock-tab-btn" id="btn-tab-notif">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-      <span>Messages</span>
+      <span>COMMS</span>
     </button>
-    <button type="button" class="dock-btn" id="btn-tab-diag">
+    <button type="button" class="dock-tab-btn" id="btn-tab-diag">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
-      <span>Diagnostics</span>
+      <span>DIAGNOSTICS</span>
     </button>
   </nav>
 </div>
 
 <script>
+
 
 
 // Protocol: see ../SYSTEM.md. CE "K6" SDK from the boAt Wearables app.
@@ -2284,6 +2421,7 @@ if (typeof window !== 'undefined') {
 }
 
 updateBytes();
+
 
 
 </script>
