@@ -47,8 +47,26 @@ if (content.includes(buggyFunction)) {
   content = content.replace(buggyFunction, safeFunction);
   fs.writeFileSync(targetFile, content, 'utf8');
   console.log('[patch-plugin] Successfully patched Conversion.swift for crash resilience!');
-} else if (content.includes('clean.trimmingCharacters')) {
+} else if (content.includes('trimmingCharacters')) {
   console.log('[patch-plugin] Conversion.swift is already patched.');
 } else {
   console.warn('[patch-plugin] Could not locate exact buggy function in Conversion.swift to patch.');
+}
+
+// Ensure HealthKitPlugin is included in packageClassList if ios config exists
+const iosConfigFile = path.join(__dirname, '..', 'ios', 'App', 'App', 'capacitor.config.json');
+if (fs.existsSync(iosConfigFile)) {
+  try {
+    const config = JSON.parse(fs.readFileSync(iosConfigFile, 'utf8'));
+    if (!Array.isArray(config.packageClassList)) {
+      config.packageClassList = [];
+    }
+    if (!config.packageClassList.includes('HealthKitPlugin')) {
+      config.packageClassList.push('HealthKitPlugin');
+      fs.writeFileSync(iosConfigFile, JSON.stringify(config, null, '\t'), 'utf8');
+      console.log('[patch-plugin] Registered HealthKitPlugin in ios/App/App/capacitor.config.json');
+    }
+  } catch (err) {
+    console.warn('[patch-plugin] Could not update ios capacitor.config.json:', err.message);
+  }
 }

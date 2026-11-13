@@ -1,5 +1,241 @@
 import UIKit
 import Capacitor
+import HealthKit
+
+@objc(ViewController)
+class ViewController: CAPBridgeViewController {
+    override open func capacitorDidLoad() {
+        super.capacitorDidLoad()
+        bridge?.registerPluginInstance(HealthKitPlugin())
+    }
+}
+
+@objc(HealthKitPlugin)
+public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
+    public let identifier = "HealthKitPlugin"
+    public let jsName = "HealthKit"
+    public let pluginMethods: [CAPPluginMethod] = [
+        CAPPluginMethod(name: "isAvailable", returnType: CAPPluginMethodTypePromise),
+        CAPPluginMethod(name: "requestAuthorization", returnType: CAPPluginMethodTypePromise),
+        CAPPluginMethod(name: "saveSportRecord", returnType: CAPPluginMethodTypePromise),
+        CAPPluginMethod(name: "saveSportRecords", returnType: CAPPluginMethodTypePromise),
+        CAPPluginMethod(name: "getTodaySteps", returnType: CAPPluginMethodTypePromise)
+    ]
+
+    private let healthStore = HKHealthStore()
+
+    @objc func isAvailable(_ call: CAPPluginCall) {
+        call.resolve([
+            "available": HKHealthStore.isHealthDataAvailable()
+        ])
+    }
+
+    @objc func requestAuthorization(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            call.reject("HealthKit is not available on this device")
+            return
+        }
+
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount),
+              let distType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+              let calType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
+            call.reject("Unable to initialize HealthKit data types")
+            return
+        }
+
+        let writeTypes: Set<HKSampleType> = [stepType, distType, calType]
+        let readTypes: Set<HKObjectType> = [stepType, distType, calType]
+
+        healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
+            if let error = error {
+                call.reject("HealthKit authorization failed: \(error.localizedDescription)")
+            } else {
+                call.resolve(["authorized": success])
+            }
+        }
+    }
+
+    @objc func saveSportRecord(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            call.reject("HealthKit is not available")
+            return
+        }
+
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount),
+              let distType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+              let calType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
+            call.reject("HealthKit quantity types not found")
+            return
+        }
+
+        let steps = call.getInt("steps") ?? 0
+        let distance = call.getDouble("distance") ?? 0.0 // meters
+        let calories = call.getDouble("calories") ?? 0.0 // kcal
+        let duration = max(call.getDouble("duration") ?? 60.0, 1.0) // seconds
+        let startTimeSec = call.getDouble("startTime") ?? Date().timeIntervalSince1970
+
+        let startDate = Date(timeIntervalSince1970: startTimeSec)
+        let endDate = startDate.addingTimeInterval(duration)
+
+        let device = HKDevice(
+            name: "boAt FLASH",
+            manufacturer: "boAt",
+            model: "FLASH",
+            hardwareVersion: nil,
+            firmwareVersion: nil,
+            softwareVersion: "1.0",
+            localIdentifier: nil,
+            udiDeviceIdentifier: nil
+        )
+
+        let syncId = "boat-flash-\(Int(startTimeSec))"
+        let metadata: [String: Any] = [
+            HKMetadataKeyDeviceManufacturerName: "boAt",
+            HKMetadataKeyDeviceModel: "FLASH",
+            HKMetadataKeySyncIdentifier: syncId,
+            HKMetadataKeySyncVersion: 1
+        ]
+
+        var samples: [HKSample] = []
+
+        if steps > 0 {
+            let stepQuantity = HKQuantity(unit: .count(), doubleValue: Double(steps))
+            let stepSample = HKQuantitySample(type: stepType, quantity: stepQuantity, start: startDate, end: endDate, device: device, metadata: metadata)
+            samples.append(stepSample)
+        }
+
+        if distance > 0 {
+            let distQuantity = HKQuantity(unit: .meter(), doubleValue: distance)
+            let distSample = HKQuantitySample(type: distType, quantity: distQuantity, start: startDate, end: endDate, device: device, metadata: metadata)
+            samples.append(distSample)
+        }
+
+        if calories > 0 {
+            let calQuantity = HKQuantity(unit: .kilocalorie(), doubleValue: calories)
+            let calSample = HKQuantitySample(type: calType, quantity: calQuantity, start: startDate, end: endDate, device: device, metadata: metadata)
+            samples.append(calSample)
+        }
+
+        guard !samples.isEmpty else {
+            call.resolve(["saved": true, "sampleCount": 0])
+            return
+        }
+
+        healthStore.save(samples) { success, error in
+            if let error = error {
+                call.reject("Failed to save sport sample to HealthKit: \(error.localizedDescription)")
+            } else {
+                call.resolve([
+                    "saved": success,
+                    "sampleCount": samples.count
+                ])
+            }
+        }
+    }
+
+    @objc func saveSportRecords(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            call.reject("HealthKit is not available")
+            return
+        }
+
+        guard let records = call.getArray("records", [String: Any].self), !records.isEmpty else {
+            call.resolve(["saved": true, "sampleCount": 0])
+            return
+        }
+
+        guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount),
+              let distType = HKQuantityType.quantityType(forIdentifier: .distanceWalkingRunning),
+              let calType = HKQuantityType.quantityType(forIdentifier: .activeEnergyBurned) else {
+            call.reject("HealthKit quantity types not found")
+            return
+        }
+
+        let device = HKDevice(
+            name: "boAt FLASH",
+            manufacturer: "boAt",
+            model: "FLASH",
+            hardwareVersion: nil,
+            firmwareVersion: nil,
+            softwareVersion: "1.0",
+            localIdentifier: nil,
+            udiDeviceIdentifier: nil
+        )
+
+        var samples: [HKSample] = []
+
+        for item in records {
+            let steps = item["steps"] as? Int ?? 0
+            let distance = (item["distance"] as? NSNumber)?.doubleValue ?? 0.0
+            let calories = (item["calories"] as? NSNumber)?.doubleValue ?? 0.0
+            let duration = max((item["duration"] as? NSNumber)?.doubleValue ?? 60.0, 1.0)
+            let startTimeSec = (item["startTime"] as? NSNumber)?.doubleValue ?? Date().timeIntervalSince1970
+
+            let startDate = Date(timeIntervalSince1970: startTimeSec)
+            let endDate = startDate.addingTimeInterval(duration)
+            let syncId = "boat-flash-\(Int(startTimeSec))"
+            let metadata: [String: Any] = [
+                HKMetadataKeyDeviceManufacturerName: "boAt",
+                HKMetadataKeyDeviceModel: "FLASH",
+                HKMetadataKeySyncIdentifier: syncId,
+                HKMetadataKeySyncVersion: 1
+            ]
+
+            if steps > 0 {
+                let stepQuantity = HKQuantity(unit: .count(), doubleValue: Double(steps))
+                samples.append(HKQuantitySample(type: stepType, quantity: stepQuantity, start: startDate, end: endDate, device: device, metadata: metadata))
+            }
+            if distance > 0 {
+                let distQuantity = HKQuantity(unit: .meter(), doubleValue: distance)
+                samples.append(HKQuantitySample(type: distType, quantity: distQuantity, start: startDate, end: endDate, device: device, metadata: metadata))
+            }
+            if calories > 0 {
+                let calQuantity = HKQuantity(unit: .kilocalorie(), doubleValue: calories)
+                samples.append(HKQuantitySample(type: calType, quantity: calQuantity, start: startDate, end: endDate, device: device, metadata: metadata))
+            }
+        }
+
+        guard !samples.isEmpty else {
+            call.resolve(["saved": true, "sampleCount": 0])
+            return
+        }
+
+        healthStore.save(samples) { success, error in
+            if let error = error {
+                call.reject("Failed to batch save samples: \(error.localizedDescription)")
+            } else {
+                call.resolve([
+                    "saved": success,
+                    "sampleCount": samples.count
+                ])
+            }
+        }
+    }
+
+    @objc func getTodaySteps(_ call: CAPPluginCall) {
+        guard HKHealthStore.isHealthDataAvailable(),
+              let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+            call.reject("HealthKit not available")
+            return
+        }
+
+        let calendar = Calendar.current
+        let now = Date()
+        let startOfDay = calendar.startOfDay(for: now)
+        let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now, options: .strictStartDate)
+
+        let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+            if let error = error {
+                call.reject("Query failed: \(error.localizedDescription)")
+                return
+            }
+            let sum = result?.sumQuantity()?.doubleValue(for: .count()) ?? 0.0
+            call.resolve(["steps": Int(sum)])
+        }
+
+        healthStore.execute(query)
+    }
+}
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {

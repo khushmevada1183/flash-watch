@@ -828,7 +828,8 @@
     </div>
 
     <!-- Quick Tool Pills -->
-    <div class="row" style="justify-content:center; gap:8px;">
+    <div class="row" style="justify-content:center; gap:8px; flex-wrap:wrap;">
+      <button data-act="sport" disabled title="Request step and activity sync from watch">🏃 Sync Steps</button>
       <button data-act="time" disabled title="Sync clock with this device">🕒 Sync Clock</button>
       <button data-act="find" disabled title="Vibrate and ring the watch">🔔 Find Watch</button>
       <button data-act="info" disabled title="Query firmware info">ℹ️ Info</button>
@@ -863,6 +864,29 @@
           <span>⏱️</span>
         </div>
         <div class="metric-val" id="sport-dur">–</div>
+      </div>
+    </div>
+
+    <!-- Apple Health & Health Connect Sync Card -->
+    <div class="card" id="health-card" style="margin-top:10px; background:var(--bg-tertiary, #161b22); border:1px solid var(--border-subtle, #30363d); border-radius:10px; padding:12px 14px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:20px; line-height:1;">❤️</span>
+          <div>
+            <div style="font-weight:700; font-size:13px; color:var(--text-primary, #f0f6fc);" id="health-title">Apple Health Sync</div>
+            <div style="font-size:11px; color:var(--text-tertiary, #8b949e);" id="health-status">Checking integration…</div>
+          </div>
+        </div>
+        <button id="btn-health-sync" class="chip" style="font-size:12px; font-weight:600; padding:6px 12px; cursor:pointer; background:rgba(56,139,253,0.15); border:1px solid rgba(56,139,253,0.4); color:#58a6ff; border-radius:6px;">
+          🔄 Sync Now
+        </button>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary, #c9d1d9); border-top:1px solid var(--border-subtle, #30363d); padding-top:8px; margin-top:4px;">
+        <span>Auto-sync steps to Apple Health</span>
+        <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
+          <input type="checkbox" id="health-auto-sync" checked style="width:auto; cursor:pointer;">
+          <span style="font-size:10px; color:var(--text-tertiary, #8b949e);">Enabled</span>
+        </label>
       </div>
     </div>
 
@@ -1040,7 +1064,7 @@ const CMD = { SEND: 1, REQUEST: 3, ACK: 4 };
 
 // Hard allowlist. Reset(118), shutdown(119), OTA(201/202), watch-face/file push(131),
 // pairing/bond(69,70,112,120), deletes, contacts etc. can never be sent from this page.
-const ALLOWED = new Set(["3:2", "1:11", "1:104", "1:107"]);
+const ALLOWED = new Set(["3:2", "1:11", "1:104", "1:107", "3:4", "3:5", "1:109"]);
 
 const $ = id => {
   const el = typeof document !== 'undefined' && document.getElementById ? document.getElementById(id) : null;
@@ -1115,6 +1139,10 @@ const send = (cmd, type, data) => write(pages(cmd, type, data));
 // --- commands -------------------------------------------------------------
 const nowSec = () => Math.floor(Date.now() / 1000);
 const cmds = {
+  sport: () => {
+    try { send(CMD.SEND, 109, new Uint8Array([1])); } catch (e) {}
+    return send(CMD.REQUEST, 4);
+  },
   info: () => send(CMD.REQUEST, 2),
   find: () => send(CMD.SEND, 11, new Uint8Array([1])),
   // K6_CESyncTime: u32 unix | i32 tz offset seconds | flags (bit0 time format, bit1 month/day order)
@@ -1204,7 +1232,9 @@ function done() {
     case 4:
     case 5: { // K6_Sport records
       const dv = new DataView(d.buffer, d.byteOffset);
+      const recordsToSync = [];
       for (let i = 3; i + 20 <= d.length; i += 20) {
+        const starTime = dv.getUint32(i, true);
         const steps = dv.getUint32(i + 4, true);
         const dist = dv.getUint32(i + 8, true) & 0xffffff;
         const kcal = dv.getUint32(i + 12, true) & 0xffffff;
@@ -1219,7 +1249,19 @@ function done() {
           const stepPct = Math.max(0, Math.min(1, steps / 10000));
           stepRing.style.strokeDashoffset = 465 - (465 * stepPct);
         }
-        log(`   sport record: steps=${steps} dist=${dist}m kcal=${kcal} dur=${dur}s`);
+        log(`   sport record: time=${starTime} steps=${steps} dist=${dist}m kcal=${kcal} dur=${dur}s`);
+        if (steps > 0 || dist > 0 || kcal > 0) {
+          recordsToSync.push({
+            startTime: (starTime > 1577836800) ? starTime : Math.floor(Date.now() / 1000),
+            steps: steps,
+            distance: dist,
+            calories: kcal,
+            duration: Math.max(dur, 60)
+          });
+        }
+      }
+      if (recordsToSync.length > 0 && typeof handleIncomingSportRecords === 'function') {
+        handleIncomingSportRecords(recordsToSync);
       }
       break;
     }
@@ -1298,6 +1340,7 @@ const post = (path, body) => api(path, { method: "POST", body: JSON.stringify(bo
   .then(async r => { const j = await r.json(); if (!r.ok) throw new Error(j.error); return j; });
 
 const bridgeCmds = {
+  sport: () => post("sport").catch(() => {}),
   info: () => post("info"),
   find: () => post("find"),
   time: () => post("time"),
@@ -1533,10 +1576,157 @@ async function connectGattWithRetry(targetDevice, maxRetries = 2) {
   }
 }
 
+// --- Apple Health & Activity Sync ---
+let healthKitAuthorized = false;
+
+async function checkHealthKitAvailability() {
+  const healthStatusEl = $("health-status");
+  const healthTitleEl = $("health-title");
+  const isIOS = (typeof navigator !== 'undefined' && navigator.userAgent && (/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)));
+
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.HealthKit) {
+    try {
+      const res = await window.Capacitor.Plugins.HealthKit.isAvailable();
+      if (res && res.available) {
+        if (healthStatusEl) healthStatusEl.textContent = "Apple Health Ready";
+        return true;
+      }
+    } catch (e) {
+      log("HealthKit check err:", e.message || String(e));
+    }
+  }
+
+  if (isIOS) {
+    if (healthStatusEl) healthStatusEl.textContent = "Apple Health (iOS)";
+  } else {
+    if (healthTitleEl) healthTitleEl.textContent = "Health & Step Sync";
+    if (healthStatusEl) healthStatusEl.textContent = "Offline / Web Activity Mode";
+  }
+  return false;
+}
+
+async function requestHealthKitAuth() {
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.HealthKit) {
+    try {
+      const res = await window.Capacitor.Plugins.HealthKit.requestAuthorization();
+      healthKitAuthorized = !!(res && res.authorized);
+      const healthStatusEl = $("health-status");
+      if (healthStatusEl) healthStatusEl.textContent = healthKitAuthorized ? "Apple Health Connected ✅" : "Permission Denied";
+      return healthKitAuthorized;
+    } catch (err) {
+      log("HealthKit auth error:", err.message || String(err));
+      const healthStatusEl = $("health-status");
+      if (healthStatusEl) healthStatusEl.textContent = "Auth Error: " + (err.message || String(err));
+      return false;
+    }
+  }
+  return false;
+}
+
+async function handleIncomingSportRecords(records) {
+  try {
+    if (typeof localStorage !== 'undefined' && records && records.length) {
+      const latest = records[records.length - 1];
+      localStorage.setItem("flash_last_steps", String(latest.steps));
+      localStorage.setItem("flash_last_sync_time", String(Date.now()));
+    }
+  } catch (e) {}
+
+  const autoSync = $("health-auto-sync") ? $("health-auto-sync").checked : true;
+  if (!autoSync) return;
+
+  await syncSportRecordsToHealthKit(records);
+}
+
+async function syncSportRecordsToHealthKit(records) {
+  const healthStatusEl = $("health-status");
+  if (!records || !records.length) {
+    const stepsText = $("sport-steps") ? $("sport-steps").textContent.replace(/,/g, "") : "0";
+    const distText = $("sport-dist") ? $("sport-dist").textContent.replace(/,/g, "") : "0";
+    const kcalText = $("sport-kcal") ? $("sport-kcal").textContent.replace(/,/g, "") : "0";
+    const durText = $("sport-dur") ? $("sport-dur").textContent.replace(/[^0-9]/g, "") : "0";
+    const s = parseInt(stepsText, 10) || 0;
+    const d = parseFloat(distText) || 0;
+    const k = parseFloat(kcalText) || 0;
+    const dur = (parseInt(durText, 10) || 1) * 60;
+    if (s > 0 || d > 0 || k > 0) {
+      records = [{
+        startTime: Math.floor(Date.now() / 1000) - dur,
+        steps: s,
+        distance: d,
+        calories: k,
+        duration: dur
+      }];
+    }
+  }
+
+  if (!records || !records.length) {
+    if (healthStatusEl) healthStatusEl.textContent = "No new activity data to sync";
+    return;
+  }
+
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.HealthKit) {
+    try {
+      if (!healthKitAuthorized) {
+        const authed = await requestHealthKitAuth();
+        if (!authed) return;
+      }
+      if (healthStatusEl) healthStatusEl.textContent = "Writing to Apple Health…";
+      const res = await window.Capacitor.Plugins.HealthKit.saveSportRecords({ records });
+      if (res && res.saved) {
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (healthStatusEl) healthStatusEl.textContent = `Synced ${res.sampleCount || records.length} records at ${timeStr} ✅`;
+        log(`Synced ${res.sampleCount || records.length} activity samples to Apple Health.`);
+      }
+    } catch (err) {
+      log("HealthKit sync error:", err.message || String(err));
+      if (healthStatusEl) healthStatusEl.textContent = "Sync failed: " + (err.message || String(err));
+    }
+  } else {
+    try {
+      if (typeof localStorage !== 'undefined') {
+        const history = JSON.parse(localStorage.getItem("flash_activity_log") || "[]");
+        records.forEach(r => history.push({ ...r, loggedAt: new Date().toISOString() }));
+        if (history.length > 500) history.splice(0, history.length - 500);
+        localStorage.setItem("flash_activity_log", JSON.stringify(history));
+      }
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      if (healthStatusEl) healthStatusEl.textContent = `Logged ${records.length} records locally at ${timeStr}`;
+    } catch (e) {}
+  }
+}
+
 // --- Wire Event Handlers ---
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
     checkBrowserCompatibility();
+    checkHealthKitAvailability();
+
+    const btnHealth = $("btn-health-sync");
+    if (btnHealth) {
+      btnHealth.onclick = async () => {
+        btnHealth.disabled = true;
+        const origText = btnHealth.textContent;
+        btnHealth.textContent = "Syncing…";
+        try {
+          if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.HealthKit) {
+            await requestHealthKitAuth();
+          }
+          if ((dev && dev.gatt && dev.gatt.connected) || (isCapacitorNative && capDeviceId)) {
+            await cmds.sport();
+          } else {
+            await syncSportRecordsToHealthKit();
+          }
+        } catch (e) {
+          log("Health sync error:", e.message || String(e));
+        } finally {
+          btnHealth.disabled = false;
+          btnHealth.textContent = origText;
+        }
+      };
+    }
 
     // Main 3-Tab Navigator
     const tDash = $("btn-tab-dash");
@@ -1651,6 +1841,7 @@ if (typeof window !== 'undefined') {
             await cmds.time();
             await cmds.info();
             updateStep(4, "done", "Watch active and synchronized!");
+            setTimeout(() => { cmds.sport().catch(() => {}); }, 1200);
           } catch (nativeErr) {
             updateStep(2, "error", nativeErr.message || String(nativeErr));
             setConnected(false, "Error: " + (nativeErr.message || String(nativeErr)));
@@ -1753,6 +1944,7 @@ if (typeof window !== 'undefined') {
           await cmds.time();
           await cmds.info();
           updateStep(4, "done", "Watch synchronized & ready!");
+          setTimeout(() => { cmds.sport().catch(() => {}); }, 1200);
         } catch (e) {
           const errStr = e.message || String(e);
           setConnected(false, "Error: " + errStr);

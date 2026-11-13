@@ -29,6 +29,9 @@ jobs:
       - name: Sync Capacitor iOS
         run: npx cap sync ios
 
+      - name: Patch Native Plugins After Sync
+        run: node scripts/patch-plugin.js
+
       - name: Install CocoaPods
         run: |
           cd ios/App

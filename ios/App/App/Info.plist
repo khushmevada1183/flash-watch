@@ -49,5 +49,9 @@
 	<string>FLASH Watch connects directly to your boAt FLASH smartwatch to sync clock, battery, steps, and notifications.</string>
 	<key>NSBluetoothPeripheralUsageDescription</key>
 	<string>FLASH Watch communicates with your boAt FLASH smartwatch over Bluetooth Low Energy.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>FLASH Watch reads health data to display your daily activity.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>FLASH Watch saves steps, walking distance, and active energy from your boAt FLASH smartwatch into Apple Health.</string>
 </dict>
 </plist>
