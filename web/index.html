@@ -13,29 +13,28 @@
 <style>
 
   :root {
-    --cyber-black: #05060b;
-    --cyber-abyss: #070913;
-    --cyber-surface: rgba(11, 15, 28, 0.88);
-    --cyber-surface-elevated: rgba(16, 22, 42, 0.95);
-    --cyber-surface-card: rgba(12, 17, 33, 0.90);
-    --cyber-cyan: #00f0ff;
-    --cyber-cyan-dim: rgba(0, 240, 255, 0.18);
-    --cyber-cyan-glow: 0 0 16px rgba(0, 240, 255, 0.55);
-    --cyber-pink: #ff0055;
-    --cyber-pink-dim: rgba(255, 0, 85, 0.18);
-    --cyber-pink-glow: 0 0 16px rgba(255, 0, 85, 0.55);
-    --cyber-yellow: #ffe600;
-    --cyber-yellow-glow: 0 0 16px rgba(255, 230, 0, 0.55);
-    --cyber-green: #00ff66;
-    --cyber-green-glow: 0 0 16px rgba(0, 255, 102, 0.55);
-    --cyber-border: rgba(0, 240, 255, 0.25);
-    --cyber-border-bright: rgba(0, 240, 255, 0.65);
-    --text-primary: #f0f6fc;
-    --text-secondary: #859bb8;
-    --text-cyan: #00f0ff;
-    --text-dim: #4d5b73;
-    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --bg-black: #000000;
+    --card-bg: #1c1c1e;
+    --card-elevated: #2c2c2e;
+    --card-surface: #242426;
+    --border-color: rgba(255, 255, 255, 0.08);
+    --border-light: rgba(255, 255, 255, 0.14);
+    --text-primary: #ffffff;
+    --text-secondary: #8e8e93;
+    --text-tertiary: #636366;
+    --apple-blue: #0a84ff;
+    --apple-blue-hover: #0071e3;
+    --apple-green: #30d158;
+    --apple-red: #ff453a;
+    --apple-yellow: #ffd60a;
+    --apple-orange: #ff9f0a;
     --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --radius-full: 9999px;
+    --radius-lg: 18px;
+    --radius-md: 12px;
+    --radius-sm: 8px;
+    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 
   * {
@@ -50,57 +49,38 @@
     width: 100%;
     overflow: hidden;
     overscroll-behavior: none;
-    background-color: var(--cyber-black);
+    background-color: var(--bg-black);
     color: var(--text-primary);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     letter-spacing: -0.01em;
   }
 
-  /* Cyber Grid & Ambient Lighting */
-  body {
-    background-image: 
-      linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-      radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.15) 0%, transparent 60%),
-      radial-gradient(circle at 100% 100%, rgba(255, 0, 85, 0.10) 0%, transparent 50%);
-    background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%;
-    position: relative;
-  }
-
-  /* Subtle CRT Scanline overlay */
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0px, rgba(0, 0, 0, 0.18) 1px, transparent 1px, transparent 3px);
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.5;
-  }
-
-  /* --- Native iOS App Shell --- */
+  /* --- iOS App Shell --- */
   .app-shell {
     display: flex;
     flex-direction: column;
     height: 100dvh;
     width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
     position: relative;
     overflow: hidden;
+    background: var(--bg-black);
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
   }
 
-  /* Fixed Top Header / Dynamic Island Status Bar */
+  /* Top Navigation Bar */
   header.ios-header {
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: max(10px, env(safe-area-inset-top)) 16px 10px 16px;
-    background: rgba(7, 10, 20, 0.92);
-    backdrop-filter: blur(28px) saturate(200%);
-    -webkit-backdrop-filter: blur(28px) saturate(200%);
-    border-bottom: 1px solid rgba(0, 240, 255, 0.18);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    padding: max(12px, env(safe-area-inset-top)) 16px 12px 16px;
+    background: rgba(18, 18, 20, 0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-color);
     z-index: 100;
   }
 
@@ -111,77 +91,60 @@
   }
 
   .brand img {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid var(--cyber-cyan);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
     object-fit: cover;
   }
 
   .brand-text h1 {
-    font-size: 14px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
     color: #fff;
-    text-transform: uppercase;
-    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
     line-height: 1.1;
   }
 
   .brand-text span {
-    font-size: 10px;
-    font-family: var(--font-mono);
-    color: var(--cyber-cyan);
-    letter-spacing: 0.05em;
+    font-size: 11px;
+    color: var(--text-secondary);
     display: block;
     line-height: 1.1;
     margin-top: 2px;
   }
 
-  /* Top Status Capsule */
+  /* Top Status Pill */
   .badge {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 5px 12px;
-    font-family: var(--font-mono);
+    gap: 6px;
+    padding: 4px 10px;
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    background: rgba(14, 20, 36, 0.9);
-    border: 1px solid var(--cyber-border);
-    border-radius: 9999px;
+    font-weight: 600;
+    background: var(--card-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
     color: var(--text-secondary);
-    text-transform: uppercase;
-    transition: all 0.2s ease;
+    transition: all 0.2s var(--ease-out);
   }
 
   .badge.connected {
-    background: rgba(0, 255, 102, 0.14);
-    border-color: var(--cyber-green);
-    color: var(--cyber-green);
-    box-shadow: 0 0 14px rgba(0, 255, 102, 0.35);
+    background: rgba(48, 209, 88, 0.14);
+    border-color: rgba(48, 209, 88, 0.3);
+    color: var(--apple-green);
   }
 
   .dot {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background: var(--text-dim);
+    background: var(--text-tertiary);
     transition: all 0.2s ease;
   }
 
   .badge.connected .dot {
-    background: var(--cyber-green);
-    box-shadow: 0 0 8px var(--cyber-green);
-    animation: cyberPulse 1.6s infinite ease-in-out;
-  }
-
-  @keyframes cyberPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.7; }
+    background: var(--apple-green);
+    box-shadow: 0 0 6px var(--apple-green);
   }
 
   /* --- Scrollable Native Viewport --- */
@@ -190,28 +153,31 @@
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
-    padding: 14px 16px calc(90px + env(safe-area-inset-bottom)) 16px;
+    padding: 16px 16px calc(88px + env(safe-area-inset-bottom)) 16px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    max-width: 600px;
-    margin: 0 auto;
     width: 100%;
   }
 
-  /* --- Cyber Hardware Inset Grouped Cards --- */
+  /* Clean Scrollbar */
+  main.app-viewport::-webkit-scrollbar {
+    width: 4px;
+  }
+  main.app-viewport::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 4px;
+  }
+
+  /* --- Inset Grouped Cards --- */
   .card {
-    background: var(--cyber-surface-card);
-    backdrop-filter: blur(28px) saturate(180%);
-    -webkit-backdrop-filter: blur(28px) saturate(180%);
-    border: 1px solid var(--cyber-border);
-    border-radius: 20px;
-    padding: 18px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), inset 0 0 20px rgba(0, 240, 255, 0.03);
-    position: relative;
+    gap: 12px;
     user-select: none;
     -webkit-user-select: none;
   }
@@ -220,66 +186,37 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(0, 240, 255, 0.12);
-    padding-bottom: 8px;
+    padding-bottom: 2px;
   }
 
   .card-title {
-    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 800;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--cyber-cyan);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
   }
 
-  .card-title::before {
-    content: "//";
-    color: var(--cyber-pink);
-  }
-
-  /* --- Watch Hero Centerpiece Stage --- */
+  /* --- Clean Watch Face Hero --- */
   .watch-hero {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 6px 0;
+    padding: 8px 0;
     position: relative;
   }
 
   .watch-case {
-    width: 196px;
-    height: 196px;
+    width: 180px;
+    height: 180px;
     border-radius: 50%;
     position: relative;
-    background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.09) 0%, rgba(9, 13, 26, 0.96) 70%, #030408 100%);
-    border: 2px solid rgba(0, 240, 255, 0.45);
-    box-shadow: 
-      0 0 28px rgba(0, 240, 255, 0.28),
-      inset 0 0 30px rgba(0, 240, 255, 0.12),
-      0 14px 44px rgba(0, 0, 0, 0.9);
+    background: radial-gradient(circle at 50% 50%, #151518 0%, #0c0c0e 100%);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .watch-case::before {
-    content: "";
-    position: absolute;
-    inset: -6px;
-    border-radius: 50%;
-    border: 1px dashed rgba(0, 240, 255, 0.35);
-    animation: rotateReticle 45s linear infinite;
-    pointer-events: none;
-  }
-
-  @keyframes rotateReticle {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
   }
 
   .rings-svg {
@@ -299,8 +236,7 @@
   .ring-bar {
     fill: none;
     stroke-linecap: round;
-    transition: stroke-dashoffset 900ms cubic-bezier(0.2, 0.8, 0.2, 1);
-    filter: drop-shadow(0 0 6px currentColor);
+    transition: stroke-dashoffset 900ms var(--ease-out);
   }
 
   .watch-content {
@@ -313,21 +249,18 @@
   }
 
   .watch-time {
-    font-family: var(--font-mono);
     font-size: 32px;
-    font-weight: 900;
-    letter-spacing: -0.02em;
+    font-weight: 700;
+    letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
     color: #fff;
-    text-shadow: 0 0 14px var(--cyber-cyan), 0 0 2px #fff;
   }
 
   .watch-label {
-    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.12em;
-    color: var(--cyber-cyan);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
     text-transform: uppercase;
   }
 
@@ -335,20 +268,16 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-    padding: 3px 9px;
-    border-radius: 9999px;
-    background: rgba(0, 255, 102, 0.14);
-    border: 1px solid rgba(0, 255, 102, 0.45);
-    color: var(--cyber-green);
-    margin-top: 4px;
-    box-shadow: 0 0 8px rgba(0, 255, 102, 0.25);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--card-elevated);
+    color: var(--text-secondary);
+    margin-top: 3px;
   }
 
-  /* --- 4-Metric Sensor Grid --- */
+  /* --- 4-Metric Grid --- */
   .metrics-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -356,162 +285,142 @@
   }
 
   .metric-card {
-    background: rgba(14, 19, 36, 0.92);
-    border: 1px solid var(--cyber-border);
-    border-radius: 16px;
-    padding: 14px;
+    background: var(--card-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
-    position: relative;
-    box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.04);
+    gap: 3px;
   }
 
   .metric-top {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.08em;
+    font-size: 11px;
+    font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
+    letter-spacing: 0.03em;
   }
 
   .metric-val {
-    font-family: var(--font-mono);
     font-size: 24px;
-    font-weight: 900;
+    font-weight: 700;
     letter-spacing: -0.02em;
     color: #fff;
     font-variant-numeric: tabular-nums;
   }
 
-  #sport-steps { color: var(--cyber-cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); }
-  #sport-dist { color: var(--cyber-yellow); text-shadow: 0 0 10px rgba(255, 230, 0, 0.6); }
-  #sport-kcal { color: var(--cyber-pink); text-shadow: 0 0 10px rgba(255, 0, 85, 0.6); }
-  #sport-dur { color: var(--cyber-green); text-shadow: 0 0 10px rgba(0, 255, 102, 0.6); }
+  #sport-steps { color: var(--apple-green); }
+  #sport-dist { color: var(--apple-blue); }
+  #sport-kcal { color: var(--apple-red); }
+  #sport-dur { color: var(--apple-yellow); }
 
-  /* --- Tactile iOS Hardware Buttons --- */
+  /* --- Clean Apple iOS Buttons --- */
   button, .button {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
+    font-weight: 600;
     padding: 11px 16px;
-    border-radius: 12px;
-    border: 1px solid var(--cyber-border);
-    background: rgba(16, 23, 44, 0.95);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--card-elevated);
     color: #fff;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 6px;
     user-select: none;
     -webkit-user-select: none;
     text-decoration: none;
-    text-transform: uppercase;
     touch-action: manipulation;
-    transition: transform 80ms ease-out, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    transition: transform 80ms var(--ease-out), background 120ms ease;
   }
 
   button:active, .button:active {
-    transform: scale(0.96);
+    transform: scale(0.97);
   }
 
   button.primary, .button.primary {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 112, 243, 0.4) 100%);
-    border: 1px solid var(--cyber-cyan);
-    color: var(--cyber-cyan);
-    box-shadow: 0 0 18px rgba(0, 240, 255, 0.35), inset 0 0 10px rgba(0, 240, 255, 0.15);
-    text-shadow: 0 0 6px var(--cyber-cyan);
+    background: var(--apple-blue);
+    border-color: transparent;
+    color: #fff;
+    font-weight: 600;
   }
 
   button.primary:active {
-    background: var(--cyber-cyan);
-    color: #04060c;
-    text-shadow: none;
+    background: var(--apple-blue-hover);
   }
 
   button.danger {
-    background: rgba(255, 0, 85, 0.14);
-    border: 1px solid var(--cyber-pink);
-    color: var(--cyber-pink);
-    box-shadow: 0 0 14px rgba(255, 0, 85, 0.25);
-    text-shadow: 0 0 6px var(--cyber-pink);
+    background: rgba(255, 69, 58, 0.12);
+    border-color: rgba(255, 69, 58, 0.25);
+    color: var(--apple-red);
+  }
+
+  button.danger:active {
+    background: rgba(255, 69, 58, 0.25);
   }
 
   button:disabled, .button:disabled {
     opacity: 0.35;
     cursor: not-allowed;
-    border-color: rgba(255, 255, 255, 0.1) !important;
-    box-shadow: none !important;
     transform: none !important;
   }
 
   .chip {
     padding: 6px 12px;
-    font-size: 11px;
-    font-weight: 700;
-    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: var(--radius-full);
   }
 
-  /* --- iOS Form Inputs --- */
+  /* --- Inputs --- */
   input, select, textarea {
-    font-family: var(--font-mono);
-    font-size: 16px; /* Native iOS prevents zoom */
+    font-family: var(--font-sans);
+    font-size: 16px; /* Native iOS prevents auto-zoom */
     width: 100%;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--cyber-border);
-    background: rgba(8, 12, 24, 0.95);
+    padding: 11px 13px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+    background: var(--card-elevated);
     color: #fff;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
-    transition: all 0.16s ease;
+    transition: border-color 0.15s ease;
   }
 
   input:focus, select:focus, textarea:focus {
     outline: none;
-    border-color: var(--cyber-cyan);
-    box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
+    border-color: var(--apple-blue);
   }
 
   label {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.06em;
+    font-size: 12px;
+    font-weight: 600;
     color: var(--text-secondary);
-    text-transform: uppercase;
     display: flex;
     flex-direction: column;
     gap: 6px;
   }
 
-  /* --- FLOATING DYNAMIC ISLAND CYBER-DOCK (BOTTOM TAB BAR) --- */
+  /* --- Clean iOS Bottom Tab Bar --- */
   nav.bottom-dock {
     position: fixed;
-    bottom: max(14px, env(safe-area-inset-bottom));
-    left: 16px;
-    right: 16px;
-    max-width: 480px;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-width: 460px;
     margin: 0 auto;
     z-index: 1000;
-    background: rgba(9, 13, 26, 0.88);
-    backdrop-filter: blur(32px) saturate(220%);
-    -webkit-backdrop-filter: blur(32px) saturate(220%);
-    border: 1px solid rgba(0, 240, 255, 0.35);
-    border-radius: 9999px;
-    padding: 5px 6px;
-    box-shadow: 
-      0 12px 36px rgba(0, 0, 0, 0.85),
-      0 0 20px rgba(0, 240, 255, 0.20),
-      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    background: rgba(18, 18, 20, 0.88);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border-top: 1px solid var(--border-color);
+    padding: 6px 16px max(8px, env(safe-area-inset-bottom)) 16px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 4px;
   }
 
   .dock-btn {
@@ -519,60 +428,48 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 2px;
-    padding: 8px 4px;
-    border-radius: 9999px;
+    gap: 3px;
+    padding: 4px 0;
     border: none;
     background: transparent;
     color: var(--text-secondary);
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
+    font-weight: 500;
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
-    transition: transform 80ms ease-out, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+    transition: color 120ms ease;
   }
 
   .dock-btn:active {
-    transform: scale(0.94);
+    transform: scale(0.95);
   }
 
   .dock-btn span.dock-icon {
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1;
-    transition: transform 160ms ease;
   }
 
   .dock-btn.active {
-    background: linear-gradient(135deg, var(--cyber-cyan) 0%, #0088ff 100%);
-    color: #030509;
-    font-weight: 900;
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
+    color: var(--apple-blue);
+    font-weight: 600;
   }
 
-  .dock-btn.active span.dock-icon {
-    transform: scale(1.1);
-  }
-
-  /* Log Terminal */
+  /* Clean Log Terminal */
   pre#log {
-    background: #03050a;
-    border: 1px solid var(--cyber-border);
-    border-radius: 14px;
-    padding: 12px 14px;
+    background: #111113;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: #00ff88;
-    text-shadow: 0 0 6px rgba(0, 255, 136, 0.6);
-    height: 180px;
+    color: #30d158;
+    height: 170px;
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-all;
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 240, 255, 0.1);
   }
 
   .presets-row {
@@ -591,52 +488,48 @@
   .emoji-btn {
     padding: 8px 4px;
     font-size: 18px;
-    background: rgba(14, 20, 36, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.2);
-    border-radius: 10px;
+    background: var(--card-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
     cursor: pointer;
   }
 
   .row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
   .bytes-bar {
     font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 700;
-    color: var(--cyber-yellow);
-    padding: 3px 8px;
-    background: rgba(255, 230, 0, 0.12);
-    border: 1px solid rgba(255, 230, 0, 0.4);
-    border-radius: 9999px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    padding: 2px 8px;
+    background: var(--card-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-full);
   }
 
   .step-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 10px 14px;
-    background: rgba(10, 14, 26, 0.85);
-    border: 1px solid rgba(0, 240, 255, 0.15);
-    border-radius: 12px;
-    font-family: var(--font-mono);
-    font-size: 11px;
+    padding: 10px 12px;
+    background: var(--card-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    font-size: 12px;
   }
 
   .step-row.done {
-    border-color: var(--cyber-green);
-    background: rgba(0, 255, 102, 0.08);
-    color: var(--cyber-green);
+    border-color: rgba(48, 209, 88, 0.4);
+    color: var(--apple-green);
   }
 
   .step-row.active {
-    border-color: var(--cyber-cyan);
-    background: rgba(0, 240, 255, 0.1);
-    color: var(--cyber-cyan);
-    box-shadow: 0 0 12px rgba(0, 240, 255, 0.3);
+    border-color: var(--apple-blue);
+    color: var(--apple-blue);
   }
 
   .step-badge {
@@ -645,27 +538,26 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-weight: 900;
+    font-weight: 700;
     border: 1px solid currentColor;
-    border-radius: 6px;
+    border-radius: 50%;
+    font-size: 11px;
   }
 
   .guide-tab {
-    font-family: var(--font-mono);
     font-size: 11px;
-    font-weight: 700;
-    padding: 7px 12px;
+    font-weight: 600;
+    padding: 6px 12px;
     background: transparent;
-    border: 1px solid rgba(0, 240, 255, 0.2);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
   }
 
   .guide-tab.active {
-    background: var(--cyber-cyan);
-    color: #03050a;
-    border-color: var(--cyber-cyan);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+    background: var(--card-surface);
+    color: #fff;
+    border-color: var(--border-light);
   }
 
   .hidden {
@@ -685,221 +577,215 @@
 <body>
 
 <div class="app-shell">
-  <!-- Fixed Top Header / Dynamic Island Status Bar -->
+  <!-- Fixed Top Header -->
   <header class="ios-header">
     <div class="brand">
       <img src="icon.svg" alt="boAt FLASH">
       <div class="brand-text">
         <h1>boAt FLASH</h1>
-        <span>REV-K6 TACTICAL OS</span>
+        <span id="name">Smartwatch Connected</span>
       </div>
     </div>
 
-    <!-- Dynamic Status Capsule -->
+    <!-- Status Capsule -->
     <div id="conn-badge" class="badge">
       <span class="dot"></span>
-      <span id="conn-state-text">STANDBY</span>
+      <span id="conn-state-text">Disconnected</span>
     </div>
   </header>
 
-  <!-- Scrollable Native iOS Viewport -->
+  <!-- Scrollable Native Viewport -->
   <main class="app-viewport">
-    <!-- iOS Error 2 Alert Banner -->
-    <div id="error2-alert" class="card hidden" style="border-color:var(--cyber-pink); background:rgba(255,0,85,0.12); box-shadow:0 0 20px rgba(255,0,85,0.3);">
-      <div style="display:flex; align-items:flex-start; gap:12px;">
-        <span style="font-size:22px; line-height:1;">⚠️</span>
+    <!-- iOS Bluetooth Notice Banner -->
+    <div id="error2-alert" class="card hidden" style="border-color:rgba(255,69,58,0.4); background:rgba(255,69,58,0.1);">
+      <div style="display:flex; align-items:flex-start; gap:10px;">
+        <span style="font-size:20px; line-height:1;">⚠️</span>
         <div style="flex:1;">
-          <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-pink); font-size:13px; text-transform:uppercase; letter-spacing:0.06em;">iOS Connection Rejected (Error 2)</div>
-          <p style="font-size:12px; color:#f0f6fc; margin:4px 0 10px; line-height:1.4;">
-            iOS cannot connect while FLASH is paired in iPhone Bluetooth settings.
+          <div style="font-weight:700; color:var(--apple-red); font-size:13px;">iOS Connection Note</div>
+          <p style="font-size:12px; color:#f0f6fc; margin:3px 0 8px; line-height:1.4;">
+            If connection fails, "Forget Device" in iPhone Settings > Bluetooth, then reconnect here.
           </p>
-          <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <button type="button" id="error2-retry-btn" class="primary" style="padding:6px 12px; font-size:11px;">Retry Scan</button>
-            <button type="button" id="error2-dismiss-btn" style="padding:6px 12px; font-size:11px;">Dismiss</button>
+          <div style="display:flex; gap:8px;">
+            <button type="button" id="error2-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">Retry Scan</button>
+            <button type="button" id="error2-dismiss-btn" style="padding:5px 12px; font-size:11px;">Dismiss</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Brave Browser Alert Banner -->
-    <div id="brave-alert" class="card hidden" style="border-color:var(--cyber-yellow); background:rgba(255,230,0,0.1);">
-      <div style="display:flex; align-items:flex-start; gap:12px;">
+    <!-- Brave Browser Notice Banner -->
+    <div id="brave-alert" class="card hidden" style="border-color:rgba(255,214,10,0.4); background:rgba(255,214,10,0.1);">
+      <div style="display:flex; align-items:flex-start; gap:10px;">
         <span style="font-size:20px; line-height:1;">🦁</span>
         <div style="flex:1;">
-          <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-yellow); font-size:12px; text-transform:uppercase;">Brave Shields Flag Required</div>
-          <div style="display:flex; gap:8px; margin-top:8px;">
+          <div style="font-weight:700; color:var(--apple-yellow); font-size:12px;">Brave Bluetooth Flag Required</div>
+          <div style="display:flex; gap:8px; margin-top:6px;">
             <button type="button" id="copy-brave-direct" class="chip primary">Copy Flag Link</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ================= SECTION 1: DASHBOARD / TELEMETRY ================= -->
+    <!-- ================= SECTION 1: DASHBOARD / ACTIVITY ================= -->
     <div id="section-dash" class="card">
-      <div class="card-header">
-        <span class="card-title">Watch Telemetry Matrix</span>
-        <span style="font-family:var(--font-mono); font-size:10px; color:var(--cyber-cyan); letter-spacing:0.08em;">NODE 0xF618</span>
-      </div>
-
-      <!-- Cyber Arc Reactor Hero Centerpiece -->
+      <!-- Clean Apple Watch Face Centerpiece -->
       <div class="watch-hero">
         <div class="watch-case">
           <svg class="rings-svg" viewBox="0 0 170 170">
             <!-- Step Activity Ring (Outer) -->
             <circle class="ring-bg" cx="85" cy="85" r="74" stroke-width="7"></circle>
-            <circle id="ring-steps" class="ring-bar" cx="85" cy="85" r="74" stroke-width="7" stroke="#00f0ff" stroke-dasharray="465" stroke-dashoffset="465"></circle>
+            <circle id="ring-steps" class="ring-bar" cx="85" cy="85" r="74" stroke-width="7" stroke="#30d158" stroke-dasharray="465" stroke-dashoffset="465"></circle>
             <!-- Battery Ring (Inner) -->
             <circle class="ring-bg" cx="85" cy="85" r="62" stroke-width="6"></circle>
-            <circle id="ring-bat" class="ring-bar" cx="85" cy="85" r="62" stroke-width="6" stroke="#ff0055" stroke-dasharray="390" stroke-dashoffset="390"></circle>
+            <circle id="ring-bat" class="ring-bar" cx="85" cy="85" r="62" stroke-width="6" stroke="#0a84ff" stroke-dasharray="390" stroke-dashoffset="390"></circle>
           </svg>
 
           <div class="watch-content">
             <div class="watch-time" id="watch-clock">10:09</div>
-            <div class="watch-label"><b id="name">boAt FLASH</b></div>
+            <div class="watch-label">FLASH</div>
             <div class="battery-pill">
-              <span>⚡ CELL</span>
+              <span>🔋</span>
               <span id="bat">–</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Primary Cyber Action Controls -->
+      <!-- Primary Action Controls -->
       <div class="row" style="justify-content:center;">
-        <button id="connect" class="primary" style="flex:1; max-width:260px; font-size:14px; font-weight:800;">⚡ JACK IN // CONNECT</button>
-        <button id="disconnect" class="danger" disabled>ABORT</button>
+        <button id="connect" class="primary" style="flex:1; max-width:240px; font-size:14px; font-weight:600;">Connect Watch</button>
+        <button id="disconnect" class="danger" disabled>Disconnect</button>
       </div>
 
-      <!-- Quick Tool Action Pills -->
+      <!-- Quick Action Controls -->
       <div class="row" style="justify-content:center; gap:8px; flex-wrap:wrap;">
-        <button data-act="sport" disabled title="Request step and activity sync from watch">👟 Sync Steps</button>
-        <button data-act="time" disabled title="Sync clock with this device">⏱️ Sync Clock</button>
-        <button data-act="find" disabled title="Vibrate and ring the watch">🔔 Ping Watch</button>
-        <button data-act="info" disabled title="Query firmware info">ℹ️ Sys Info</button>
+        <button data-act="sport" disabled title="Sync steps from watch">👟 Sync Steps</button>
+        <button data-act="time" disabled title="Sync clock with this device">🕒 Sync Clock</button>
+        <button data-act="find" disabled title="Find the watch">🔔 Find Watch</button>
+        <button data-act="info" disabled title="Query watch info">ℹ️ Info</button>
       </div>
 
-      <!-- Activity & Sensors 4-Grid -->
+      <!-- Activity 4-Metric Grid -->
       <div class="metrics-grid" id="telemetry-card">
         <div class="metric-card">
           <div class="metric-top">
-            <span>01 // Steps Kinetics</span>
+            <span>Steps</span>
             <span>👟</span>
           </div>
           <div class="metric-val" id="sport-steps">–</div>
         </div>
         <div class="metric-card">
           <div class="metric-top">
-            <span>02 // Traverse Dist (m)</span>
+            <span>Distance (m)</span>
             <span>📍</span>
           </div>
           <div class="metric-val" id="sport-dist">–</div>
         </div>
         <div class="metric-card">
           <div class="metric-top">
-            <span>03 // Metabolic Burn</span>
+            <span>Calories</span>
             <span>🔥</span>
           </div>
           <div class="metric-val" id="sport-kcal">–</div>
         </div>
         <div class="metric-card">
           <div class="metric-top">
-            <span>04 // Active Chrono</span>
+            <span>Active Time</span>
             <span>⏱️</span>
           </div>
           <div class="metric-val" id="sport-dur">–</div>
         </div>
       </div>
 
-      <!-- Neural Health Matrix / Apple Health Sync Card -->
-      <div class="card" id="health-card" style="margin-top:6px; background:rgba(9, 14, 28, 0.95); border:1px solid var(--cyber-border); padding:14px;">
+      <!-- Apple Health Sync Card -->
+      <div class="card" id="health-card" style="margin-top:4px; background:var(--card-elevated); border:1px solid var(--border-color); padding:14px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:10px;">
           <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:22px; line-height:1; filter:drop-shadow(0 0 8px var(--cyber-pink));">❤️</span>
+            <span style="font-size:20px; line-height:1;">❤️</span>
             <div>
-              <div style="font-family:var(--font-mono); font-weight:800; font-size:12px; color:#fff; letter-spacing:0.06em;" id="health-title">Neural Health Matrix</div>
-              <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);" id="health-status">Apple Health Link Ready</div>
+              <div style="font-weight:700; font-size:13px; color:#fff;" id="health-title">Apple Health</div>
+              <div style="font-size:11px; color:var(--text-secondary);" id="health-status">Sync activity to Health app</div>
             </div>
           </div>
           <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button id="btn-health-shortcut" class="chip primary" style="font-size:11px; padding:7px 14px; cursor:pointer; background:linear-gradient(135deg, #00f0ff 0%, #0070f3 100%); color:#04060c; font-weight:900;">
-              ⚡ SYNC TO APPLE HEALTH
+            <button id="btn-health-shortcut" class="chip primary" style="font-size:11px; padding:6px 12px; cursor:pointer;">
+              Sync to Health
             </button>
             <button id="btn-health-sync" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
-              🔄 Direct HK
+              Direct Sync
             </button>
-            <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer; background:rgba(255,230,0,0.12); border-color:rgba(255,230,0,0.4); color:var(--cyber-yellow);">
-              ⬇️ CSV
+            <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
+              Export CSV
             </button>
           </div>
         </div>
-        <p id="health-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px; font-family:var(--font-mono);">
-          Tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to write steps into Apple Health via native Shortcuts bridge.
+        <p id="health-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px;">
+          Tap <b>Sync to Health</b> to log steps into Apple Health via Shortcuts bridge.
         </p>
 
-        <!-- Collapsible 30-sec Setup Guide -->
-        <div style="margin-bottom:8px;">
-          <button type="button" id="btn-toggle-shortcut-guide" class="chip" style="font-size:10px; padding:4px 8px; background:rgba(0,240,255,0.08); border-color:rgba(0,240,255,0.3); color:var(--cyber-cyan); width:100%; justify-content:space-between;">
-            <span>ℹ️ 30-Sec Apple Health Setup Guide</span>
+        <!-- 30-sec Setup Guide -->
+        <div style="margin-bottom:6px;">
+          <button type="button" id="btn-toggle-shortcut-guide" class="chip" style="font-size:10px; padding:4px 8px; background:transparent; border-color:var(--border-color); color:var(--apple-blue); width:100%; justify-content:space-between;">
+            <span>Shortcuts Bridge Setup Guide</span>
             <span id="guide-arrow">▼</span>
           </button>
-          <div id="shortcut-setup-box" class="hidden" style="margin-top:6px; padding:10px; background:#04060a; border:1px solid rgba(0,240,255,0.25); font-family:var(--font-mono); font-size:11px; line-height:1.5; color:#d0e0ff;">
-            <div style="color:var(--cyber-yellow); font-weight:800; margin-bottom:4px;">// HOW IT WORKS:</div>
-            <p style="margin-bottom:6px; color:var(--text-secondary);">Apple blocks direct background sync for sideloaded apps. The native solution is Apple's built-in Shortcuts app:</p>
+          <div id="shortcut-setup-box" class="hidden" style="margin-top:6px; padding:10px; background:#121214; border:1px solid var(--border-color); border-radius:8px; font-size:11px; line-height:1.5; color:#d0d0d5;">
+            <p style="margin-bottom:6px; color:var(--text-secondary);">Because Apple blocks direct background write for free sideloaded apps, a 1-action Apple Shortcut logs steps into Health:</p>
             <ol style="padding-left:18px; margin-bottom:8px; display:flex; flex-direction:column; gap:4px;">
               <li>Tap <button type="button" id="btn-open-shortcuts" class="chip primary" style="display:inline-flex; padding:2px 8px; font-size:10px; margin:0 4px;">Open Shortcuts App</button></li>
-              <li>Tap <b>+</b> (New Shortcut) & rename it to: <b style="color:var(--cyber-cyan);">FlashSync</b></li>
-              <li>Add 1 action: Search <b style="color:var(--cyber-yellow);">"Log Health Sample"</b></li>
-              <li>Set Value: <b style="color:#fff;">Shortcut Input</b>, Type: <b style="color:#fff;">Step Count</b></li>
-              <li>Done! Now tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to log watch steps anytime!</li>
+              <li>Tap <b>+</b> and name it <b>FlashSync</b>.</li>
+              <li>Add action: Search <b>"Log Health Sample"</b>.</li>
+              <li>Set Value to <b>Shortcut Input</b>, Type to <b>Step Count</b>.</li>
+              <li>Tap Done. Now tapping <b>Sync to Health</b> logs steps instantly!</li>
             </ol>
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary); border-top:1px solid rgba(0,240,255,0.15); padding-top:8px;">
-          <span style="font-family:var(--font-mono);">Auto-Sync Biometrics</span>
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary); border-top:1px solid var(--border-color); padding-top:8px;">
+          <span>Auto-sync steps</span>
           <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
             <input type="checkbox" id="health-auto-sync" checked style="width:auto; cursor:pointer;">
-            <span style="font-size:10px; color:var(--cyber-cyan); font-family:var(--font-mono);">[ ENABLED ]</span>
+            <span style="font-size:10px; color:var(--text-secondary);">Enabled</span>
           </label>
         </div>
       </div>
 
-      <!-- Hardware Meta -->
-      <div class="row" style="justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); padding:4px 4px 0;">
-        <span>FW: <b id="fw" style="color:var(--cyber-cyan); font-weight:700;">–</b></span>
-        <span>MAC: <b id="mac-display" style="color:var(--cyber-cyan); font-weight:700;">08:7C:85:03:12:0F</b></span>
+      <!-- Hardware Info -->
+      <div class="row" style="justify-content:space-between; font-size:11px; color:var(--text-secondary); padding:4px 4px 0;">
+        <span>Firmware: <b id="fw" style="color:#fff; font-weight:600;">–</b></span>
+        <span>MAC: <b id="mac-display" style="color:#fff; font-weight:600;">08:7C:85:03:12:0F</b></span>
       </div>
 
-      <label style="flex-direction:row; align-items:center; gap:8px; cursor:pointer; font-size:11px; color:var(--text-secondary); margin-top:4px;">
-        <input type="checkbox" id="scan-all" style="width:auto;"> Scan all nearby BLE nodes
+      <label style="flex-direction:row; align-items:center; gap:8px; cursor:pointer; font-size:11px; color:var(--text-secondary); margin-top:2px;">
+        <input type="checkbox" id="scan-all" style="width:auto;"> Show all nearby Bluetooth devices
       </label>
     </div>
 
-    <!-- ================= SECTION 2: PUSH NOTIFICATIONS / COMMS ================= -->
+    <!-- ================= SECTION 2: NOTIFICATIONS ================= -->
     <div id="section-notif" class="card hidden">
       <div class="card-header">
-        <span class="card-title">Comms Transmitter Studio</span>
+        <span class="card-title">Send Notification</span>
         <span id="nbytes" class="bytes-bar">0 / 150 B</span>
       </div>
 
       <div class="presets-row">
-        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">PRESETS:</span>
+        <span style="font-size:11px; color:var(--text-secondary);">Presets:</span>
         <button type="button" class="chip" id="preset-call">📞 Call</button>
         <button type="button" class="chip" id="preset-wa">💬 WhatsApp</button>
         <button type="button" class="chip" id="preset-alert">🚨 Alert</button>
         <button type="button" class="chip" id="preset-emoji">🎉 Emoji</button>
       </div>
 
-      <label>Message Title
-        <input id="ntitle" value="Hello 👋" maxlength="60" placeholder="Title (≤ 52 bytes)">
+      <label>Title
+        <input id="ntitle" value="Hello 👋" maxlength="60" placeholder="Notification Title">
       </label>
 
-      <label>Message Payload
-        <textarea id="nbody" rows="3" maxlength="200" placeholder="Notification body content...">Hello from your laptop 👋🔥😎 it works! ✅</textarea>
+      <label>Message
+        <textarea id="nbody" rows="3" maxlength="200" placeholder="Notification body...">Hello from your iPhone! ✅</textarea>
       </label>
 
-      <div class="row" style="gap:12px;">
-        <label style="flex:1;">Stream Category
+      <div class="row" style="gap:10px;">
+        <label style="flex:1;">Category
           <select id="nkind">
             <option value="call">📞 Phone Call (1)</option>
             <option value="msg" selected>💬 Short Message (2)</option>
@@ -925,15 +811,15 @@
         <button type="button" class="emoji-btn">🕒</button>
       </div>
 
-      <button id="send-btn" class="primary" style="margin-top:8px;" data-act="notify" disabled>
-        🚀 TRANSMIT PACKET TO WATCH
+      <button id="send-btn" class="primary" style="margin-top:6px;" data-act="notify" disabled>
+        Send to Watch
       </button>
     </div>
 
-    <!-- ================= SECTION 3: SYSTEM DIAGNOSTICS ================= -->
+    <!-- ================= SECTION 3: DIAGNOSTICS ================= -->
     <div id="section-diag" class="card hidden">
       <div class="card-header">
-        <span class="card-title">Cyber-Link Diagnostics</span>
+        <span class="card-title">Connection Diagnostics</span>
         <div style="display:flex; gap:6px;">
           <button id="copy-log" class="chip" style="padding:3px 9px;">Copy Log</button>
           <button id="clear" class="chip" style="padding:3px 9px;">Clear</button>
@@ -944,78 +830,74 @@
       <div id="conn-steps-box" style="display:flex; flex-direction:column; gap:6px;">
         <div class="step-row" id="st-scan">
           <span class="step-badge">1</span>
-          <span>BLE Scan & Device Discovery</span>
+          <span>Bluetooth Discovery</span>
         </div>
         <div class="step-row" id="st-gatt">
           <span class="step-badge">2</span>
-          <span>GATT Server Connection</span>
+          <span>GATT Connection</span>
         </div>
         <div class="step-row" id="st-svc">
           <span class="step-badge">3</span>
-          <span>Service 0xF618 & Pipe Resolution</span>
+          <span>Service 0xF618 Pipes</span>
         </div>
         <div class="step-row" id="st-ready">
           <span class="step-badge">4</span>
-          <span>Encrypted Protocol Ready</span>
+          <span>Communication Ready</span>
         </div>
       </div>
 
-      <div id="diag-error-tip" class="hidden" style="padding:10px; background:rgba(255,0,85,0.12); border:1px solid var(--cyber-pink); border-radius:12px;">
-        <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-pink); font-size:12px;">LINK FAILURE DETECTED</div>
-        <div id="diag-error-text" style="font-size:11px; margin:4px 0 8px; font-family:var(--font-mono);">Error details</div>
-        <button type="button" id="diag-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">RETRY LINK</button>
+      <div id="diag-error-tip" class="hidden" style="padding:10px; background:rgba(255,69,58,0.12); border:1px solid rgba(255,69,58,0.3); border-radius:10px;">
+        <div style="font-weight:700; color:var(--apple-red); font-size:12px;">Connection Issue Detected</div>
+        <div id="diag-error-text" style="font-size:11px; margin:4px 0 8px; color:var(--text-secondary);">Details</div>
+        <button type="button" id="diag-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">Retry Connection</button>
       </div>
 
-      <!-- Platform Setup Guides -->
-      <div class="card" id="guide-card" style="padding:12px; background:rgba(6,10,20,0.9);">
-        <div style="display:flex; gap:4px; margin-bottom:10px; flex-wrap:wrap;">
+      <!-- Platform Guides -->
+      <div class="card" id="guide-card" style="padding:12px; background:var(--card-elevated);">
+        <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
           <button type="button" class="guide-tab active" id="tab-btn-ios">iOS Setup</button>
           <button type="button" class="guide-tab" id="tab-btn-android">Android</button>
           <button type="button" class="guide-tab" id="tab-btn-brave">Brave</button>
           <button type="button" class="guide-tab" id="tab-btn-desktop">Desktop</button>
         </div>
 
-        <div class="guide-content" id="panel-ios" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+        <div class="guide-content" id="panel-ios" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
           <p>1. Ensure iPhone Bluetooth is ON in Control Center.</p>
           <p>2. If error occurs, "Forget Device" in iOS Bluetooth settings then reconnect in this app.</p>
-          <p>3. Bluefy or Capacitor iOS shell enables full WebBluetooth support.</p>
+          <p>3. Bluefy or native iOS app enables full WebBluetooth support.</p>
         </div>
 
-        <div class="guide-content hidden" id="panel-android" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+        <div class="guide-content hidden" id="panel-android" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
           <p>1. Chrome or Edge for Android supports WebBluetooth natively.</p>
           <p>2. Location & Nearby Devices permissions must be Granted.</p>
         </div>
 
-        <div class="guide-content hidden" id="panel-brave" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+        <div class="guide-content hidden" id="panel-brave" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
           <p>Enable WebBluetooth flag at chrome://flags/#enable-web-bluetooth</p>
           <button type="button" id="copy-brave-flag-guide" class="chip" style="margin-top:6px;">Copy Flag Link</button>
         </div>
 
-        <div class="guide-content hidden" id="panel-desktop" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+        <div class="guide-content hidden" id="panel-desktop" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
           <p>Native Chrome, Edge, and Opera on macOS / Windows / Linux work out-of-the-box.</p>
         </div>
       </div>
 
-      <!-- Packet Log Terminal -->
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-        <span style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);">STREAM: BLE_SYS_LOG</span>
-      </div>
-      <pre id="log" placeholder="Packet stream will materialize here..."></pre>
+      <pre id="log" placeholder="Bluetooth traffic will appear here..."></pre>
     </div>
   </main>
 
-  <!-- FLOATING DYNAMIC ISLAND CYBER-DOCK (BOTTOM NAVIGATION BAR) -->
+  <!-- Clean iOS Bottom Tab Bar -->
   <nav class="bottom-dock">
     <button type="button" class="dock-btn active" id="btn-tab-dash">
       <span class="dock-icon">⌚</span>
-      <span>Telemetry</span>
+      <span>Activity</span>
     </button>
     <button type="button" class="dock-btn" id="btn-tab-notif">
       <span class="dock-icon">💬</span>
-      <span>Comms</span>
+      <span>Messages</span>
     </button>
     <button type="button" class="dock-btn" id="btn-tab-diag">
-      <span class="dock-icon">⚡</span>
+      <span class="dock-icon">⚙️</span>
       <span>Diagnostics</span>
     </button>
   </nav>
