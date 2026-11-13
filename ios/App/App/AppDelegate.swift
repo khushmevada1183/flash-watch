@@ -15,11 +15,11 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
     public let identifier = "HealthKitPlugin"
     public let jsName = "HealthKit"
     public let pluginMethods: [CAPPluginMethod] = [
-        CAPPluginMethod(name: "isAvailable", returnType: CAPPluginMethodTypePromise),
-        CAPPluginMethod(name: "requestAuthorization", returnType: CAPPluginMethodTypePromise),
-        CAPPluginMethod(name: "saveSportRecord", returnType: CAPPluginMethodTypePromise),
-        CAPPluginMethod(name: "saveSportRecords", returnType: CAPPluginMethodTypePromise),
-        CAPPluginMethod(name: "getTodaySteps", returnType: CAPPluginMethodTypePromise)
+        CAPPluginMethod(name: "isAvailable", returnType: "promise"),
+        CAPPluginMethod(name: "requestAuthorization", returnType: "promise"),
+        CAPPluginMethod(name: "saveSportRecord", returnType: "promise"),
+        CAPPluginMethod(name: "saveSportRecords", returnType: "promise"),
+        CAPPluginMethod(name: "getTodaySteps", returnType: "promise")
     ]
 
     private let healthStore = HKHealthStore()
@@ -91,7 +91,6 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
         let syncId = "boat-flash-\(Int(startTimeSec))"
         let metadata: [String: Any] = [
             HKMetadataKeyDeviceManufacturerName: "boAt",
-            HKMetadataKeyDeviceModel: "FLASH",
             HKMetadataKeySyncIdentifier: syncId,
             HKMetadataKeySyncVersion: 1
         ]
@@ -176,7 +175,6 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
             let syncId = "boat-flash-\(Int(startTimeSec))"
             let metadata: [String: Any] = [
                 HKMetadataKeyDeviceManufacturerName: "boAt",
-                HKMetadataKeyDeviceModel: "FLASH",
                 HKMetadataKeySyncIdentifier: syncId,
                 HKMetadataKeySyncVersion: 1
             ]
