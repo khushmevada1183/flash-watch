@@ -13,4 +13,7 @@ ios/App/Podfile.lock
 .agents/
 skills-lock.json
 FlashWatch-iOS-IPA/
+build_artifacts/
+temp_profiles/
+zsign_bin/
 
