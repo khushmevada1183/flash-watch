@@ -48,9 +48,18 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
 
         healthStore.requestAuthorization(toShare: writeTypes, read: readTypes) { success, error in
             if let error = error {
-                call.reject("HealthKit authorization failed: \(error.localizedDescription)")
+                let desc = error.localizedDescription
+                if desc.contains("entitlement") || (error as NSError).code == 4 {
+                    call.resolve([
+                        "authorized": false,
+                        "entitlementMissing": true,
+                        "message": "Personal Apple ID sideloading does not have HealthKit entitlement. Local fitness vault is enabled."
+                    ])
+                    return
+                }
+                call.reject("HealthKit authorization failed: \(desc)")
             } else {
-                call.resolve(["authorized": success])
+                call.resolve(["authorized": success, "entitlementMissing": false])
             }
         }
     }
@@ -122,7 +131,17 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
 
         healthStore.save(samples) { success, error in
             if let error = error {
-                call.reject("Failed to save sport sample to HealthKit: \(error.localizedDescription)")
+                let desc = error.localizedDescription
+                if desc.contains("entitlement") || (error as NSError).code == 4 {
+                    call.resolve([
+                        "saved": false,
+                        "entitlementMissing": true,
+                        "sampleCount": samples.count,
+                        "message": "HealthKit entitlement missing in provisioning profile. Stored to local fitness matrix."
+                    ])
+                    return
+                }
+                call.reject("Failed to save sport sample to HealthKit: \(desc)")
             } else {
                 call.resolve([
                     "saved": success,
@@ -200,7 +219,17 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
 
         healthStore.save(samples) { success, error in
             if let error = error {
-                call.reject("Failed to batch save samples: \(error.localizedDescription)")
+                let desc = error.localizedDescription
+                if desc.contains("entitlement") || (error as NSError).code == 4 {
+                    call.resolve([
+                        "saved": false,
+                        "entitlementMissing": true,
+                        "sampleCount": samples.count,
+                        "message": "HealthKit entitlement missing in provisioning profile. Stored to local fitness matrix."
+                    ])
+                    return
+                }
+                call.reject("Failed to batch save samples: \(desc)")
             } else {
                 call.resolve([
                     "saved": success,
