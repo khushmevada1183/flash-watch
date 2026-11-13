@@ -15,9 +15,9 @@
   :root {
     --cyber-black: #05060b;
     --cyber-abyss: #070913;
-    --cyber-surface: rgba(11, 15, 28, 0.82);
-    --cyber-surface-elevated: rgba(16, 22, 42, 0.92);
-    --cyber-surface-card: rgba(12, 17, 33, 0.85);
+    --cyber-surface: rgba(11, 15, 28, 0.88);
+    --cyber-surface-elevated: rgba(16, 22, 42, 0.95);
+    --cyber-surface-card: rgba(12, 17, 33, 0.90);
     --cyber-cyan: #00f0ff;
     --cyber-cyan-dim: rgba(0, 240, 255, 0.18);
     --cyber-cyan-glow: 0 0 16px rgba(0, 240, 255, 0.55);
@@ -28,15 +28,14 @@
     --cyber-yellow-glow: 0 0 16px rgba(255, 230, 0, 0.55);
     --cyber-green: #00ff66;
     --cyber-green-glow: 0 0 16px rgba(0, 255, 102, 0.55);
-    --cyber-border: rgba(0, 240, 255, 0.24);
+    --cyber-border: rgba(0, 240, 255, 0.25);
     --cyber-border-bright: rgba(0, 240, 255, 0.65);
-    --cyber-border-pink: rgba(255, 0, 85, 0.55);
     --text-primary: #f0f6fc;
     --text-secondary: #859bb8;
     --text-cyan: #00f0ff;
     --text-dim: #4d5b73;
     --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
   }
 
   * {
@@ -46,70 +45,63 @@
     -webkit-tap-highlight-color: transparent;
   }
 
-  body {
+  html, body {
+    height: 100dvh;
+    width: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
     background-color: var(--cyber-black);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+  }
+
+  /* Cyber Grid & Ambient Lighting */
+  body {
     background-image: 
       linear-gradient(rgba(0, 240, 255, 0.04) 1px, transparent 1px),
       linear-gradient(90deg, rgba(0, 240, 255, 0.04) 1px, transparent 1px),
-      radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.14) 0%, transparent 55%),
-      radial-gradient(circle at 100% 100%, rgba(255, 0, 85, 0.09) 0%, transparent 50%),
-      radial-gradient(circle at 0% 80%, rgba(0, 255, 102, 0.06) 0%, transparent 40%);
-    background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%, 100% 100%;
-    color: var(--text-primary);
-    font-family: var(--font-sans);
-    min-height: 100vh;
-    padding-top: max(14px, env(safe-area-inset-top));
-    padding-bottom: max(36px, env(safe-area-inset-bottom));
-    -webkit-font-smoothing: antialiased;
+      radial-gradient(circle at 50% 0%, rgba(0, 240, 255, 0.15) 0%, transparent 60%),
+      radial-gradient(circle at 100% 100%, rgba(255, 0, 85, 0.10) 0%, transparent 50%);
+    background-size: 28px 28px, 28px 28px, 100% 100%, 100% 100%;
     position: relative;
-    overflow-x: hidden;
   }
 
-  /* Cyber CRT Scanlines */
+  /* Subtle CRT Scanline overlay */
   body::before {
     content: "";
     position: fixed;
     inset: 0;
-    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.22) 0px, rgba(0, 0, 0, 0.22) 1px, transparent 1px, transparent 3px);
+    background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.18) 0px, rgba(0, 0, 0, 0.18) 1px, transparent 1px, transparent 3px);
     pointer-events: none;
     z-index: 9999;
-    opacity: 0.55;
+    opacity: 0.5;
   }
 
-  main {
-    max-width: 620px;
-    margin: 0 auto;
-    padding: 0 16px;
+  /* --- Native iOS App Shell --- */
+  .app-shell {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    height: 100dvh;
+    width: 100%;
     position: relative;
-    z-index: 10;
+    overflow: hidden;
   }
 
-  /* --- Top Tactical Cyber Bar --- */
-  header {
+  /* Fixed Top Header / Dynamic Island Status Bar */
+  header.ios-header {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 14px;
-    background: var(--cyber-surface);
-    backdrop-filter: blur(20px) saturate(180%);
-    -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--cyber-border);
-    clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.7), inset 0 0 14px rgba(0, 240, 255, 0.05);
-    position: relative;
-  }
-
-  header::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 20px;
-    right: 20px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--cyber-cyan), transparent);
+    padding: max(10px, env(safe-area-inset-top)) 16px 10px 16px;
+    background: rgba(7, 10, 20, 0.92);
+    backdrop-filter: blur(28px) saturate(200%);
+    -webkit-backdrop-filter: blur(28px) saturate(200%);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.18);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    z-index: 100;
   }
 
   .brand {
@@ -119,37 +111,36 @@
   }
 
   .brand img {
-    width: 30px;
-    height: 30px;
-    border-radius: 4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
     border: 1px solid var(--cyber-cyan);
-    box-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
     object-fit: cover;
   }
 
   .brand-text h1 {
     font-size: 14px;
     font-weight: 800;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     font-family: var(--font-mono);
     color: #fff;
     text-transform: uppercase;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+    text-shadow: 0 0 8px rgba(0, 240, 255, 0.5);
+    line-height: 1.1;
   }
 
   .brand-text span {
     font-size: 10px;
     font-family: var(--font-mono);
     color: var(--cyber-cyan);
-    letter-spacing: 0.06em;
+    letter-spacing: 0.05em;
     display: block;
-    opacity: 0.9;
+    line-height: 1.1;
+    margin-top: 2px;
   }
 
-  /* Cyber Status Badge */
+  /* Top Status Capsule */
   .badge {
     display: inline-flex;
     align-items: center;
@@ -161,14 +152,14 @@
     letter-spacing: 0.06em;
     background: rgba(14, 20, 36, 0.9);
     border: 1px solid var(--cyber-border);
-    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    border-radius: 9999px;
     color: var(--text-secondary);
     text-transform: uppercase;
     transition: all 0.2s ease;
   }
 
   .badge.connected {
-    background: rgba(0, 255, 102, 0.12);
+    background: rgba(0, 255, 102, 0.14);
     border-color: var(--cyber-green);
     color: var(--cyber-green);
     box-shadow: 0 0 14px rgba(0, 255, 102, 0.35);
@@ -189,99 +180,47 @@
   }
 
   @keyframes cyberPulse {
-    0%, 100% { transform: scale(1); opacity: 1; filter: drop-shadow(0 0 2px var(--cyber-green)); }
-    50% { transform: scale(1.3); opacity: 0.7; filter: drop-shadow(0 0 8px var(--cyber-green)); }
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.3); opacity: 0.7; }
   }
 
-  /* --- Cyber Segmented Navigation --- */
-  .segmented-nav {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    background: rgba(10, 14, 28, 0.9);
-    border: 1px solid var(--cyber-border);
-    padding: 3px;
-    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.6);
-    gap: 3px;
-  }
-
-  .nav-pill {
-    padding: 8px 10px;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-    background: transparent;
-    border: none;
-    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
-    cursor: pointer;
-    text-transform: uppercase;
+  /* --- Scrollable Native Viewport --- */
+  main.app-viewport {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 14px 16px calc(90px + env(safe-area-inset-bottom)) 16px;
     display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    transition: all 0.16s ease;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 600px;
+    margin: 0 auto;
+    width: 100%;
   }
 
-  .nav-pill:active {
-    transform: scale(0.97);
-  }
-
-  .nav-pill.active {
-    background: linear-gradient(135deg, var(--cyber-cyan) 0%, #0088ff 100%);
-    color: #030509;
-    font-weight: 800;
-    box-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
-    text-shadow: none;
-  }
-
-  /* --- Cyber Deck Cards --- */
+  /* --- Cyber Hardware Inset Grouped Cards --- */
   .card {
     background: var(--cyber-surface-card);
-    backdrop-filter: blur(24px) saturate(180%);
-    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    backdrop-filter: blur(28px) saturate(180%);
+    -webkit-backdrop-filter: blur(28px) saturate(180%);
     border: 1px solid var(--cyber-border);
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+    border-radius: 20px;
     padding: 18px;
     display: flex;
     flex-direction: column;
     gap: 14px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 0 24px rgba(0, 240, 255, 0.03);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75), inset 0 0 20px rgba(0, 240, 255, 0.03);
     position: relative;
-    transition: border-color 0.2s ease;
-  }
-
-  /* Corner Targeting Accents */
-  .card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 8px;
-    height: 8px;
-    border-top: 2px solid var(--cyber-cyan);
-    border-left: 2px solid var(--cyber-cyan);
-    pointer-events: none;
-  }
-
-  .card::after {
-    content: "";
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    width: 8px;
-    height: 8px;
-    border-bottom: 2px solid var(--cyber-pink);
-    border-right: 2px solid var(--cyber-pink);
-    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .card-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-bottom: 1px solid rgba(0, 240, 255, 0.15);
+    border-bottom: 1px solid rgba(0, 240, 255, 0.12);
     padding-bottom: 8px;
   }
 
@@ -303,60 +242,44 @@
     color: var(--cyber-pink);
   }
 
-  /* --- Cyber Arc Reactor Hero Dial --- */
+  /* --- Watch Hero Centerpiece Stage --- */
   .watch-hero {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 10px 0 6px;
+    padding: 6px 0;
     position: relative;
   }
 
   .watch-case {
-    width: 186px;
-    height: 186px;
+    width: 196px;
+    height: 196px;
     border-radius: 50%;
     position: relative;
-    background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.08) 0%, rgba(9, 13, 26, 0.95) 70%, #030408 100%);
-    border: 2px solid rgba(0, 240, 255, 0.4);
+    background: radial-gradient(circle at 50% 50%, rgba(0, 240, 255, 0.09) 0%, rgba(9, 13, 26, 0.96) 70%, #030408 100%);
+    border: 2px solid rgba(0, 240, 255, 0.45);
     box-shadow: 
-      0 0 24px rgba(0, 240, 255, 0.25),
-      inset 0 0 28px rgba(0, 240, 255, 0.12),
-      0 12px 40px rgba(0, 0, 0, 0.85);
+      0 0 28px rgba(0, 240, 255, 0.28),
+      inset 0 0 30px rgba(0, 240, 255, 0.12),
+      0 14px 44px rgba(0, 0, 0, 0.9);
     display: flex;
     align-items: center;
     justify-content: center;
   }
 
-  /* Rotating HUD reticle notches */
   .watch-case::before {
     content: "";
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-    border: 1px dashed rgba(0, 240, 255, 0.3);
-    animation: rotateReticle 40s linear infinite;
-    pointer-events: none;
-  }
-
-  .watch-case::after {
-    content: "";
-    position: absolute;
-    inset: 6px;
-    border-radius: 50%;
-    border: 1px dotted rgba(255, 0, 85, 0.3);
-    animation: rotateReticleReverse 30s linear infinite;
+    border: 1px dashed rgba(0, 240, 255, 0.35);
+    animation: rotateReticle 45s linear infinite;
     pointer-events: none;
   }
 
   @keyframes rotateReticle {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }
-  }
-
-  @keyframes rotateReticleReverse {
-    from { transform: rotate(360deg); }
-    to { transform: rotate(0deg); }
   }
 
   .rings-svg {
@@ -370,7 +293,7 @@
 
   .ring-bg {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.05);
+    stroke: rgba(255, 255, 255, 0.06);
   }
 
   .ring-bar {
@@ -386,22 +309,22 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    gap: 3px;
   }
 
   .watch-time {
     font-family: var(--font-mono);
-    font-size: 30px;
+    font-size: 32px;
     font-weight: 900;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
     color: #fff;
-    text-shadow: 0 0 12px var(--cyber-cyan), 0 0 2px #fff;
+    text-shadow: 0 0 14px var(--cyber-cyan), 0 0 2px #fff;
   }
 
   .watch-label {
     font-family: var(--font-mono);
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.12em;
     color: var(--cyber-cyan);
@@ -416,16 +339,16 @@
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 0.06em;
-    padding: 2px 8px;
-    clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+    padding: 3px 9px;
+    border-radius: 9999px;
     background: rgba(0, 255, 102, 0.14);
     border: 1px solid rgba(0, 255, 102, 0.45);
     color: var(--cyber-green);
-    margin-top: 3px;
+    margin-top: 4px;
     box-shadow: 0 0 8px rgba(0, 255, 102, 0.25);
   }
 
-  /* --- Cyber Sensor 4-Metric Grid --- */
+  /* --- 4-Metric Sensor Grid --- */
   .metrics-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -433,21 +356,15 @@
   }
 
   .metric-card {
-    background: rgba(14, 19, 36, 0.9);
+    background: rgba(14, 19, 36, 0.92);
     border: 1px solid var(--cyber-border);
-    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
-    padding: 12px 14px;
+    border-radius: 16px;
+    padding: 14px;
     display: flex;
     flex-direction: column;
     gap: 4px;
     position: relative;
     box-shadow: inset 0 0 14px rgba(0, 240, 255, 0.04);
-    transition: all 0.2s ease;
-  }
-
-  .metric-card:hover {
-    border-color: var(--cyber-border-bright);
-    box-shadow: 0 0 16px rgba(0, 240, 255, 0.2), inset 0 0 14px rgba(0, 240, 255, 0.08);
   }
 
   .metric-top {
@@ -464,12 +381,11 @@
 
   .metric-val {
     font-family: var(--font-mono);
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 900;
     letter-spacing: -0.02em;
     color: #fff;
     font-variant-numeric: tabular-nums;
-    text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
   }
 
   #sport-steps { color: var(--cyber-cyan); text-shadow: 0 0 10px rgba(0, 240, 255, 0.6); }
@@ -477,16 +393,16 @@
   #sport-kcal { color: var(--cyber-pink); text-shadow: 0 0 10px rgba(255, 0, 85, 0.6); }
   #sport-dur { color: var(--cyber-green); text-shadow: 0 0 10px rgba(0, 255, 102, 0.6); }
 
-  /* --- Cyberdeck Buttons & Controls --- */
+  /* --- Tactile iOS Hardware Buttons --- */
   button, .button {
     font-family: var(--font-mono);
     font-size: 13px;
     font-weight: 700;
-    letter-spacing: 0.06em;
-    padding: 10px 16px;
-    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    letter-spacing: 0.05em;
+    padding: 11px 16px;
+    border-radius: 12px;
     border: 1px solid var(--cyber-border);
-    background: rgba(16, 23, 44, 0.9);
+    background: rgba(16, 23, 44, 0.95);
     color: #fff;
     cursor: pointer;
     display: inline-flex;
@@ -494,50 +410,37 @@
     justify-content: center;
     gap: 8px;
     user-select: none;
+    -webkit-user-select: none;
     text-decoration: none;
     text-transform: uppercase;
-    transition: all 0.16s ease;
+    touch-action: manipulation;
+    transition: transform 80ms ease-out, background 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
   }
 
   button:active, .button:active {
-    transform: scale(0.97);
-  }
-
-  @media (hover: hover) and (pointer: fine) {
-    button:hover:not(:disabled), .button:hover:not(:disabled) {
-      border-color: var(--cyber-cyan);
-      box-shadow: 0 0 14px rgba(0, 240, 255, 0.4);
-      color: var(--cyber-cyan);
-    }
+    transform: scale(0.96);
   }
 
   button.primary, .button.primary {
-    background: linear-gradient(135deg, rgba(0, 240, 255, 0.25) 0%, rgba(0, 112, 243, 0.35) 100%);
+    background: linear-gradient(135deg, rgba(0, 240, 255, 0.3) 0%, rgba(0, 112, 243, 0.4) 100%);
     border: 1px solid var(--cyber-cyan);
     color: var(--cyber-cyan);
     box-shadow: 0 0 18px rgba(0, 240, 255, 0.35), inset 0 0 10px rgba(0, 240, 255, 0.15);
     text-shadow: 0 0 6px var(--cyber-cyan);
   }
 
-  button.primary:hover:not(:disabled) {
+  button.primary:active {
     background: var(--cyber-cyan);
     color: #04060c;
     text-shadow: none;
-    box-shadow: 0 0 26px rgba(0, 240, 255, 0.85);
   }
 
   button.danger {
-    background: rgba(255, 0, 85, 0.12);
+    background: rgba(255, 0, 85, 0.14);
     border: 1px solid var(--cyber-pink);
     color: var(--cyber-pink);
     box-shadow: 0 0 14px rgba(255, 0, 85, 0.25);
     text-shadow: 0 0 6px var(--cyber-pink);
-  }
-
-  button.danger:hover:not(:disabled) {
-    background: var(--cyber-pink);
-    color: #fff;
-    box-shadow: 0 0 24px rgba(255, 0, 85, 0.85);
   }
 
   button:disabled, .button:disabled {
@@ -549,19 +452,19 @@
   }
 
   .chip {
-    padding: 5px 12px;
+    padding: 6px 12px;
     font-size: 11px;
     font-weight: 700;
-    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    border-radius: 9999px;
   }
 
-  /* --- Cyber Inputs --- */
+  /* --- iOS Form Inputs --- */
   input, select, textarea {
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 16px; /* Native iOS prevents zoom */
     width: 100%;
-    padding: 10px 14px;
-    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    padding: 12px 14px;
+    border-radius: 12px;
     border: 1px solid var(--cyber-border);
     background: rgba(8, 12, 24, 0.95);
     color: #fff;
@@ -572,7 +475,7 @@
   input:focus, select:focus, textarea:focus {
     outline: none;
     border-color: var(--cyber-cyan);
-    box-shadow: 0 0 12px rgba(0, 240, 255, 0.4), inset 0 0 10px rgba(0, 240, 255, 0.1);
+    box-shadow: 0 0 14px rgba(0, 240, 255, 0.45);
   }
 
   label {
@@ -587,11 +490,79 @@
     gap: 6px;
   }
 
-  /* --- CRT Terminal Log View --- */
+  /* --- FLOATING DYNAMIC ISLAND CYBER-DOCK (BOTTOM TAB BAR) --- */
+  nav.bottom-dock {
+    position: fixed;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    left: 16px;
+    right: 16px;
+    max-width: 480px;
+    margin: 0 auto;
+    z-index: 1000;
+    background: rgba(9, 13, 26, 0.88);
+    backdrop-filter: blur(32px) saturate(220%);
+    -webkit-backdrop-filter: blur(32px) saturate(220%);
+    border: 1px solid rgba(0, 240, 255, 0.35);
+    border-radius: 9999px;
+    padding: 5px 6px;
+    box-shadow: 
+      0 12px 36px rgba(0, 0, 0, 0.85),
+      0 0 20px rgba(0, 240, 255, 0.20),
+      inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+  }
+
+  .dock-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 8px 4px;
+    border-radius: 9999px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: transform 80ms ease-out, background 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  }
+
+  .dock-btn:active {
+    transform: scale(0.94);
+  }
+
+  .dock-btn span.dock-icon {
+    font-size: 18px;
+    line-height: 1;
+    transition: transform 160ms ease;
+  }
+
+  .dock-btn.active {
+    background: linear-gradient(135deg, var(--cyber-cyan) 0%, #0088ff 100%);
+    color: #030509;
+    font-weight: 900;
+    box-shadow: 0 0 16px rgba(0, 240, 255, 0.7);
+  }
+
+  .dock-btn.active span.dock-icon {
+    transform: scale(1.1);
+  }
+
+  /* Log Terminal */
   pre#log {
     background: #03050a;
     border: 1px solid var(--cyber-border);
-    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    border-radius: 14px;
     padding: 12px 14px;
     font-family: var(--font-mono);
     font-size: 11px;
@@ -604,7 +575,6 @@
     box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 240, 255, 0.1);
   }
 
-  /* Preset row buttons */
   .presets-row {
     display: flex;
     align-items: center;
@@ -623,15 +593,8 @@
     font-size: 18px;
     background: rgba(14, 20, 36, 0.85);
     border: 1px solid rgba(0, 240, 255, 0.2);
-    clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+    border-radius: 10px;
     cursor: pointer;
-    transition: all 0.15s ease;
-  }
-
-  .emoji-btn:hover {
-    background: rgba(0, 240, 255, 0.2);
-    border-color: var(--cyber-cyan);
-    box-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
   }
 
   .row {
@@ -648,21 +611,19 @@
     padding: 3px 8px;
     background: rgba(255, 230, 0, 0.12);
     border: 1px solid rgba(255, 230, 0, 0.4);
-    clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+    border-radius: 9999px;
   }
 
-  /* Connection Stepper Cyber Matrix */
   .step-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 12px;
-    background: rgba(10, 14, 26, 0.8);
+    padding: 10px 14px;
+    background: rgba(10, 14, 26, 0.85);
     border: 1px solid rgba(0, 240, 255, 0.15);
-    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    border-radius: 12px;
     font-family: var(--font-mono);
     font-size: 11px;
-    transition: all 0.2s ease;
   }
 
   .step-row.done {
@@ -686,10 +647,9 @@
     justify-content: center;
     font-weight: 900;
     border: 1px solid currentColor;
-    clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+    border-radius: 6px;
   }
 
-  /* Platform setup tabs */
   .guide-tab {
     font-family: var(--font-mono);
     font-size: 11px;
@@ -698,6 +658,7 @@
     background: transparent;
     border: 1px solid rgba(0, 240, 255, 0.2);
     color: var(--text-secondary);
+    border-radius: 8px;
   }
 
   .guide-tab.active {
@@ -723,336 +684,342 @@
 </head>
 <body>
 
-<main>
-  <!-- Top Tactical Cyber Bar -->
-  <header>
+<div class="app-shell">
+  <!-- Fixed Top Header / Dynamic Island Status Bar -->
+  <header class="ios-header">
     <div class="brand">
       <img src="icon.svg" alt="boAt FLASH">
       <div class="brand-text">
-        <h1>FLASH // CYBER-LINK</h1>
+        <h1>boAt FLASH</h1>
         <span>REV-K6 TACTICAL OS</span>
       </div>
     </div>
 
-    <!-- Dynamic Status Badge -->
+    <!-- Dynamic Status Capsule -->
     <div id="conn-badge" class="badge">
       <span class="dot"></span>
       <span id="conn-state-text">STANDBY</span>
     </div>
   </header>
 
-  <!-- Segmented Main 3-Tab Navigator -->
-  <nav class="segmented-nav">
-    <button type="button" class="nav-pill active" id="btn-tab-dash">
-      <span>01</span> Telemetry
-    </button>
-    <button type="button" class="nav-pill" id="btn-tab-notif">
-      <span>02</span> Comms
-    </button>
-    <button type="button" class="nav-pill" id="btn-tab-diag">
-      <span>03</span> Diagnostics
-    </button>
-  </nav>
+  <!-- Scrollable Native iOS Viewport -->
+  <main class="app-viewport">
+    <!-- iOS Error 2 Alert Banner -->
+    <div id="error2-alert" class="card hidden" style="border-color:var(--cyber-pink); background:rgba(255,0,85,0.12); box-shadow:0 0 20px rgba(255,0,85,0.3);">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <span style="font-size:22px; line-height:1;">⚠️</span>
+        <div style="flex:1;">
+          <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-pink); font-size:13px; text-transform:uppercase; letter-spacing:0.06em;">iOS Connection Rejected (Error 2)</div>
+          <p style="font-size:12px; color:#f0f6fc; margin:4px 0 10px; line-height:1.4;">
+            iOS cannot connect while FLASH is paired in iPhone Bluetooth settings.
+          </p>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button type="button" id="error2-retry-btn" class="primary" style="padding:6px 12px; font-size:11px;">Retry Scan</button>
+            <button type="button" id="error2-dismiss-btn" style="padding:6px 12px; font-size:11px;">Dismiss</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
-  <!-- iOS Error 2 Alert Banner -->
-  <div id="error2-alert" class="card hidden" style="border-color:var(--cyber-pink); background:rgba(255,0,85,0.12); box-shadow:0 0 20px rgba(255,0,85,0.3);">
-    <div style="display:flex; align-items:flex-start; gap:12px;">
-      <span style="font-size:22px; line-height:1;">⚠️</span>
-      <div style="flex:1;">
-        <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-pink); font-size:13px; text-transform:uppercase; letter-spacing:0.06em;">iOS Connection Rejected (Error 2)</div>
-        <p style="font-size:12px; color:#f0f6fc; margin:4px 0 10px; line-height:1.4;">
-          iOS cannot connect while FLASH is paired in iPhone Bluetooth settings.
+    <!-- Brave Browser Alert Banner -->
+    <div id="brave-alert" class="card hidden" style="border-color:var(--cyber-yellow); background:rgba(255,230,0,0.1);">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <span style="font-size:20px; line-height:1;">🦁</span>
+        <div style="flex:1;">
+          <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-yellow); font-size:12px; text-transform:uppercase;">Brave Shields Flag Required</div>
+          <div style="display:flex; gap:8px; margin-top:8px;">
+            <button type="button" id="copy-brave-direct" class="chip primary">Copy Flag Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= SECTION 1: DASHBOARD / TELEMETRY ================= -->
+    <div id="section-dash" class="card">
+      <div class="card-header">
+        <span class="card-title">Watch Telemetry Matrix</span>
+        <span style="font-family:var(--font-mono); font-size:10px; color:var(--cyber-cyan); letter-spacing:0.08em;">NODE 0xF618</span>
+      </div>
+
+      <!-- Cyber Arc Reactor Hero Centerpiece -->
+      <div class="watch-hero">
+        <div class="watch-case">
+          <svg class="rings-svg" viewBox="0 0 170 170">
+            <!-- Step Activity Ring (Outer) -->
+            <circle class="ring-bg" cx="85" cy="85" r="74" stroke-width="7"></circle>
+            <circle id="ring-steps" class="ring-bar" cx="85" cy="85" r="74" stroke-width="7" stroke="#00f0ff" stroke-dasharray="465" stroke-dashoffset="465"></circle>
+            <!-- Battery Ring (Inner) -->
+            <circle class="ring-bg" cx="85" cy="85" r="62" stroke-width="6"></circle>
+            <circle id="ring-bat" class="ring-bar" cx="85" cy="85" r="62" stroke-width="6" stroke="#ff0055" stroke-dasharray="390" stroke-dashoffset="390"></circle>
+          </svg>
+
+          <div class="watch-content">
+            <div class="watch-time" id="watch-clock">10:09</div>
+            <div class="watch-label"><b id="name">boAt FLASH</b></div>
+            <div class="battery-pill">
+              <span>⚡ CELL</span>
+              <span id="bat">–</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Primary Cyber Action Controls -->
+      <div class="row" style="justify-content:center;">
+        <button id="connect" class="primary" style="flex:1; max-width:260px; font-size:14px; font-weight:800;">⚡ JACK IN // CONNECT</button>
+        <button id="disconnect" class="danger" disabled>ABORT</button>
+      </div>
+
+      <!-- Quick Tool Action Pills -->
+      <div class="row" style="justify-content:center; gap:8px; flex-wrap:wrap;">
+        <button data-act="sport" disabled title="Request step and activity sync from watch">👟 Sync Steps</button>
+        <button data-act="time" disabled title="Sync clock with this device">⏱️ Sync Clock</button>
+        <button data-act="find" disabled title="Vibrate and ring the watch">🔔 Ping Watch</button>
+        <button data-act="info" disabled title="Query firmware info">ℹ️ Sys Info</button>
+      </div>
+
+      <!-- Activity & Sensors 4-Grid -->
+      <div class="metrics-grid" id="telemetry-card">
+        <div class="metric-card">
+          <div class="metric-top">
+            <span>01 // Steps Kinetics</span>
+            <span>👟</span>
+          </div>
+          <div class="metric-val" id="sport-steps">–</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span>02 // Traverse Dist (m)</span>
+            <span>📍</span>
+          </div>
+          <div class="metric-val" id="sport-dist">–</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span>03 // Metabolic Burn</span>
+            <span>🔥</span>
+          </div>
+          <div class="metric-val" id="sport-kcal">–</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-top">
+            <span>04 // Active Chrono</span>
+            <span>⏱️</span>
+          </div>
+          <div class="metric-val" id="sport-dur">–</div>
+        </div>
+      </div>
+
+      <!-- Neural Health Matrix / Apple Health Sync Card -->
+      <div class="card" id="health-card" style="margin-top:6px; background:rgba(9, 14, 28, 0.95); border:1px solid var(--cyber-border); padding:14px;">
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:22px; line-height:1; filter:drop-shadow(0 0 8px var(--cyber-pink));">❤️</span>
+            <div>
+              <div style="font-family:var(--font-mono); font-weight:800; font-size:12px; color:#fff; letter-spacing:0.06em;" id="health-title">Neural Health Matrix</div>
+              <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);" id="health-status">Apple Health Link Ready</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button id="btn-health-shortcut" class="chip primary" style="font-size:11px; padding:7px 14px; cursor:pointer; background:linear-gradient(135deg, #00f0ff 0%, #0070f3 100%); color:#04060c; font-weight:900;">
+              ⚡ SYNC TO APPLE HEALTH
+            </button>
+            <button id="btn-health-sync" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
+              🔄 Direct HK
+            </button>
+            <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer; background:rgba(255,230,0,0.12); border-color:rgba(255,230,0,0.4); color:var(--cyber-yellow);">
+              ⬇️ CSV
+            </button>
+          </div>
+        </div>
+        <p id="health-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px; font-family:var(--font-mono);">
+          Tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to write steps into Apple Health via native Shortcuts bridge.
         </p>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" id="error2-retry-btn" class="primary" style="padding:6px 12px; font-size:11px;">Retry Scan</button>
-          <button type="button" id="error2-dismiss-btn" style="padding:6px 12px; font-size:11px;">Dismiss</button>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Brave Browser Alert Banner -->
-  <div id="brave-alert" class="card hidden" style="border-color:var(--cyber-yellow); background:rgba(255,230,0,0.1);">
-    <div style="display:flex; align-items:flex-start; gap:12px;">
-      <span style="font-size:20px; line-height:1;">🦁</span>
-      <div style="flex:1;">
-        <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-yellow); font-size:12px; text-transform:uppercase;">Brave Shields Flag Required</div>
-        <div style="display:flex; gap:8px; margin-top:8px;">
-          <button type="button" id="copy-brave-direct" class="chip primary">Copy Flag Link</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================= SECTION 1: DASHBOARD / TELEMETRY ================= -->
-  <div id="section-dash" class="card">
-    <div class="card-header">
-      <span class="card-title">Neural Telemetry Matrix</span>
-      <span style="font-family:var(--font-mono); font-size:10px; color:var(--cyber-cyan); letter-spacing:0.08em;">NODE 0xF618</span>
-    </div>
-
-    <!-- Cyber Arc Reactor Hero Centerpiece -->
-    <div class="watch-hero">
-      <div class="watch-case">
-        <svg class="rings-svg" viewBox="0 0 170 170">
-          <!-- Step Activity Ring (Outer) -->
-          <circle class="ring-bg" cx="85" cy="85" r="74" stroke-width="7"></circle>
-          <circle id="ring-steps" class="ring-bar" cx="85" cy="85" r="74" stroke-width="7" stroke="#00f0ff" stroke-dasharray="465" stroke-dashoffset="465"></circle>
-          <!-- Battery Ring (Inner) -->
-          <circle class="ring-bg" cx="85" cy="85" r="62" stroke-width="6"></circle>
-          <circle id="ring-bat" class="ring-bar" cx="85" cy="85" r="62" stroke-width="6" stroke="#ff0055" stroke-dasharray="390" stroke-dashoffset="390"></circle>
-        </svg>
-
-        <div class="watch-content">
-          <div class="watch-time" id="watch-clock">10:09</div>
-          <div class="watch-label"><b id="name">boAt FLASH</b></div>
-          <div class="battery-pill">
-            <span>⚡ CELL</span>
-            <span id="bat">–</span>
+        <!-- Collapsible 30-sec Setup Guide -->
+        <div style="margin-bottom:8px;">
+          <button type="button" id="btn-toggle-shortcut-guide" class="chip" style="font-size:10px; padding:4px 8px; background:rgba(0,240,255,0.08); border-color:rgba(0,240,255,0.3); color:var(--cyber-cyan); width:100%; justify-content:space-between;">
+            <span>ℹ️ 30-Sec Apple Health Setup Guide</span>
+            <span id="guide-arrow">▼</span>
+          </button>
+          <div id="shortcut-setup-box" class="hidden" style="margin-top:6px; padding:10px; background:#04060a; border:1px solid rgba(0,240,255,0.25); font-family:var(--font-mono); font-size:11px; line-height:1.5; color:#d0e0ff;">
+            <div style="color:var(--cyber-yellow); font-weight:800; margin-bottom:4px;">// HOW IT WORKS:</div>
+            <p style="margin-bottom:6px; color:var(--text-secondary);">Apple blocks direct background sync for sideloaded apps. The native solution is Apple's built-in Shortcuts app:</p>
+            <ol style="padding-left:18px; margin-bottom:8px; display:flex; flex-direction:column; gap:4px;">
+              <li>Tap <button type="button" id="btn-open-shortcuts" class="chip primary" style="display:inline-flex; padding:2px 8px; font-size:10px; margin:0 4px;">Open Shortcuts App</button></li>
+              <li>Tap <b>+</b> (New Shortcut) & rename it to: <b style="color:var(--cyber-cyan);">FlashSync</b></li>
+              <li>Add 1 action: Search <b style="color:var(--cyber-yellow);">"Log Health Sample"</b></li>
+              <li>Set Value: <b style="color:#fff;">Shortcut Input</b>, Type: <b style="color:#fff;">Step Count</b></li>
+              <li>Done! Now tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to log watch steps anytime!</li>
+            </ol>
           </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Primary Cyber Action Controls -->
-    <div class="row" style="justify-content:center;">
-      <button id="connect" class="primary" style="flex:1; max-width:260px; font-size:14px; font-weight:800;">⚡ JACK IN // CONNECT</button>
-      <button id="disconnect" class="danger" disabled>ABORT</button>
-    </div>
-
-    <!-- Quick Tool Action Pills -->
-    <div class="row" style="justify-content:center; gap:8px; flex-wrap:wrap;">
-      <button data-act="sport" disabled title="Request step and activity sync from watch">👟 Sync Steps</button>
-      <button data-act="time" disabled title="Sync clock with this device">⏱️ Sync Clock</button>
-      <button data-act="find" disabled title="Vibrate and ring the watch">🔔 Ping Watch</button>
-      <button data-act="info" disabled title="Query firmware info">ℹ️ Sys Info</button>
-    </div>
-
-    <!-- Activity & Sensors 4-Grid -->
-    <div class="metrics-grid" id="telemetry-card">
-      <div class="metric-card">
-        <div class="metric-top">
-          <span>01 // Steps Kinetics</span>
-          <span>👟</span>
-        </div>
-        <div class="metric-val" id="sport-steps">–</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-top">
-          <span>02 // Traverse Dist (m)</span>
-          <span>📍</span>
-        </div>
-        <div class="metric-val" id="sport-dist">–</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-top">
-          <span>03 // Metabolic Burn</span>
-          <span>🔥</span>
-        </div>
-        <div class="metric-val" id="sport-kcal">–</div>
-      </div>
-      <div class="metric-card">
-        <div class="metric-top">
-          <span>04 // Active Chrono</span>
-          <span>⏱️</span>
-        </div>
-        <div class="metric-val" id="sport-dur">–</div>
-      </div>
-    </div>
-
-    <!-- Neural Health Matrix / Apple Health Sync Card -->
-    <div class="card" id="health-card" style="margin-top:6px; background:rgba(9, 14, 28, 0.95); border:1px solid var(--cyber-border); padding:14px;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:10px;">
-        <div style="display:flex; align-items:center; gap:10px;">
-          <span style="font-size:22px; line-height:1; filter:drop-shadow(0 0 8px var(--cyber-pink));">❤️</span>
-          <div>
-            <div style="font-family:var(--font-mono); font-weight:800; font-size:12px; color:#fff; letter-spacing:0.06em;" id="health-title">Neural Health Matrix</div>
-            <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);" id="health-status">Apple Health Link Ready</div>
-          </div>
-        </div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button id="btn-health-shortcut" class="chip primary" style="font-size:11px; padding:7px 14px; cursor:pointer; background:linear-gradient(135deg, #00f0ff 0%, #0070f3 100%); color:#04060c; font-weight:900;">
-            ⚡ SYNC TO APPLE HEALTH
-          </button>
-          <button id="btn-health-sync" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
-            🔄 Direct HK
-          </button>
-          <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer; background:rgba(255,230,0,0.12); border-color:rgba(255,230,0,0.4); color:var(--cyber-yellow);">
-            ⬇️ CSV
-          </button>
-        </div>
-      </div>
-      <p id="health-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px; font-family:var(--font-mono);">
-        Tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to write steps into Apple Health via native Shortcuts bridge.
-      </p>
-
-      <!-- Collapsible 30-sec Setup Guide -->
-      <div style="margin-bottom:8px;">
-        <button type="button" id="btn-toggle-shortcut-guide" class="chip" style="font-size:10px; padding:4px 8px; background:rgba(0,240,255,0.08); border-color:rgba(0,240,255,0.3); color:var(--cyber-cyan); width:100%; justify-content:space-between;">
-          <span>ℹ️ 30-Sec Apple Health Setup Guide</span>
-          <span id="guide-arrow">▼</span>
-        </button>
-        <div id="shortcut-setup-box" class="hidden" style="margin-top:6px; padding:10px; background:#04060a; border:1px solid rgba(0,240,255,0.25); font-family:var(--font-mono); font-size:11px; line-height:1.5; color:#d0e0ff;">
-          <div style="color:var(--cyber-yellow); font-weight:800; margin-bottom:4px;">// HOW IT WORKS:</div>
-          <p style="margin-bottom:6px; color:var(--text-secondary);">Apple blocks direct background sync for sideloaded apps. The native solution is Apple's built-in Shortcuts app:</p>
-          <ol style="padding-left:18px; margin-bottom:8px; display:flex; flex-direction:column; gap:4px;">
-            <li>Tap <button type="button" id="btn-open-shortcuts" class="chip primary" style="display:inline-flex; padding:2px 8px; font-size:10px; margin:0 4px;">Open Shortcuts App</button></li>
-            <li>Tap <b>+</b> (New Shortcut) & rename it to: <b style="color:var(--cyber-cyan);">FlashSync</b></li>
-            <li>Add 1 action: Search <b style="color:var(--cyber-yellow);">"Log Health Sample"</b></li>
-            <li>Set Value: <b style="color:#fff;">Shortcut Input</b>, Type: <b style="color:#fff;">Step Count</b></li>
-            <li>Done! Now tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to log watch steps anytime!</li>
-          </ol>
+        <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary); border-top:1px solid rgba(0,240,255,0.15); padding-top:8px;">
+          <span style="font-family:var(--font-mono);">Auto-Sync Biometrics</span>
+          <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
+            <input type="checkbox" id="health-auto-sync" checked style="width:auto; cursor:pointer;">
+            <span style="font-size:10px; color:var(--cyber-cyan); font-family:var(--font-mono);">[ ENABLED ]</span>
+          </label>
         </div>
       </div>
 
-      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary); border-top:1px solid rgba(0,240,255,0.15); padding-top:8px;">
-        <span style="font-family:var(--font-mono);">Auto-Sync Biometrics</span>
-        <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
-          <input type="checkbox" id="health-auto-sync" checked style="width:auto; cursor:pointer;">
-          <span style="font-size:10px; color:var(--cyber-cyan); font-family:var(--font-mono);">[ ENABLED ]</span>
-        </label>
+      <!-- Hardware Meta -->
+      <div class="row" style="justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); padding:4px 4px 0;">
+        <span>FW: <b id="fw" style="color:var(--cyber-cyan); font-weight:700;">–</b></span>
+        <span>MAC: <b id="mac-display" style="color:var(--cyber-cyan); font-weight:700;">08:7C:85:03:12:0F</b></span>
       </div>
-    </div>
 
-    <!-- Hardware Meta -->
-    <div class="row" style="justify-content:space-between; font-family:var(--font-mono); font-size:11px; color:var(--text-secondary); padding:4px 4px 0;">
-      <span>FW: <b id="fw" style="color:var(--cyber-cyan); font-weight:700;">–</b></span>
-      <span>MAC: <b id="mac-display" style="color:var(--cyber-cyan); font-weight:700;">08:7C:85:03:12:0F</b></span>
-    </div>
-
-    <label style="flex-direction:row; align-items:center; gap:8px; cursor:pointer; font-size:11px; color:var(--text-secondary); margin-top:4px;">
-      <input type="checkbox" id="scan-all" style="width:auto;"> Scan all nearby BLE nodes
-    </label>
-  </div>
-
-  <!-- ================= SECTION 2: PUSH NOTIFICATIONS / COMMS ================= -->
-  <div id="section-notif" class="card hidden">
-    <div class="card-header">
-      <span class="card-title">Comms Transmitter Studio</span>
-      <span id="nbytes" class="bytes-bar">0 / 150 B</span>
-    </div>
-
-    <div class="presets-row">
-      <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">PRESETS:</span>
-      <button type="button" class="chip" id="preset-call">📞 Call</button>
-      <button type="button" class="chip" id="preset-wa">💬 WhatsApp</button>
-      <button type="button" class="chip" id="preset-alert">🚨 Alert</button>
-      <button type="button" class="chip" id="preset-emoji">🎉 Emoji</button>
-    </div>
-
-    <label>Message Title
-      <input id="ntitle" value="Hello 👋" maxlength="60" placeholder="Title (≤ 52 bytes)">
-    </label>
-
-    <label>Message Payload
-      <textarea id="nbody" rows="3" maxlength="200" placeholder="Notification body content...">Hello from your laptop 👋🔥😎 it works! ✅</textarea>
-    </label>
-
-    <div class="row" style="gap:12px;">
-      <label style="flex:1;">Stream Category
-        <select id="nkind">
-          <option value="call">📞 Phone Call (1)</option>
-          <option value="msg" selected>💬 Short Message (2)</option>
-          <option value="wechat">🟢 WeChat (3)</option>
-          <option value="qq">🐧 QQ (4)</option>
-          <option value="app">📱 Third-Party App (7)</option>
-        </select>
+      <label style="flex-direction:row; align-items:center; gap:8px; cursor:pointer; font-size:11px; color:var(--text-secondary); margin-top:4px;">
+        <input type="checkbox" id="scan-all" style="width:auto;"> Scan all nearby BLE nodes
       </label>
     </div>
 
-    <div class="emoji-picker">
-      <button type="button" class="emoji-btn">👋</button>
-      <button type="button" class="emoji-btn">🔥</button>
-      <button type="button" class="emoji-btn">😎</button>
-      <button type="button" class="emoji-btn">✅</button>
-      <button type="button" class="emoji-btn">⚡</button>
-      <button type="button" class="emoji-btn">❤️</button>
-      <button type="button" class="emoji-btn">🚀</button>
-      <button type="button" class="emoji-btn">💀</button>
-      <button type="button" class="emoji-btn">🎉</button>
-      <button type="button" class="emoji-btn">🤖</button>
-      <button type="button" class="emoji-btn">🏃</button>
-      <button type="button" class="emoji-btn">🕒</button>
+    <!-- ================= SECTION 2: PUSH NOTIFICATIONS / COMMS ================= -->
+    <div id="section-notif" class="card hidden">
+      <div class="card-header">
+        <span class="card-title">Comms Transmitter Studio</span>
+        <span id="nbytes" class="bytes-bar">0 / 150 B</span>
+      </div>
+
+      <div class="presets-row">
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-secondary);">PRESETS:</span>
+        <button type="button" class="chip" id="preset-call">📞 Call</button>
+        <button type="button" class="chip" id="preset-wa">💬 WhatsApp</button>
+        <button type="button" class="chip" id="preset-alert">🚨 Alert</button>
+        <button type="button" class="chip" id="preset-emoji">🎉 Emoji</button>
+      </div>
+
+      <label>Message Title
+        <input id="ntitle" value="Hello 👋" maxlength="60" placeholder="Title (≤ 52 bytes)">
+      </label>
+
+      <label>Message Payload
+        <textarea id="nbody" rows="3" maxlength="200" placeholder="Notification body content...">Hello from your laptop 👋🔥😎 it works! ✅</textarea>
+      </label>
+
+      <div class="row" style="gap:12px;">
+        <label style="flex:1;">Stream Category
+          <select id="nkind">
+            <option value="call">📞 Phone Call (1)</option>
+            <option value="msg" selected>💬 Short Message (2)</option>
+            <option value="wechat">🟢 WeChat (3)</option>
+            <option value="qq">🐧 QQ (4)</option>
+            <option value="app">📱 Third-Party App (7)</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="emoji-picker">
+        <button type="button" class="emoji-btn">👋</button>
+        <button type="button" class="emoji-btn">🔥</button>
+        <button type="button" class="emoji-btn">😎</button>
+        <button type="button" class="emoji-btn">✅</button>
+        <button type="button" class="emoji-btn">⚡</button>
+        <button type="button" class="emoji-btn">❤️</button>
+        <button type="button" class="emoji-btn">🚀</button>
+        <button type="button" class="emoji-btn">💀</button>
+        <button type="button" class="emoji-btn">🎉</button>
+        <button type="button" class="emoji-btn">🤖</button>
+        <button type="button" class="emoji-btn">🏃</button>
+        <button type="button" class="emoji-btn">🕒</button>
+      </div>
+
+      <button id="send-btn" class="primary" style="margin-top:8px;" data-act="notify" disabled>
+        🚀 TRANSMIT PACKET TO WATCH
+      </button>
     </div>
 
-    <button id="send-btn" class="primary" style="margin-top:8px;" data-act="notify" disabled>
-      🚀 TRANSMIT PACKET TO WATCH
+    <!-- ================= SECTION 3: SYSTEM DIAGNOSTICS ================= -->
+    <div id="section-diag" class="card hidden">
+      <div class="card-header">
+        <span class="card-title">Cyber-Link Diagnostics</span>
+        <div style="display:flex; gap:6px;">
+          <button id="copy-log" class="chip" style="padding:3px 9px;">Copy Log</button>
+          <button id="clear" class="chip" style="padding:3px 9px;">Clear</button>
+        </div>
+      </div>
+
+      <!-- Diagnostic Stepper -->
+      <div id="conn-steps-box" style="display:flex; flex-direction:column; gap:6px;">
+        <div class="step-row" id="st-scan">
+          <span class="step-badge">1</span>
+          <span>BLE Scan & Device Discovery</span>
+        </div>
+        <div class="step-row" id="st-gatt">
+          <span class="step-badge">2</span>
+          <span>GATT Server Connection</span>
+        </div>
+        <div class="step-row" id="st-svc">
+          <span class="step-badge">3</span>
+          <span>Service 0xF618 & Pipe Resolution</span>
+        </div>
+        <div class="step-row" id="st-ready">
+          <span class="step-badge">4</span>
+          <span>Encrypted Protocol Ready</span>
+        </div>
+      </div>
+
+      <div id="diag-error-tip" class="hidden" style="padding:10px; background:rgba(255,0,85,0.12); border:1px solid var(--cyber-pink); border-radius:12px;">
+        <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-pink); font-size:12px;">LINK FAILURE DETECTED</div>
+        <div id="diag-error-text" style="font-size:11px; margin:4px 0 8px; font-family:var(--font-mono);">Error details</div>
+        <button type="button" id="diag-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">RETRY LINK</button>
+      </div>
+
+      <!-- Platform Setup Guides -->
+      <div class="card" id="guide-card" style="padding:12px; background:rgba(6,10,20,0.9);">
+        <div style="display:flex; gap:4px; margin-bottom:10px; flex-wrap:wrap;">
+          <button type="button" class="guide-tab active" id="tab-btn-ios">iOS Setup</button>
+          <button type="button" class="guide-tab" id="tab-btn-android">Android</button>
+          <button type="button" class="guide-tab" id="tab-btn-brave">Brave</button>
+          <button type="button" class="guide-tab" id="tab-btn-desktop">Desktop</button>
+        </div>
+
+        <div class="guide-content" id="panel-ios" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+          <p>1. Ensure iPhone Bluetooth is ON in Control Center.</p>
+          <p>2. If error occurs, "Forget Device" in iOS Bluetooth settings then reconnect in this app.</p>
+          <p>3. Bluefy or Capacitor iOS shell enables full WebBluetooth support.</p>
+        </div>
+
+        <div class="guide-content hidden" id="panel-android" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+          <p>1. Chrome or Edge for Android supports WebBluetooth natively.</p>
+          <p>2. Location & Nearby Devices permissions must be Granted.</p>
+        </div>
+
+        <div class="guide-content hidden" id="panel-brave" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+          <p>Enable WebBluetooth flag at chrome://flags/#enable-web-bluetooth</p>
+          <button type="button" id="copy-brave-flag-guide" class="chip" style="margin-top:6px;">Copy Flag Link</button>
+        </div>
+
+        <div class="guide-content hidden" id="panel-desktop" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
+          <p>Native Chrome, Edge, and Opera on macOS / Windows / Linux work out-of-the-box.</p>
+        </div>
+      </div>
+
+      <!-- Packet Log Terminal -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+        <span style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);">STREAM: BLE_SYS_LOG</span>
+      </div>
+      <pre id="log" placeholder="Packet stream will materialize here..."></pre>
+    </div>
+  </main>
+
+  <!-- FLOATING DYNAMIC ISLAND CYBER-DOCK (BOTTOM NAVIGATION BAR) -->
+  <nav class="bottom-dock">
+    <button type="button" class="dock-btn active" id="btn-tab-dash">
+      <span class="dock-icon">⌚</span>
+      <span>Telemetry</span>
     </button>
-  </div>
-
-  <!-- ================= SECTION 3: SYSTEM DIAGNOSTICS ================= -->
-  <div id="section-diag" class="card hidden">
-    <div class="card-header">
-      <span class="card-title">Cyber-Link Diagnostics</span>
-      <div style="display:flex; gap:6px;">
-        <button id="copy-log" class="chip" style="padding:3px 9px;">Copy Log</button>
-        <button id="clear" class="chip" style="padding:3px 9px;">Clear</button>
-      </div>
-    </div>
-
-    <!-- Diagnostic Stepper -->
-    <div id="conn-steps-box" style="display:flex; flex-direction:column; gap:6px;">
-      <div class="step-row" id="st-scan">
-        <span class="step-badge">1</span>
-        <span>BLE Scan & Device Discovery</span>
-      </div>
-      <div class="step-row" id="st-gatt">
-        <span class="step-badge">2</span>
-        <span>GATT Server Connection</span>
-      </div>
-      <div class="step-row" id="st-svc">
-        <span class="step-badge">3</span>
-        <span>Service 0xF618 & Pipe Resolution</span>
-      </div>
-      <div class="step-row" id="st-ready">
-        <span class="step-badge">4</span>
-        <span>Encrypted Protocol Ready</span>
-      </div>
-    </div>
-
-    <div id="diag-error-tip" class="hidden" style="padding:10px; background:rgba(255,0,85,0.12); border:1px solid var(--cyber-pink); clip-path:polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 6px 100%, 0 calc(100% - 6px));">
-      <div style="font-weight:800; font-family:var(--font-mono); color:var(--cyber-pink); font-size:12px;">LINK FAILURE DETECTED</div>
-      <div id="diag-error-text" style="font-size:11px; margin:4px 0 8px; font-family:var(--font-mono);">Error details</div>
-      <button type="button" id="diag-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">RETRY LINK</button>
-    </div>
-
-    <!-- Platform Setup Guides -->
-    <div class="card" id="guide-card" style="padding:10px; background:rgba(6,10,20,0.85);">
-      <div style="display:flex; gap:4px; margin-bottom:10px; flex-wrap:wrap;">
-        <button type="button" class="guide-tab active" id="tab-btn-ios">iOS Setup</button>
-        <button type="button" class="guide-tab" id="tab-btn-android">Android</button>
-        <button type="button" class="guide-tab" id="tab-btn-brave">Brave</button>
-        <button type="button" class="guide-tab" id="tab-btn-desktop">Desktop</button>
-      </div>
-
-      <div class="guide-content" id="panel-ios" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
-        <p>1. Ensure iPhone Bluetooth is ON in Control Center.</p>
-        <p>2. If error occurs, "Forget Device" in iOS Bluetooth settings then reconnect in this app.</p>
-        <p>3. Bluefy or Capacitor iOS shell enables full WebBluetooth support.</p>
-      </div>
-
-      <div class="guide-content hidden" id="panel-android" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
-        <p>1. Chrome or Edge for Android supports WebBluetooth natively.</p>
-        <p>2. Location & Nearby Devices permissions must be Granted.</p>
-      </div>
-
-      <div class="guide-content hidden" id="panel-brave" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
-        <p>Enable WebBluetooth flag at chrome://flags/#enable-web-bluetooth</p>
-        <button type="button" id="copy-brave-flag-guide" class="chip" style="margin-top:6px;">Copy Flag Link</button>
-      </div>
-
-      <div class="guide-content hidden" id="panel-desktop" style="font-size:11px; line-height:1.5; color:var(--text-secondary); font-family:var(--font-mono);">
-        <p>Native Chrome, Edge, and Opera on macOS / Windows / Linux work out-of-the-box.</p>
-      </div>
-    </div>
-
-    <!-- Packet Log Terminal -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-      <span style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);">STREAM: BLE_SYS_LOG</span>
-    </div>
-    <pre id="log" placeholder="Packet stream will materialize here..."></pre>
-  </div>
-</main>
+    <button type="button" class="dock-btn" id="btn-tab-notif">
+      <span class="dock-icon">💬</span>
+      <span>Comms</span>
+    </button>
+    <button type="button" class="dock-btn" id="btn-tab-diag">
+      <span class="dock-icon">⚡</span>
+      <span>Diagnostics</span>
+    </button>
+  </nav>
+</div>
 
 <script>
 
