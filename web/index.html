@@ -3,38 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#07090e">
+<meta name="theme-color" content="#0b0f19">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="description" content="Zero-cloud Web Bluetooth and native iOS CoreBluetooth controller for the boAt FLASH smartwatch.">
+<meta name="description" content="Clean zero-cloud Web Bluetooth and native iOS companion app for the boAt FLASH smartwatch.">
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="manifest" href="manifest.webmanifest">
 <title>boAt FLASH Watch</title>
 <style>
-
   :root {
-    --bg-black: #000000;
-    --card-bg: #1c1c1e;
-    --card-elevated: #2c2c2e;
-    --card-surface: #242426;
+    --bg-page: #0b0f19;
+    --surface-card: rgba(15, 23, 42, 0.72);
+    --surface-card-hover: rgba(22, 33, 58, 0.85);
+    --surface-inset: rgba(11, 17, 32, 0.6);
+    --surface-dock: rgba(15, 23, 42, 0.88);
     --border-color: rgba(255, 255, 255, 0.08);
-    --border-light: rgba(255, 255, 255, 0.14);
-    --text-primary: #ffffff;
-    --text-secondary: #8e8e93;
-    --text-tertiary: #636366;
-    --apple-blue: #0a84ff;
-    --apple-blue-hover: #0071e3;
-    --apple-green: #30d158;
-    --apple-red: #ff453a;
-    --apple-yellow: #ffd60a;
-    --apple-orange: #ff9f0a;
-    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, sans-serif;
-    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --border-subtle: rgba(255, 255, 255, 0.05);
+    --border-highlight: rgba(255, 255, 255, 0.14);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-glow: rgba(59, 130, 246, 0.25);
+    --success: #10b981;
+    --success-bg: rgba(16, 185, 129, 0.12);
+    --warning: #f59e0b;
+    --warning-bg: rgba(245, 158, 11, 0.12);
+    --danger: #ef4444;
+    --danger-bg: rgba(239, 68, 68, 0.12);
+    --rose: #f43f5e;
+    --rose-bg: rgba(244, 63, 94, 0.12);
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", -system-ui, sans-serif;
+    --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --radius-2xl: 20px;
+    --radius-xl: 16px;
+    --radius-lg: 12px;
+    --radius-md: 10px;
     --radius-full: 9999px;
-    --radius-lg: 18px;
-    --radius-md: 12px;
-    --radius-sm: 8px;
-    --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   * {
@@ -44,179 +51,249 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
   html, body {
-    height: 100dvh;
+    min-height: 100%;
     width: 100%;
-    overflow: hidden;
-    overscroll-behavior: none;
-    background-color: var(--bg-black);
+    margin: 0;
+    padding: 0;
+    background-color: var(--bg-page);
     color: var(--text-primary);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    letter-spacing: -0.01em;
-  }
-
-  /* --- iOS App Shell --- */
-  .app-shell {
-    display: flex;
-    flex-direction: column;
-    height: 100dvh;
-    width: 100%;
-    max-width: 460px;
-    margin: 0 auto;
-    position: relative;
-    overflow: hidden;
-    background: var(--bg-black);
-    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
-  }
-
-  /* Top Navigation Bar */
-  header.ios-header {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: max(12px, env(safe-area-inset-top)) 16px 12px 16px;
-    background: rgba(18, 18, 20, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-color);
-    z-index: 100;
-  }
-
-  .brand {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .brand img {
-    width: 28px;
-    height: 28px;
-    border-radius: 7px;
-    object-fit: cover;
-  }
-
-  .brand-text h1 {
-    font-size: 15px;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-    color: #fff;
-    line-height: 1.1;
-  }
-
-  .brand-text span {
-    font-size: 11px;
-    color: var(--text-secondary);
-    display: block;
-    line-height: 1.1;
-    margin-top: 2px;
-  }
-
-  /* Top Status Pill */
-  .badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
-    font-weight: 600;
-    background: var(--card-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-full);
-    color: var(--text-secondary);
-    transition: all 0.2s var(--ease-out);
-  }
-
-  .badge.connected {
-    background: rgba(48, 209, 88, 0.14);
-    border-color: rgba(48, 209, 88, 0.3);
-    color: var(--apple-green);
-  }
-
-  .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--text-tertiary);
-    transition: all 0.2s ease;
-  }
-
-  .badge.connected .dot {
-    background: var(--apple-green);
-    box-shadow: 0 0 6px var(--apple-green);
-  }
-
-  /* --- Scrollable Native Viewport --- */
-  main.app-viewport {
-    flex: 1;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    overscroll-behavior: contain;
-    padding: 16px 16px calc(88px + env(safe-area-inset-bottom)) 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    width: 100%;
   }
 
-  /* Clean Scrollbar */
-  main.app-viewport::-webkit-scrollbar {
-    width: 4px;
+  /* Subtle ambient lighting behind main cards */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -120px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 680px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, rgba(16, 185, 129, 0.04) 40%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
   }
-  main.app-viewport::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.15);
+
+  /* Clean Scrollbars */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.14);
     border-radius: 4px;
   }
-
-  /* --- Inset Grouped Cards --- */
-  .card {
-    background: var(--card-bg);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-lg);
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    user-select: none;
-    -webkit-user-select: none;
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.25);
   }
 
-  .card-header {
+  /* Main Responsive Container */
+  .app-container {
+    width: 100%;
+    max-width: 580px;
+    margin: 0 auto;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 1;
+    padding: max(14px, env(safe-area-inset-top, 0px)) 16px calc(92px + env(safe-area-inset-bottom, 0px)) 16px;
+  }
+
+  /* Top App Header */
+  header.app-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding-bottom: 2px;
+    padding: 12px 0 18px 0;
+    gap: 12px;
   }
 
-  .card-title {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--text-secondary);
-  }
-
-  /* --- Clean Watch Face Hero --- */
-  .watch-hero {
+  .brand-group {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 8px 0;
-    position: relative;
+    gap: 12px;
   }
 
-  .watch-case {
-    width: 180px;
-    height: 180px;
-    border-radius: 50%;
-    position: relative;
-    background: radial-gradient(circle at 50% 50%, #151518 0%, #0c0c0e 100%);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.6);
+  .brand-icon-box {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .brand-icon-box img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+
+  .brand-title {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--text-primary);
+    line-height: 1.2;
+  }
+
+  .brand-status-capsule {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-muted);
+    transition: var(--transition);
+  }
+
+  .status-dot.active {
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Surface Cards - Office-Break-Calculator Signature */
+  .surface-card {
+    position: relative;
+    border-radius: var(--radius-2xl);
+    background: var(--surface-card);
+    backdrop-filter: blur(22px) saturate(1.4);
+    -webkit-backdrop-filter: blur(22px) saturate(1.4);
+    border: 1px solid var(--border-color);
+    box-shadow: 
+      0 1px 0 var(--border-highlight) inset,
+      0 12px 32px -10px rgba(0, 0, 0, 0.45);
+    padding: 20px;
+    margin-bottom: 14px;
+    transition: var(--transition);
+  }
+
+  .surface-card:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .card-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .card-section-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+  }
+
+  /* Buttons */
+  button, .btn {
+    font-family: var(--font-sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 9px 15px;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: rgba(30, 41, 59, 0.6);
+    color: var(--text-primary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    text-decoration: none;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: var(--transition);
+  }
+
+  button:active, .btn:active {
+    transform: scale(0.97);
+  }
+
+  button.btn-primary, .btn.btn-primary {
+    background: var(--primary);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(59, 130, 246, 0.35);
+  }
+
+  button.btn-primary:hover, .btn.btn-primary:hover {
+    background: var(--primary-hover);
+  }
+
+  button.btn-danger, .btn.btn-danger {
+    background: var(--danger-bg);
+    border-color: rgba(239, 68, 68, 0.3);
+    color: #fca5a5;
+  }
+
+  button.btn-danger:hover, .btn.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.22);
+  }
+
+  button:disabled, .btn:disabled {
+    opacity: 0.38;
+    cursor: not-allowed;
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Watch Activity Centerpiece */
+  .watch-hero-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 0 16px 0;
+  }
+
+  .watch-ring-stage {
+    width: 176px;
+    height: 176px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.45) 0%, rgba(15, 23, 42, 0.6) 100%);
+    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
   }
 
   .rings-svg {
@@ -230,680 +307,797 @@
 
   .ring-bg {
     fill: none;
-    stroke: rgba(255, 255, 255, 0.06);
+    stroke: rgba(255, 255, 255, 0.05);
   }
 
   .ring-bar {
     fill: none;
     stroke-linecap: round;
-    transition: stroke-dashoffset 900ms var(--ease-out);
+    transition: stroke-dashoffset 900ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .watch-content {
-    z-index: 5;
+  .watch-ring-content {
+    z-index: 2;
     text-align: center;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 3px;
+    gap: 2px;
   }
 
-  .watch-time {
+  .watch-main-digits {
     font-size: 32px;
     font-weight: 700;
     letter-spacing: -0.03em;
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-mono);
     color: #fff;
+    line-height: 1;
   }
 
-  .watch-label {
+  .watch-digits-label {
     font-size: 11px;
-    font-weight: 600;
-    letter-spacing: 0.04em;
+    font-weight: 500;
     color: var(--text-secondary);
-    text-transform: uppercase;
-  }
-
-  .battery-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 11px;
-    font-weight: 600;
-    padding: 2px 8px;
-    border-radius: var(--radius-full);
-    background: var(--card-elevated);
-    color: var(--text-secondary);
+    letter-spacing: 0.02em;
     margin-top: 3px;
   }
 
-  /* --- 4-Metric Grid --- */
-  .metrics-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-  }
-
-  .metric-card {
-    background: var(--card-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 12px 14px;
+  .watch-telemetry-pills {
     display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .metric-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
-  .metric-val {
-    font-size: 24px;
-    font-weight: 700;
-    letter-spacing: -0.02em;
-    color: #fff;
-    font-variant-numeric: tabular-nums;
-  }
-
-  #sport-steps { color: var(--apple-green); }
-  #sport-dist { color: var(--apple-blue); }
-  #sport-kcal { color: var(--apple-red); }
-  #sport-dur { color: var(--apple-yellow); }
-
-  /* --- Clean Apple iOS Buttons --- */
-  button, .button {
-    font-family: var(--font-sans);
-    font-size: 13px;
-    font-weight: 600;
-    padding: 11px 16px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    background: var(--card-elevated);
-    color: #fff;
-    cursor: pointer;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .tele-pill {
+    display: inline-flex;
+    align-items: center;
     gap: 6px;
-    user-select: none;
-    -webkit-user-select: none;
-    text-decoration: none;
-    touch-action: manipulation;
-    transition: transform 80ms var(--ease-out), background 120ms ease;
-  }
-
-  button:active, .button:active {
-    transform: scale(0.97);
-  }
-
-  button.primary, .button.primary {
-    background: var(--apple-blue);
-    border-color: transparent;
-    color: #fff;
-    font-weight: 600;
-  }
-
-  button.primary:active {
-    background: var(--apple-blue-hover);
-  }
-
-  button.danger {
-    background: rgba(255, 69, 58, 0.12);
-    border-color: rgba(255, 69, 58, 0.25);
-    color: var(--apple-red);
-  }
-
-  button.danger:active {
-    background: rgba(255, 69, 58, 0.25);
-  }
-
-  button:disabled, .button:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    transform: none !important;
-  }
-
-  .chip {
-    padding: 6px 12px;
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--surface-inset);
+    border: 1px solid var(--border-color);
+    padding: 4px 10px;
     border-radius: var(--radius-full);
   }
 
-  /* --- Inputs --- */
-  input, select, textarea {
-    font-family: var(--font-sans);
-    font-size: 16px; /* Native iOS prevents auto-zoom */
-    width: 100%;
-    padding: 11px 13px;
-    border-radius: var(--radius-md);
+  .tele-pill svg {
+    width: 13px;
+    height: 13px;
+    color: var(--primary);
+  }
+
+  /* Quick Actions Row */
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin: 16px 0 6px 0;
+  }
+
+  .action-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 12px 6px;
+    border-radius: var(--radius-xl);
+    background: var(--surface-inset);
     border: 1px solid var(--border-color);
-    background: var(--card-elevated);
-    color: #fff;
-    transition: border-color 0.15s ease;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--apple-blue);
-  }
-
-  label {
-    font-size: 12px;
-    font-weight: 600;
     color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+    transition: var(--transition);
+  }
+
+  .action-tile:hover {
+    background: rgba(30, 41, 59, 0.75);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.14);
+  }
+
+  .action-tile:active {
+    transform: scale(0.95);
+  }
+
+  .action-tile-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 9px;
+    background: rgba(59, 130, 246, 0.1);
+    color: #60a5fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+  }
+
+  .action-tile:hover .action-tile-icon {
+    background: rgba(59, 130, 246, 0.2);
+    transform: translateY(-1px);
+  }
+
+  .action-tile-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* 4 Premium Stat Cards - Matching Office-Break-Calculator */
+  .metrics-2x2-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .stat-card-box {
+    background: var(--surface-inset);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-xl);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 94px;
+    transition: var(--transition);
+  }
+
+  .stat-card-box:hover {
+    border-color: rgba(255, 255, 255, 0.12);
+    background: rgba(15, 23, 42, 0.8);
+  }
+
+  .stat-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .stat-card-title {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: -0.01em;
+    truncate: true;
+  }
+
+  .stat-icon-wrapper {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .stat-icon-wrapper svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .stat-card-val {
+    font-size: 22px;
+    font-weight: 700;
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-top: 8px;
+  }
+
+  .stat-card-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  /* Apple Health Card Specifics */
+  .health-hero-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .health-badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(244, 63, 94, 0.2) 0%, rgba(225, 29, 72, 0.1) 100%);
+    border: 1px solid rgba(244, 63, 94, 0.25);
+    color: #fb7185;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .health-badge-icon svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .health-content {
+    flex: 1;
+  }
+
+  .health-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .health-main-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .health-status-badge {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--success-bg);
+    color: var(--success);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+  }
+
+  .health-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.45;
+    margin: 4px 0 14px 0;
+  }
+
+  .health-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .toggle-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 14px;
+    margin-top: 14px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .toggle-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  /* iOS Style Switch */
+  .ios-switch {
+    position: relative;
+    display: inline-block;
+    width: 42px;
+    height: 24px;
+  }
+
+  .ios-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+
+  .ios-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.16);
+    transition: .25s;
+    border-radius: 24px;
+  }
+
+  .ios-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .25s;
+    border-radius: 50%;
+  }
+
+  input:checked + .ios-slider {
+    background-color: var(--primary);
+  }
+
+  input:checked + .ios-slider:before {
+    transform: translateX(18px);
+  }
+
+  /* Form Controls */
+  input[type="text"], textarea, select {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    background: var(--surface-inset);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    color: var(--text-primary);
+    transition: var(--transition);
+  }
+
+  input[type="text"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
+  }
+
+  .form-group {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    margin-bottom: 12px;
   }
 
-  /* --- Clean iOS Bottom Tab Bar --- */
-  nav.bottom-dock {
+  .form-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Floating Dynamic Island Navigation Dock */
+  .dynamic-island-dock {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    max-width: 460px;
-    margin: 0 auto;
+    bottom: calc(max(16px, env(safe-area-inset-bottom, 0px)) + 6px);
+    left: 50%;
+    transform: translateX(-50%);
     z-index: 1000;
-    background: rgba(18, 18, 20, 0.88);
-    backdrop-filter: blur(25px);
-    -webkit-backdrop-filter: blur(25px);
-    border-top: 1px solid var(--border-color);
-    padding: 6px 16px max(8px, env(safe-area-inset-bottom)) 16px;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px;
+    background: var(--surface-dock);
+    backdrop-filter: blur(32px) saturate(1.6);
+    -webkit-backdrop-filter: blur(32px) saturate(1.6);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: var(--radius-full);
+    box-shadow: 
+      0 1px 0 rgba(255, 255, 255, 0.15) inset,
+      0 16px 40px -8px rgba(0, 0, 0, 0.65);
   }
 
   .dock-btn {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 3px;
-    padding: 4px 0;
+    gap: 7px;
+    padding: 7px 15px;
+    border-radius: var(--radius-full);
     border: none;
     background: transparent;
     color: var(--text-secondary);
     font-family: var(--font-sans);
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 500;
     cursor: pointer;
     touch-action: manipulation;
     user-select: none;
     -webkit-user-select: none;
-    transition: color 120ms ease;
+    transition: var(--transition);
   }
 
   .dock-btn:active {
-    transform: scale(0.95);
-  }
-
-  .dock-btn span.dock-icon {
-    font-size: 20px;
-    line-height: 1;
+    transform: scale(0.96);
   }
 
   .dock-btn.active {
-    color: var(--apple-blue);
+    background: rgba(59, 130, 246, 0.18);
+    color: #60a5fa;
     font-weight: 600;
   }
 
-  /* Clean Log Terminal */
+  .dock-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Terminal Log */
   pre#log {
-    background: #111113;
+    background: #070a12;
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 12px;
+    border-radius: var(--radius-lg);
+    padding: 12px 14px;
     font-family: var(--font-mono);
     font-size: 11px;
-    color: #30d158;
+    color: #34d399;
     height: 170px;
     overflow-y: auto;
     white-space: pre-wrap;
     word-break: break-all;
+    line-height: 1.5;
   }
 
-  .presets-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  .emoji-picker {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
-    gap: 6px;
-  }
-
-  .emoji-btn {
-    padding: 8px 4px;
-    font-size: 18px;
-    background: var(--card-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-  }
-
-  .row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .bytes-bar {
-    font-family: var(--font-mono);
+  .chip {
+    padding: 4px 10px;
     font-size: 11px;
     font-weight: 500;
-    color: var(--text-secondary);
-    padding: 2px 8px;
-    background: var(--card-elevated);
-    border: 1px solid var(--border-color);
     border-radius: var(--radius-full);
-  }
-
-  .step-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 12px;
-    background: var(--card-elevated);
+    background: var(--surface-inset);
     border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    font-size: 12px;
-  }
-
-  .step-row.done {
-    border-color: rgba(48, 209, 88, 0.4);
-    color: var(--apple-green);
-  }
-
-  .step-row.active {
-    border-color: var(--apple-blue);
-    color: var(--apple-blue);
-  }
-
-  .step-badge {
-    width: 22px;
-    height: 22px;
+    color: var(--text-secondary);
+    cursor: pointer;
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    border: 1px solid currentColor;
-    border-radius: 50%;
-    font-size: 11px;
+    gap: 4px;
   }
 
-  .guide-tab {
-    font-size: 11px;
-    font-weight: 600;
-    padding: 6px 12px;
-    background: transparent;
-    border: 1px solid var(--border-color);
-    color: var(--text-secondary);
-    border-radius: var(--radius-sm);
+  .chip:hover {
+    background: rgba(30, 41, 59, 0.8);
+    color: var(--text-primary);
   }
 
-  .guide-tab.active {
-    background: var(--card-surface);
-    color: #fff;
-    border-color: var(--border-light);
+  .preset-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
   }
 
   .hidden {
     display: none !important;
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-      animation-duration: 0.01ms !important;
-      animation-iteration-count: 1 !important;
-      transition-duration: 0.01ms !important;
+  /* Responsive Adjustments */
+  @media (max-width: 480px) {
+    .app-container {
+      padding-left: 12px;
+      padding-right: 12px;
+    }
+    .metrics-2x2-grid {
+      gap: 8px;
+    }
+    .stat-card-box {
+      padding: 12px;
+    }
+    .stat-card-val {
+      font-size: 20px;
+    }
+    .dock-btn span {
+      display: inline-block;
     }
   }
-
 </style>
 </head>
 <body>
 
-<div class="app-shell">
-  <!-- Fixed Top Header -->
-  <header class="ios-header">
-    <div class="brand">
-      <img src="icon.svg" alt="boAt FLASH">
-      <div class="brand-text">
-        <h1>boAt FLASH</h1>
-        <span id="name">Smartwatch Connected</span>
+<div class="app-container">
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="brand-group">
+      <div class="brand-icon-box">
+        <img src="icon.svg" alt="boAt FLASH">
+      </div>
+      <div>
+        <div class="brand-title">boAt FLASH</div>
+        <div class="brand-status-capsule" id="conn-badge">
+          <span class="status-dot" id="status-dot"></span>
+          <span id="name">Ready to connect</span>
+        </div>
       </div>
     </div>
 
-    <!-- Status Capsule -->
-    <div id="conn-badge" class="badge">
-      <span class="dot"></span>
-      <span id="conn-state-text">Disconnected</span>
+    <div class="header-actions">
+      <button id="connect" type="button" class="btn btn-primary">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10-5 5V2l5 5L7 17"></path></svg>
+        <span>Connect Watch</span>
+      </button>
+      <button id="disconnect" type="button" class="btn btn-danger hidden">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        <span>Disconnect</span>
+      </button>
     </div>
   </header>
 
-  <!-- Scrollable Native Viewport -->
-  <main class="app-viewport">
-    <!-- iOS Bluetooth Notice Banner -->
-    <div id="error2-alert" class="card hidden" style="border-color:rgba(255,69,58,0.4); background:rgba(255,69,58,0.1);">
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:20px; line-height:1;">⚠️</span>
-        <div style="flex:1;">
-          <div style="font-weight:700; color:var(--apple-red); font-size:13px;">iOS Connection Note</div>
-          <p style="font-size:12px; color:#f0f6fc; margin:3px 0 8px; line-height:1.4;">
-            If connection fails, "Forget Device" in iPhone Settings > Bluetooth, then reconnect here.
-          </p>
-          <div style="display:flex; gap:8px;">
-            <button type="button" id="error2-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">Retry Scan</button>
-            <button type="button" id="error2-dismiss-btn" style="padding:5px 12px; font-size:11px;">Dismiss</button>
-          </div>
+  <!-- iOS Bluetooth Notice Banner (Hidden unless triggered) -->
+  <div id="error2-alert" class="surface-card hidden" style="border-color:rgba(239,68,68,0.4); background:rgba(239,68,68,0.08);">
+    <div style="display:flex; align-items:flex-start; gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+      <div style="flex:1;">
+        <div style="font-weight:600; color:var(--danger); font-size:13px;">iOS Connection Notice</div>
+        <p style="font-size:12px; color:var(--text-secondary); margin:4px 0 10px; line-height:1.4;">
+          If connection drops, open iPhone Settings > Bluetooth, tap "Forget This Device", then reconnect here.
+        </p>
+        <div style="display:flex; gap:8px;">
+          <button type="button" id="error2-retry-btn" class="btn btn-primary" style="padding:5px 12px; font-size:11px;">Retry Scan</button>
+          <button type="button" id="error2-dismiss-btn" class="btn" style="padding:5px 12px; font-size:11px;">Dismiss</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- Brave Browser Notice Banner -->
-    <div id="brave-alert" class="card hidden" style="border-color:rgba(255,214,10,0.4); background:rgba(255,214,10,0.1);">
-      <div style="display:flex; align-items:flex-start; gap:10px;">
-        <span style="font-size:20px; line-height:1;">🦁</span>
-        <div style="flex:1;">
-          <div style="font-weight:700; color:var(--apple-yellow); font-size:12px;">Brave Bluetooth Flag Required</div>
-          <div style="display:flex; gap:8px; margin-top:6px;">
-            <button type="button" id="copy-brave-direct" class="chip primary">Copy Flag Link</button>
-          </div>
+  <!-- Brave Browser Notice Banner -->
+  <div id="brave-alert" class="surface-card hidden" style="border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.08);">
+    <div style="display:flex; align-items:flex-start; gap:10px;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      <div style="flex:1;">
+        <div style="font-weight:600; color:var(--warning); font-size:12px;">Brave Shields WebBluetooth Flag Required</div>
+        <div style="display:flex; gap:8px; margin-top:6px;">
+          <button type="button" id="copy-brave-direct" class="chip">Copy Flag Link</button>
         </div>
       </div>
     </div>
+  </div>
 
-    <!-- ================= SECTION 1: DASHBOARD / ACTIVITY ================= -->
-    <div id="section-dash" class="card">
-      <!-- Clean Apple Watch Face Centerpiece -->
-      <div class="watch-hero">
-        <div class="watch-case">
-          <svg class="rings-svg" viewBox="0 0 170 170">
-            <!-- Step Activity Ring (Outer) -->
-            <circle class="ring-bg" cx="85" cy="85" r="74" stroke-width="7"></circle>
-            <circle id="ring-steps" class="ring-bar" cx="85" cy="85" r="74" stroke-width="7" stroke="#30d158" stroke-dasharray="465" stroke-dashoffset="465"></circle>
-            <!-- Battery Ring (Inner) -->
-            <circle class="ring-bg" cx="85" cy="85" r="62" stroke-width="6"></circle>
-            <circle id="ring-bat" class="ring-bar" cx="85" cy="85" r="62" stroke-width="6" stroke="#0a84ff" stroke-dasharray="390" stroke-dashoffset="390"></circle>
+  <!-- ================= TAB 1: ACTIVITY & DASHBOARD ================= -->
+  <main id="section-dash">
+    <!-- Watch Activity & Telemetry Centerpiece -->
+    <section class="surface-card">
+      <div class="card-header-row">
+        <span class="card-section-label">Watch Activity</span>
+        <span class="status-badge" id="watch-clock" style="font-size:11px; font-weight:600; color:var(--text-secondary); font-family:var(--font-mono);">10:09</span>
+      </div>
+
+      <div class="watch-hero-container">
+        <!-- Dual Circular Activity Rings (Steps & Battery) -->
+        <div class="watch-ring-stage">
+          <svg class="rings-svg" viewBox="0 0 176 176">
+            <!-- Step Activity Ring (Outer Emerald) -->
+            <circle class="ring-bg" cx="88" cy="88" r="76" stroke-width="7"></circle>
+            <circle id="ring-steps" class="ring-bar" cx="88" cy="88" r="76" stroke-width="7" stroke="#10b981" stroke-dasharray="477" stroke-dashoffset="477"></circle>
+            <!-- Battery Ring (Inner Blue) -->
+            <circle class="ring-bg" cx="88" cy="88" r="64" stroke-width="6"></circle>
+            <circle id="ring-bat" class="ring-bar" cx="88" cy="88" r="64" stroke-width="6" stroke="#3b82f6" stroke-dasharray="402" stroke-dashoffset="402"></circle>
           </svg>
 
-          <div class="watch-content">
-            <div class="watch-time" id="watch-clock">10:09</div>
-            <div class="watch-label">FLASH</div>
-            <div class="battery-pill">
-              <span>🔋</span>
-              <span id="bat">–</span>
+          <div class="watch-ring-content">
+            <div class="watch-main-digits" id="hero-steps-display">—</div>
+            <div class="watch-digits-label">Steps Today</div>
+          </div>
+        </div>
+
+        <!-- Telemetry Details Bar -->
+        <div class="watch-telemetry-pills">
+          <div class="tele-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="2" ry="2"></rect><line x1="22" y1="11" x2="22" y2="13"></line></svg>
+            <span>Battery:</span>
+            <strong id="bat" style="color:var(--text-primary);">–</strong>
+          </div>
+          <div class="tele-pill">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"></rect><rect x="9" y="9" width="6" height="6"></rect><line x1="9" y1="1" x2="9" y2="4"></line><line x1="15" y1="1" x2="15" y2="4"></line><line x1="9" y1="20" x2="9" y2="23"></line><line x1="15" y1="20" x2="15" y2="23"></line><line x1="20" y1="9" x2="23" y2="9"></line><line x1="20" y1="14" x2="23" y2="14"></line><line x1="1" y1="9" x2="4" y2="9"></line><line x1="1" y1="14" x2="4" y2="14"></line></svg>
+            <span id="fw">FW: –</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Actions Grid -->
+      <div class="quick-actions-grid">
+        <button type="button" data-act="sport" class="action-tile" disabled title="Sync Daily Steps">
+          <div class="action-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+          </div>
+          <span>Sync Steps</span>
+        </button>
+
+        <button type="button" data-act="time" class="action-tile" disabled title="Sync Watch Clock">
+          <div class="action-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <span>Sync Time</span>
+        </button>
+
+        <button type="button" data-act="find" class="action-tile" disabled title="Vibrate and Find Watch">
+          <div class="action-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+          </div>
+          <span>Find Watch</span>
+        </button>
+
+        <button type="button" data-act="info" class="action-tile" disabled title="Query Device Information">
+          <div class="action-tile-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+          </div>
+          <span>Watch Info</span>
+        </button>
+      </div>
+
+      <!-- 4 Stat Cards - Exact Office-Break PremiumStatCard Specification -->
+      <div class="metrics-2x2-grid">
+        <!-- Steps Card -->
+        <div class="stat-card-box">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Today's Steps</span>
+            <div class="stat-icon-wrapper" style="background:var(--success-bg); color:var(--success);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16v-2a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"></path><circle cx="12" cy="5" r="3"></circle></svg>
             </div>
           </div>
-        </div>
-      </div>
-
-      <!-- Primary Action Controls -->
-      <div class="row" style="justify-content:center;">
-        <button id="connect" class="primary" style="flex:1; max-width:240px; font-size:14px; font-weight:600;">Connect Watch</button>
-        <button id="disconnect" class="danger" disabled>Disconnect</button>
-      </div>
-
-      <!-- Quick Action Controls -->
-      <div class="row" style="justify-content:center; gap:8px; flex-wrap:wrap;">
-        <button data-act="sport" disabled title="Sync steps from watch">👟 Sync Steps</button>
-        <button data-act="time" disabled title="Sync clock with this device">🕒 Sync Clock</button>
-        <button data-act="find" disabled title="Find the watch">🔔 Find Watch</button>
-        <button data-act="info" disabled title="Query watch info">ℹ️ Info</button>
-      </div>
-
-      <!-- Activity 4-Metric Grid -->
-      <div class="metrics-grid" id="telemetry-card">
-        <div class="metric-card">
-          <div class="metric-top">
-            <span>Steps</span>
-            <span>👟</span>
+          <div>
+            <div class="stat-card-val" id="sport-steps" style="color:var(--success);">–</div>
+            <div class="stat-card-sub">Daily Goal: 10,000</div>
           </div>
-          <div class="metric-val" id="sport-steps">–</div>
         </div>
-        <div class="metric-card">
-          <div class="metric-top">
-            <span>Distance (m)</span>
-            <span>📍</span>
-          </div>
-          <div class="metric-val" id="sport-dist">–</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-top">
-            <span>Calories</span>
-            <span>🔥</span>
-          </div>
-          <div class="metric-val" id="sport-kcal">–</div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-top">
-            <span>Active Time</span>
-            <span>⏱️</span>
-          </div>
-          <div class="metric-val" id="sport-dur">–</div>
-        </div>
-      </div>
 
-      <!-- Apple Health Sync Card -->
-      <div class="card" id="health-card" style="margin-top:4px; background:var(--card-elevated); border:1px solid var(--border-color); padding:14px;">
-        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:10px;">
-          <div style="display:flex; align-items:center; gap:10px;">
-            <span style="font-size:20px; line-height:1;">❤️</span>
-            <div>
-              <div style="font-weight:700; font-size:13px; color:#fff;" id="health-title">Apple Health</div>
-              <div style="font-size:11px; color:var(--text-secondary);" id="health-status">Sync activity to Health app</div>
+        <!-- Distance Card -->
+        <div class="stat-card-box">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Distance (M)</span>
+            <div class="stat-icon-wrapper" style="background:var(--primary-glow); color:var(--primary);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
             </div>
           </div>
-          <div style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button id="btn-health-shortcut" class="chip primary" style="font-size:11px; padding:6px 12px; cursor:pointer;">
-              Sync to Health
-            </button>
-            <button id="btn-health-sync" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
-              Direct Sync
-            </button>
-            <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
-              Export CSV
-            </button>
-          </div>
-        </div>
-        <p id="health-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px;">
-          Tap <b>Sync to Health</b> to log steps into Apple Health via Shortcuts bridge.
-        </p>
-
-        <!-- 30-sec Setup Guide -->
-        <div style="margin-bottom:6px;">
-          <button type="button" id="btn-toggle-shortcut-guide" class="chip" style="font-size:10px; padding:4px 8px; background:transparent; border-color:var(--border-color); color:var(--apple-blue); width:100%; justify-content:space-between;">
-            <span>Shortcuts Bridge Setup Guide</span>
-            <span id="guide-arrow">▼</span>
-          </button>
-          <div id="shortcut-setup-box" class="hidden" style="margin-top:6px; padding:10px; background:#121214; border:1px solid var(--border-color); border-radius:8px; font-size:11px; line-height:1.5; color:#d0d0d5;">
-            <p style="margin-bottom:6px; color:var(--text-secondary);">Because Apple blocks direct background write for free sideloaded apps, a 1-action Apple Shortcut logs steps into Health:</p>
-            <ol style="padding-left:18px; margin-bottom:8px; display:flex; flex-direction:column; gap:4px;">
-              <li>Tap <button type="button" id="btn-open-shortcuts" class="chip primary" style="display:inline-flex; padding:2px 8px; font-size:10px; margin:0 4px;">Open Shortcuts App</button></li>
-              <li>Tap <b>+</b> and name it <b>FlashSync</b>.</li>
-              <li>Add action: Search <b>"Log Health Sample"</b>.</li>
-              <li>Set Value to <b>Shortcut Input</b>, Type to <b>Step Count</b>.</li>
-              <li>Tap Done. Now tapping <b>Sync to Health</b> logs steps instantly!</li>
-            </ol>
+          <div>
+            <div class="stat-card-val" id="sport-dist" style="color:var(--primary);">–</div>
+            <div class="stat-card-sub">Stride calculated</div>
           </div>
         </div>
 
-        <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary); border-top:1px solid var(--border-color); padding-top:8px;">
-          <span>Auto-sync steps</span>
-          <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
-            <input type="checkbox" id="health-auto-sync" checked style="width:auto; cursor:pointer;">
-            <span style="font-size:10px; color:var(--text-secondary);">Enabled</span>
-          </label>
+        <!-- Calories Card -->
+        <div class="stat-card-box">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Active Energy</span>
+            <div class="stat-icon-wrapper" style="background:var(--rose-bg); color:var(--rose);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"></path></svg>
+            </div>
+          </div>
+          <div>
+            <div class="stat-card-val" id="sport-kcal" style="color:var(--rose);">–</div>
+            <div class="stat-card-sub">Metabolic burn</div>
+          </div>
+        </div>
+
+        <!-- Duration Card -->
+        <div class="stat-card-box">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Active Duration</span>
+            <div class="stat-icon-wrapper" style="background:var(--warning-bg); color:var(--warning);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            </div>
+          </div>
+          <div>
+            <div class="stat-card-val" id="sport-dur" style="color:var(--warning);">–</div>
+            <div class="stat-card-sub">Moving time</div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <!-- Hardware Info -->
-      <div class="row" style="justify-content:space-between; font-size:11px; color:var(--text-secondary); padding:4px 4px 0;">
-        <span>Firmware: <b id="fw" style="color:#fff; font-weight:600;">–</b></span>
-        <span>MAC: <b id="mac-display" style="color:#fff; font-weight:600;">08:7C:85:03:12:0F</b></span>
-      </div>
+    <!-- Apple Health Integration Card -->
+    <section class="surface-card">
+      <div class="health-hero-row">
+        <div class="health-badge-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </div>
+        <div class="health-content">
+          <div class="health-title-row">
+            <div class="health-main-title" id="health-title">Apple Health Sync</div>
+            <span class="health-status-badge" id="health-status">1-Tap Bridge</span>
+          </div>
+          <p class="health-desc" id="health-desc">
+            Directly record watch activity into the Apple Health app using the 1-Tap iOS Shortcut bridge without requiring Apple Developer entitlements.
+          </p>
+          <div class="health-actions-row">
+            <button type="button" id="btn-health-shortcut" class="btn btn-primary">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+              <span>Sync to Apple Health</span>
+            </button>
+            <button type="button" id="btn-health-export" class="btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+              <span>Export CSV</span>
+            </button>
+          </div>
 
-      <label style="flex-direction:row; align-items:center; gap:8px; cursor:pointer; font-size:11px; color:var(--text-secondary); margin-top:2px;">
-        <input type="checkbox" id="scan-all" style="width:auto;"> Show all nearby Bluetooth devices
-      </label>
-    </div>
-
-    <!-- ================= SECTION 2: NOTIFICATIONS ================= -->
-    <div id="section-notif" class="card hidden">
-      <div class="card-header">
-        <span class="card-title">Send Notification</span>
-        <span id="nbytes" class="bytes-bar">0 / 150 B</span>
-      </div>
-
-      <div class="presets-row">
-        <span style="font-size:11px; color:var(--text-secondary);">Presets:</span>
-        <button type="button" class="chip" id="preset-call">📞 Call</button>
-        <button type="button" class="chip" id="preset-wa">💬 WhatsApp</button>
-        <button type="button" class="chip" id="preset-alert">🚨 Alert</button>
-        <button type="button" class="chip" id="preset-emoji">🎉 Emoji</button>
-      </div>
-
-      <label>Title
-        <input id="ntitle" value="Hello 👋" maxlength="60" placeholder="Notification Title">
-      </label>
-
-      <label>Message
-        <textarea id="nbody" rows="3" maxlength="200" placeholder="Notification body...">Hello from your iPhone! ✅</textarea>
-      </label>
-
-      <div class="row" style="gap:10px;">
-        <label style="flex:1;">Category
-          <select id="nkind">
-            <option value="call">📞 Phone Call (1)</option>
-            <option value="msg" selected>💬 Short Message (2)</option>
-            <option value="wechat">🟢 WeChat (3)</option>
-            <option value="qq">🐧 QQ (4)</option>
-            <option value="app">📱 Third-Party App (7)</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="emoji-picker">
-        <button type="button" class="emoji-btn">👋</button>
-        <button type="button" class="emoji-btn">🔥</button>
-        <button type="button" class="emoji-btn">😎</button>
-        <button type="button" class="emoji-btn">✅</button>
-        <button type="button" class="emoji-btn">⚡</button>
-        <button type="button" class="emoji-btn">❤️</button>
-        <button type="button" class="emoji-btn">🚀</button>
-        <button type="button" class="emoji-btn">💀</button>
-        <button type="button" class="emoji-btn">🎉</button>
-        <button type="button" class="emoji-btn">🤖</button>
-        <button type="button" class="emoji-btn">🏃</button>
-        <button type="button" class="emoji-btn">🕒</button>
-      </div>
-
-      <button id="send-btn" class="primary" style="margin-top:6px;" data-act="notify" disabled>
-        Send to Watch
-      </button>
-    </div>
-
-    <!-- ================= SECTION 3: DIAGNOSTICS ================= -->
-    <div id="section-diag" class="card hidden">
-      <div class="card-header">
-        <span class="card-title">Connection Diagnostics</span>
-        <div style="display:flex; gap:6px;">
-          <button id="copy-log" class="chip" style="padding:3px 9px;">Copy Log</button>
-          <button id="clear" class="chip" style="padding:3px 9px;">Clear</button>
+          <div class="toggle-switch-row">
+            <span class="toggle-label">Auto-sync steps on connect</span>
+            <label class="ios-switch">
+              <input type="checkbox" id="health-auto-sync" checked>
+              <span class="ios-slider"></span>
+            </label>
+          </div>
         </div>
       </div>
-
-      <!-- Diagnostic Stepper -->
-      <div id="conn-steps-box" style="display:flex; flex-direction:column; gap:6px;">
-        <div class="step-row" id="st-scan">
-          <span class="step-badge">1</span>
-          <span>Bluetooth Discovery</span>
-        </div>
-        <div class="step-row" id="st-gatt">
-          <span class="step-badge">2</span>
-          <span>GATT Connection</span>
-        </div>
-        <div class="step-row" id="st-svc">
-          <span class="step-badge">3</span>
-          <span>Service 0xF618 Pipes</span>
-        </div>
-        <div class="step-row" id="st-ready">
-          <span class="step-badge">4</span>
-          <span>Communication Ready</span>
-        </div>
-      </div>
-
-      <div id="diag-error-tip" class="hidden" style="padding:10px; background:rgba(255,69,58,0.12); border:1px solid rgba(255,69,58,0.3); border-radius:10px;">
-        <div style="font-weight:700; color:var(--apple-red); font-size:12px;">Connection Issue Detected</div>
-        <div id="diag-error-text" style="font-size:11px; margin:4px 0 8px; color:var(--text-secondary);">Details</div>
-        <button type="button" id="diag-retry-btn" class="primary" style="padding:5px 12px; font-size:11px;">Retry Connection</button>
-      </div>
-
-      <!-- Platform Guides -->
-      <div class="card" id="guide-card" style="padding:12px; background:var(--card-elevated);">
-        <div style="display:flex; gap:4px; margin-bottom:8px; flex-wrap:wrap;">
-          <button type="button" class="guide-tab active" id="tab-btn-ios">iOS Setup</button>
-          <button type="button" class="guide-tab" id="tab-btn-android">Android</button>
-          <button type="button" class="guide-tab" id="tab-btn-brave">Brave</button>
-          <button type="button" class="guide-tab" id="tab-btn-desktop">Desktop</button>
-        </div>
-
-        <div class="guide-content" id="panel-ios" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
-          <p>1. Ensure iPhone Bluetooth is ON in Control Center.</p>
-          <p>2. If error occurs, "Forget Device" in iOS Bluetooth settings then reconnect in this app.</p>
-          <p>3. Bluefy or native iOS app enables full WebBluetooth support.</p>
-        </div>
-
-        <div class="guide-content hidden" id="panel-android" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
-          <p>1. Chrome or Edge for Android supports WebBluetooth natively.</p>
-          <p>2. Location & Nearby Devices permissions must be Granted.</p>
-        </div>
-
-        <div class="guide-content hidden" id="panel-brave" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
-          <p>Enable WebBluetooth flag at chrome://flags/#enable-web-bluetooth</p>
-          <button type="button" id="copy-brave-flag-guide" class="chip" style="margin-top:6px;">Copy Flag Link</button>
-        </div>
-
-        <div class="guide-content hidden" id="panel-desktop" style="font-size:11px; line-height:1.5; color:var(--text-secondary);">
-          <p>Native Chrome, Edge, and Opera on macOS / Windows / Linux work out-of-the-box.</p>
-        </div>
-      </div>
-
-      <pre id="log" placeholder="Bluetooth traffic will appear here..."></pre>
-    </div>
+    </section>
   </main>
 
-  <!-- Clean iOS Bottom Tab Bar -->
-  <nav class="bottom-dock">
+  <!-- ================= TAB 2: NOTIFICATIONS / MESSAGES ================= -->
+  <section id="section-notif" class="surface-card hidden">
+    <div class="card-header-row">
+      <span class="card-section-label">Push to Watch</span>
+      <span class="chip" id="nbytes">0 / 250 bytes</span>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="preset-row">
+      <button type="button" class="chip" id="preset-call">Call Alert</button>
+      <button type="button" class="chip" id="preset-wa">WhatsApp</button>
+      <button type="button" class="chip" id="preset-alert">Meeting</button>
+      <button type="button" class="chip" id="preset-emoji">Break Time</button>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="ntitle">Title</label>
+      <input type="text" id="ntitle" placeholder="Sender or App Name" maxlength="32">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="nbody">Message Body</label>
+      <textarea id="nbody" rows="3" placeholder="Message text displayed on watch screen..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" for="nkind">Notification Type</label>
+      <select id="nkind">
+        <option value="1">Phone Call (Kind 1)</option>
+        <option value="2" selected>SMS / Instant Message (Kind 2)</option>
+        <option value="4">WhatsApp (Kind 4)</option>
+        <option value="7">Facebook / Social (Kind 7)</option>
+        <option value="8">Twitter / X (Kind 8)</option>
+        <option value="11">Instagram (Kind 11)</option>
+      </select>
+    </div>
+
+    <button type="button" data-act="notify" id="btn-send-notif" class="btn btn-primary" style="width:100%; margin-top:8px;" disabled>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+      <span>Send to Watch Screen</span>
+    </button>
+  </section>
+
+  <!-- ================= TAB 3: DIAGNOSTICS & SYSTEM ================= -->
+  <section id="section-diag" class="surface-card hidden">
+    <div class="card-header-row">
+      <span class="card-section-label">BLE Diagnostics & Logs</span>
+      <div style="display:flex; gap:6px;">
+        <button type="button" id="copy-log" class="chip">Copy</button>
+        <button type="button" id="clear" class="chip">Clear</button>
+      </div>
+    </div>
+
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; padding:8px 12px; background:var(--surface-inset); border-radius:var(--radius-lg); border:1px solid var(--border-color);">
+      <span style="font-size:12px; color:var(--text-secondary);">Show all nearby BLE devices</span>
+      <label class="ios-switch">
+        <input type="checkbox" id="scan-all">
+        <span class="ios-slider"></span>
+      </label>
+    </div>
+
+    <pre id="log" placeholder="Live BLE packets will stream here..."></pre>
+  </section>
+
+  <!-- Floating Dynamic Island Bottom Dock -->
+  <nav class="dynamic-island-dock">
     <button type="button" class="dock-btn active" id="btn-tab-dash">
-      <span class="dock-icon">⌚</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
       <span>Activity</span>
     </button>
     <button type="button" class="dock-btn" id="btn-tab-notif">
-      <span class="dock-icon">💬</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       <span>Messages</span>
     </button>
     <button type="button" class="dock-btn" id="btn-tab-diag">
-      <span class="dock-icon">⚙️</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="1" y1="14" x2="7" y2="14"></line><line x1="9" y1="8" x2="15" y2="8"></line><line x1="17" y1="16" x2="23" y2="16"></line></svg>
       <span>Diagnostics</span>
     </button>
   </nav>
 </div>
 
 <script>
+
 
 // Protocol: see ../SYSTEM.md. CE "K6" SDK from the boAt Wearables app.
 const SERVICE = 0xf618, TX = 0xb002, RX = 0xb001;
@@ -1090,6 +1284,7 @@ function done() {
         const kcal = dv.getUint32(i + 12, true) & 0xffffff;
         const dur = dv.getUint32(i + 16, true) & 0xffffff;
         if ($("sport-steps")) $("sport-steps").textContent = steps.toLocaleString();
+        if ($("hero-steps-display")) $("hero-steps-display").textContent = steps.toLocaleString();
         if ($("sport-dist")) $("sport-dist").textContent = dist.toLocaleString();
         if ($("sport-kcal")) $("sport-kcal").textContent = kcal.toLocaleString();
         if ($("sport-dur")) $("sport-dur").textContent = Math.floor(dur / 60) + "m";
@@ -1149,22 +1344,30 @@ function alertUser(msg) {
 function setConnected(on, msg) {
   const st = $("status-text");
   if (st) {
-    st.textContent = msg;
+    st.textContent = msg || (on ? "Connected" : "Disconnected");
     st.className = on ? "ok" : (msg && msg.toLowerCase().includes("error") ? "bad" : "");
   }
-  const badge = $("conn-badge");
-  const state = $("conn-state");
-  if (badge && state) {
-    if (on) {
-      badge.className = "badge connected";
-      state.textContent = "Connected";
-    } else {
-      badge.className = "badge";
-      state.textContent = "Disconnected";
-    }
+  const dot = $("status-dot");
+  if (dot) {
+    if (on) dot.classList.add("active");
+    else dot.classList.remove("active");
   }
-  if ($("connect")) $("connect").disabled = on;
-  if ($("disconnect")) $("disconnect").disabled = !on;
+  const nameEl = $("name");
+  if (nameEl) {
+    nameEl.textContent = on ? (dev && dev.name ? dev.name : "boAt FLASH Connected") : "Ready to connect";
+  }
+  const state = $("conn-state");
+  if (state) {
+    state.textContent = on ? "Connected" : "Disconnected";
+  }
+  if ($("connect")) {
+    $("connect").disabled = on;
+    $("connect").style.display = on ? "none" : "inline-flex";
+  }
+  if ($("disconnect")) {
+    $("disconnect").disabled = !on;
+    $("disconnect").style.display = on ? "inline-flex" : "none";
+  }
   if (typeof document !== 'undefined' && document.querySelectorAll) {
     document.querySelectorAll("[data-act]").forEach(b => b.disabled = !on);
   }
@@ -2081,6 +2284,7 @@ if (typeof window !== 'undefined') {
 }
 
 updateBytes();
+
 
 </script>
 </body>
