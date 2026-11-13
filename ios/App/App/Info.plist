@@ -53,5 +53,9 @@
 	<string>FLASH Watch reads health data to display your daily activity.</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>FLASH Watch saves steps, walking distance, and active energy from your boAt FLASH smartwatch into Apple Health.</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>shortcuts</string>
+	</array>
 </dict>
 </plist>

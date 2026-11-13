@@ -19,7 +19,9 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "requestAuthorization", returnType: "promise"),
         CAPPluginMethod(name: "saveSportRecord", returnType: "promise"),
         CAPPluginMethod(name: "saveSportRecords", returnType: "promise"),
-        CAPPluginMethod(name: "getTodaySteps", returnType: "promise")
+        CAPPluginMethod(name: "getTodaySteps", returnType: "promise"),
+        CAPPluginMethod(name: "openShortcutSync", returnType: "promise"),
+        CAPPluginMethod(name: "openShortcutsApp", returnType: "promise")
     ]
 
     private let healthStore = HKHealthStore()
@@ -261,6 +263,39 @@ public class HealthKitPlugin: CAPPlugin, CAPBridgedPlugin {
         }
 
         healthStore.execute(query)
+    }
+
+    @objc func openShortcutSync(_ call: CAPPluginCall) {
+        let name = call.getString("name") ?? "FlashSync"
+        let input = call.getString("input") ?? ""
+        var allowed = CharacterSet.urlQueryAllowed
+        allowed.remove(charactersIn: "+&=")
+        let encodedName = name.addingPercentEncoding(withAllowedCharacters: allowed) ?? name
+        let encodedInput = input.addingPercentEncoding(withAllowedCharacters: allowed) ?? input
+        let urlStr = "shortcuts://run-shortcut?name=\(encodedName)&input=text&text=\(encodedInput)"
+        
+        guard let url = URL(string: urlStr) else {
+            call.reject("Invalid Shortcut URL")
+            return
+        }
+        
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url, options: [:]) { success in
+                call.resolve(["opened": success])
+            }
+        }
+    }
+
+    @objc func openShortcutsApp(_ call: CAPPluginCall) {
+        guard let url = URL(string: "shortcuts://") else {
+            call.reject("Invalid URL")
+            return
+        }
+        DispatchQueue.main.async {
+            UIApplication.shared.open(url, options: [:]) { success in
+                call.resolve(["opened": success])
+            }
+        }
     }
 }
 

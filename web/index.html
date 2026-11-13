@@ -867,21 +867,44 @@
           <span style="font-size:22px; line-height:1; filter:drop-shadow(0 0 8px var(--cyber-pink));">❤️</span>
           <div>
             <div style="font-family:var(--font-mono); font-weight:800; font-size:12px; color:#fff; letter-spacing:0.06em;" id="health-title">Neural Health Matrix</div>
-            <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);" id="health-status">Initializing biometric link…</div>
+            <div style="font-family:var(--font-mono); font-size:11px; color:var(--cyber-cyan);" id="health-status">Apple Health Link Ready</div>
           </div>
         </div>
-        <div style="display:flex; gap:6px;">
-          <button id="btn-health-sync" class="chip primary" style="font-size:11px; padding:6px 12px; cursor:pointer;">
-            🔄 Sync
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button id="btn-health-shortcut" class="chip primary" style="font-size:11px; padding:7px 14px; cursor:pointer; background:linear-gradient(135deg, #00f0ff 0%, #0070f3 100%); color:#04060c; font-weight:900;">
+            ⚡ SYNC TO APPLE HEALTH
           </button>
-          <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 12px; cursor:pointer; background:rgba(255,230,0,0.12); border-color:rgba(255,230,0,0.4); color:var(--cyber-yellow);">
-            ⬇️ Export CSV
+          <button id="btn-health-sync" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer;">
+            🔄 Direct HK
+          </button>
+          <button id="btn-health-export" class="chip" style="font-size:11px; padding:6px 10px; cursor:pointer; background:rgba(255,230,0,0.12); border-color:rgba(255,230,0,0.4); color:var(--cyber-yellow);">
+            ⬇️ CSV
           </button>
         </div>
       </div>
       <p id="health-desc" style="font-size:11px; color:var(--text-secondary); line-height:1.4; margin-bottom:8px; font-family:var(--font-mono);">
-        Direct HealthKit background sync active. Sideloaded devices auto-store steps in local Neural Vault with CSV export.
+        Tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to write steps into Apple Health via native Shortcuts bridge.
       </p>
+
+      <!-- Collapsible 30-sec Setup Guide -->
+      <div style="margin-bottom:8px;">
+        <button type="button" id="btn-toggle-shortcut-guide" class="chip" style="font-size:10px; padding:4px 8px; background:rgba(0,240,255,0.08); border-color:rgba(0,240,255,0.3); color:var(--cyber-cyan); width:100%; justify-content:space-between;">
+          <span>ℹ️ 30-Sec Apple Health Setup Guide</span>
+          <span id="guide-arrow">▼</span>
+        </button>
+        <div id="shortcut-setup-box" class="hidden" style="margin-top:6px; padding:10px; background:#04060a; border:1px solid rgba(0,240,255,0.25); font-family:var(--font-mono); font-size:11px; line-height:1.5; color:#d0e0ff;">
+          <div style="color:var(--cyber-yellow); font-weight:800; margin-bottom:4px;">// HOW IT WORKS:</div>
+          <p style="margin-bottom:6px; color:var(--text-secondary);">Apple blocks direct background sync for sideloaded apps. The native solution is Apple's built-in Shortcuts app:</p>
+          <ol style="padding-left:18px; margin-bottom:8px; display:flex; flex-direction:column; gap:4px;">
+            <li>Tap <button type="button" id="btn-open-shortcuts" class="chip primary" style="display:inline-flex; padding:2px 8px; font-size:10px; margin:0 4px;">Open Shortcuts App</button></li>
+            <li>Tap <b>+</b> (New Shortcut) & rename it to: <b style="color:var(--cyber-cyan);">FlashSync</b></li>
+            <li>Add 1 action: Search <b style="color:var(--cyber-yellow);">"Log Health Sample"</b></li>
+            <li>Set Value: <b style="color:#fff;">Shortcut Input</b>, Type: <b style="color:#fff;">Step Count</b></li>
+            <li>Done! Now tap <b style="color:var(--cyber-cyan);">⚡ SYNC TO APPLE HEALTH</b> to log watch steps anytime!</li>
+          </ol>
+        </div>
+      </div>
+
       <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:var(--text-secondary); border-top:1px solid rgba(0,240,255,0.15); padding-top:8px;">
         <span style="font-family:var(--font-mono);">Auto-Sync Biometrics</span>
         <label style="margin:0; cursor:pointer; display:flex; align-items:center; gap:6px;">
@@ -1615,6 +1638,56 @@ function exportHealthDataCSV() {
   }
 }
 
+
+async function triggerAppleHealthShortcutSync() {
+  const stepsText = $("sport-steps") ? $("sport-steps").textContent.replace(/,/g, "") : "0";
+  const distText = $("sport-dist") ? $("sport-dist").textContent.replace(/,/g, "") : "0";
+  const kcalText = $("sport-kcal") ? $("sport-kcal").textContent.replace(/,/g, "") : "0";
+  const s = parseInt(stepsText, 10) || 0;
+  
+  if (s <= 0) {
+    alert("No steps recorded yet from watch. Tap 'Sync Steps' first!");
+    return;
+  }
+
+  const healthStatusEl = $("health-status");
+  if (healthStatusEl) healthStatusEl.textContent = `Syncing ${s} steps to Apple Health…`;
+
+  // Also buffer in local vault
+  saveRecordsToLocalVault([{
+    startTime: Math.floor(Date.now() / 1000) - 300,
+    steps: s,
+    distance: parseFloat(distText) || 0,
+    calories: parseFloat(kcalText) || 0,
+    duration: 300
+  }]);
+
+  const inputStr = String(s);
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.HealthKit && window.Capacitor.Plugins.HealthKit.openShortcutSync) {
+    try {
+      await window.Capacitor.Plugins.HealthKit.openShortcutSync({ name: "FlashSync", input: inputStr });
+      if (healthStatusEl) healthStatusEl.textContent = `⚡ Sent ${s} steps to Apple Health (FlashSync)`;
+      return;
+    } catch (e) {
+      log("openShortcutSync err:", e.message || String(e));
+    }
+  }
+
+  const url = `shortcuts://run-shortcut?name=FlashSync&input=text&text=${encodeURIComponent(inputStr)}`;
+  window.location.href = url;
+  if (healthStatusEl) healthStatusEl.textContent = `⚡ Sent ${s} steps to Apple Health (FlashSync)`;
+}
+
+async function openShortcutsApp() {
+  if (typeof window !== 'undefined' && window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.HealthKit && window.Capacitor.Plugins.HealthKit.openShortcutsApp) {
+    try {
+      await window.Capacitor.Plugins.HealthKit.openShortcutsApp();
+      return;
+    } catch (e) {}
+  }
+  window.location.href = "shortcuts://";
+}
+
 async function checkHealthKitAvailability() {
   const healthStatusEl = $("health-status");
   const healthTitleEl = $("health-title");
@@ -1754,6 +1827,28 @@ if (typeof window !== 'undefined') {
     const btnExport = $("btn-health-export");
     if (btnExport) {
       btnExport.onclick = () => exportHealthDataCSV();
+    }
+
+    const btnShortcut = $("btn-health-shortcut");
+    if (btnShortcut) {
+      btnShortcut.onclick = () => triggerAppleHealthShortcutSync();
+    }
+
+    const btnToggleGuide = $("btn-toggle-shortcut-guide");
+    if (btnToggleGuide) {
+      btnToggleGuide.onclick = () => {
+        const box = $("shortcut-setup-box");
+        const arrow = $("guide-arrow");
+        if (box) {
+          box.classList.toggle("hidden");
+          if (arrow) arrow.textContent = box.classList.contains("hidden") ? "▼" : "▲";
+        }
+      };
+    }
+
+    const btnOpenShortcuts = $("btn-open-shortcuts");
+    if (btnOpenShortcuts) {
+      btnOpenShortcuts.onclick = () => openShortcutsApp();
     }
 
     const btnHealth = $("btn-health-sync");
